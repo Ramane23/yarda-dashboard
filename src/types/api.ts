@@ -1,0 +1,124 @@
+// Types matching backend dashboard API schemas
+
+export interface DashboardStats {
+  client_id: string;
+  period: string;
+  total_transactions: number;
+  total_flagged: number;
+  flagged_rate: number;
+  decisions: {
+    allow: number;
+    review: number;
+    alert: number;
+    block: number;
+  };
+  avg_score: number;
+  avg_inference_time_ms: number;
+  labeled_count: number;
+  phase: "cold_start" | "early" | "stable" | "mature";
+  model_version_id: number | null;
+  pending_review: number;
+  timestamp: string;
+}
+
+export interface TransactionItem {
+  request_id: string;
+  transaction_id: string | null;
+  decision: "allow" | "review" | "alert" | "block" | null;
+  score: number;
+  anomaly_score: number;
+  ml_score: number;
+  inference_time_ms: number;
+  ground_truth: Record<string, unknown> | null;
+  phase: string | null;
+  timestamp: string | null;
+}
+
+export interface PaginatedTransactions {
+  items: TransactionItem[];
+  total: number;
+  page: number;
+  page_size: number;
+  pages: number;
+}
+
+export interface TimeSeriesPoint {
+  date: string;
+  count: number;
+  flagged: number;
+  avg_score: number;
+}
+
+export interface DecisionBreakdown {
+  allow: number;
+  review: number;
+  alert: number;
+  block: number;
+}
+
+export interface AnalyticsData {
+  client_id: string;
+  period: string;
+  time_series: TimeSeriesPoint[];
+  decision_breakdown: DecisionBreakdown;
+  score_distribution: Record<string, number>;
+  top_hours: { hour: number; count: number }[];
+  timestamp: string;
+}
+
+export interface ReviewItem {
+  request_id: string;
+  transaction_id: string | null;
+  decision: string | null;
+  score: number;
+  top_features: string[];
+  phase: string | null;
+  timestamp: string | null;
+}
+
+export interface PaginatedReviewQueue {
+  items: ReviewItem[];
+  total: number;
+  page: number;
+  page_size: number;
+  pages: number;
+}
+
+export interface ModelVersion {
+  id: number;
+  model_name: string;
+  version: string;
+  framework: string | null;
+  stage: string | null;
+  validation_metrics: Record<string, number> | null;
+  created_at: string;
+  is_client_specific: boolean;
+}
+
+export interface ModelsResponse {
+  client_id: string;
+  models: ModelVersion[];
+}
+
+export interface FeedbackSummary {
+  client_id: string;
+  period: string;
+  total_labeled: number;
+  fraud_count: number;
+  legitimate_count: number;
+  true_positives: number;
+  false_positives: number;
+  true_negatives: number;
+  false_negatives: number;
+  precision: number;
+  recall: number;
+  f1_score: number;
+  accuracy: number;
+  labeled_count_total: number;
+  phase: string;
+  timestamp: string;
+}
+
+export type Period = "24h" | "7d" | "30d" | "90d";
+export type Decision = "allow" | "review" | "alert" | "block";
+export type SortOrder = "newest" | "oldest" | "score_desc" | "score_asc";
