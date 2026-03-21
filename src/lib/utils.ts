@@ -66,17 +66,17 @@ export function scoreBgColor(score: number): string {
 import { t as translate, type Locale, type TranslationKey } from "@/lib/i18n";
 
 const phaseColors: Record<string, string> = {
-  cold_start: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400",
-  early: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400",
-  stable: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400",
-  mature: "bg-brand-100 text-brand-700 dark:bg-brand-950/40 dark:text-brand-400",
+  detection: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400",
+  learning: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400",
+  classification: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400",
+  intelligence: "bg-brand-100 text-brand-700 dark:bg-brand-950/40 dark:text-brand-400",
 };
 
 const phaseKeys: Record<string, TranslationKey> = {
-  cold_start: "phase.cold_start",
-  early: "phase.early",
-  stable: "phase.stable",
-  mature: "phase.mature",
+  detection: "phase.detection",
+  learning: "phase.learning",
+  classification: "phase.classification",
+  intelligence: "phase.intelligence",
 };
 
 export function phaseLabel(phase: string, locale: Locale = "en"): { label: string; color: string } {

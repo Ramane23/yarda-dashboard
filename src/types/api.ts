@@ -15,7 +15,7 @@ export interface DashboardStats {
   avg_score: number;
   avg_inference_time_ms: number;
   labeled_count: number;
-  phase: "cold_start" | "early" | "stable" | "mature";
+  phase: "detection" | "learning" | "classification" | "intelligence";
   model_version_id: number | null;
   pending_review: number;
   timestamp: string;
@@ -121,8 +121,31 @@ export interface FeedbackSummary {
 
 export interface PhaseDefinition {
   phase: string;
+  description: string;
   min_labels: number;
   max_labels: number | null;
+}
+
+export interface FraudTaxonomyItem {
+  key: string;
+  label: string;
+  description: string;
+}
+
+export interface ScoringWeights {
+  anomaly: number;
+  ml: number;
+  gnn: number;
+}
+
+export interface ScoringConfig {
+  client_id: string;
+  current_phase: string;
+  phase_description: string;
+  thresholds: Record<string, number>;
+  weights_by_phase: Record<string, ScoringWeights>;
+  fraud_taxonomy: FraudTaxonomyItem[];
+  phases: PhaseDefinition[];
 }
 
 export interface PhaseProgress {
@@ -136,6 +159,7 @@ export interface PhaseProgress {
   scoring_weights: {
     anomaly: number;
     ml: number;
+    gnn: number;
   };
   phase_description: string;
   phases: PhaseDefinition[];

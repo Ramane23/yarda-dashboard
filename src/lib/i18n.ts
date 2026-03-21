@@ -52,10 +52,10 @@ const translations = {
   "decision.allDecisions": { en: "All decisions", fr: "Toutes les décisions" },
 
   // Phases
-  "phase.cold_start": { en: "Cold Start", fr: "Démarrage à Froid" },
-  "phase.early": { en: "Early", fr: "Initial" },
-  "phase.stable": { en: "Stable", fr: "Stable" },
-  "phase.mature": { en: "Mature", fr: "Mature" },
+  "phase.detection": { en: "Detection", fr: "Détection" },
+  "phase.learning": { en: "Learning", fr: "Apprentissage" },
+  "phase.classification": { en: "Classification", fr: "Classification" },
+  "phase.intelligence": { en: "Intelligence", fr: "Intelligence" },
 
   // Charts
   "chart.transactionVolume": { en: "Transaction Volume", fr: "Volume de Transactions" },
@@ -167,18 +167,16 @@ const translations = {
   "legend.alert": { en: "Alert", fr: "Alerte" },
   "legend.blocked": { en: "Blocked", fr: "Bloquées" },
 
-  // Phase progress
-  "phase.semi_supervised": { en: "Semi-supervised", fr: "Semi-supervisé" },
-  "phase.production": { en: "Production", fr: "Production" },
+  // Phase progress (kept for backward compat, primary keys above)
   "phase.progressTitle": { en: "Phase Progression", fr: "Progression de Phase" },
   "phase.currentPhase": { en: "Current Phase", fr: "Phase Actuelle" },
   "phase.nextPhase": { en: "Next Phase", fr: "Phase Suivante" },
   "phase.labelsCollected": { en: "Labels Collected", fr: "Labels Collectés" },
   "phase.labelsRemaining": { en: "labels remaining", fr: "labels restants" },
   "phase.labelsNeeded": { en: "labels needed", fr: "labels nécessaires" },
-  "phase.reachedProduction": {
-    en: "Production phase reached",
-    fr: "Phase de production atteinte",
+  "phase.reachedFinal": {
+    en: "Final phase reached",
+    fr: "Phase finale atteinte",
   },
 
   // Scoring
@@ -198,9 +196,9 @@ const translations = {
   "review.submitLabel": { en: "Submit Label", fr: "Soumettre le Label" },
   "review.submitting": { en: "Submitting...", fr: "Envoi..." },
   "review.labelSubmitted": { en: "Label submitted!", fr: "Label soumis !" },
-  "review.coldStartBanner": {
-    en: "Cold Start: Label transactions to train the first fraud detection model",
-    fr: "Démarrage à froid : Étiquetez les transactions pour entraîner le premier modèle de détection de fraude",
+  "review.detectionBanner": {
+    en: "Detection Phase: Label transactions to train the first fraud classification model",
+    fr: "Phase de Détection : Étiquetez les transactions pour entraîner le premier modèle de classification de fraude",
   },
   "review.collectLabels": {
     en: "Collect labels to improve detection",
@@ -220,6 +218,40 @@ const translations = {
     fr: "Transfert Non Autorisé",
   },
   "fraudType.other": { en: "Other", fr: "Autre" },
+
+  // Scoring configuration section
+  "config.title": { en: "Scoring Configuration", fr: "Configuration du Scoring" },
+  "config.decisionThresholds": { en: "Decision Thresholds", fr: "Seuils de Décision" },
+  "config.fraudTaxonomy": { en: "Fraud Taxonomy", fr: "Taxonomie de Fraude" },
+  "config.weightsByPhase": { en: "Scoring Weights by Phase", fr: "Pondérations par Phase" },
+  "config.threshold.allow": {
+    en: "Normal — below review threshold",
+    fr: "Normal — en dessous du seuil de révision",
+  },
+  "config.threshold.review": {
+    en: "Review — flagged for human review",
+    fr: "Révision — signalé pour révision humaine",
+  },
+  "config.threshold.alert": {
+    en: "Alert — high risk, immediate attention",
+    fr: "Alerte — risque élevé, attention immédiate",
+  },
+  "config.threshold.block": {
+    en: "Block — transaction blocked automatically",
+    fr: "Blocage — transaction bloquée automatiquement",
+  },
+  "config.anomalyDetector": {
+    en: "Anomaly Detector",
+    fr: "Détecteur d'Anomalies",
+  },
+  "config.fraudClassifier": {
+    en: "Fraud Classifier",
+    fr: "Classifieur de Fraude",
+  },
+  "config.networkDetector": {
+    en: "Network Detector (GNN)",
+    fr: "Détecteur de Réseaux (GNN)",
+  },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

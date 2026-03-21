@@ -100,7 +100,7 @@ export default function ReviewQueuePage() {
     });
   };
 
-  const isColdStart = phaseProgress?.current_phase === "cold_start";
+  const isColdStart = phaseProgress?.current_phase === "detection";
 
   const columns = [
     {
@@ -201,7 +201,7 @@ export default function ReviewQueuePage() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">
-                  {t("review.coldStartBanner")}
+                  {t("review.detectionBanner")}
                 </p>
                 <p className="mt-0.5 text-xs text-sky-600 dark:text-sky-400">
                   {t("review.collectLabels")}
@@ -230,7 +230,7 @@ export default function ReviewQueuePage() {
                     <p className="text-[11px] text-sky-500 dark:text-sky-400">
                       {phaseProgress.labels_remaining > 0
                         ? `${phaseProgress.labels_remaining} ${t("phase.labelsNeeded")}`
-                        : t("phase.reachedProduction")}
+                        : t("phase.reachedFinal")}
                     </p>
                   </div>
                 )}

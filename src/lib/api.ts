@@ -6,6 +6,7 @@ import type {
   ModelsResponse,
   FeedbackSummary,
   PhaseProgress,
+  ScoringConfig,
   Period,
   Decision,
   SortOrder,
@@ -97,6 +98,10 @@ export function getFeedbackSummary(period: Period = "30d") {
 
 export function getPhaseProgress() {
   return fetchAPI<PhaseProgress>(`${BASE}/phase-progress`);
+}
+
+export function getScoringConfig() {
+  return fetchAPI<ScoringConfig>(`${BASE}/scoring-config`);
 }
 
 export function submitFeedback(
