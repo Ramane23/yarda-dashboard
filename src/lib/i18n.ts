@@ -126,13 +126,37 @@ const translations = {
   },
 
   // Models page
-  "models.title": { en: "Models", fr: "Modèles" },
+  "models.title": { en: "Production Models", fr: "Modèles en Production" },
   "models.clientSpecific": { en: "Client-specific", fr: "Spécifique client" },
-  "models.noModels": { en: "No model versions found", fr: "Aucune version de modèle trouvée" },
+  "models.noModels": { en: "No production models found", fr: "Aucun modèle en production" },
   "models.noModelsDesc": {
-    en: "Models will appear here after training",
-    fr: "Les modèles apparaîtront ici après l'entraînement",
+    en: "Models will appear here after training and promotion to production",
+    fr: "Les modèles apparaîtront ici après entraînement et mise en production",
   },
+  "models.classifierPerformance": {
+    en: "Classifier Performance",
+    fr: "Performance du Classifieur",
+  },
+  "models.anomalyDetection": { en: "Anomaly Detection", fr: "Détection d'Anomalies" },
+  "models.confusionMatrix": { en: "Confusion Matrix", fr: "Matrice de Confusion" },
+  "models.featureImportance": { en: "Feature Importance", fr: "Importance des Variables" },
+  "models.hyperparameters": { en: "Hyperparameters", fr: "Hyperparamètres" },
+  "models.showAll": { en: "Show all", fr: "Tout afficher" },
+  "models.showLess": { en: "Show less", fr: "Réduire" },
+  "models.viewInComet": { en: "View in Comet", fr: "Voir dans Comet" },
+  "models.cometUnavailable": {
+    en: "Experiment tracking data unavailable — showing registry data only",
+    fr: "Données de suivi d'expériences indisponibles — données du registre uniquement",
+  },
+  "models.truePositive": { en: "True Positive", fr: "Vrai Positif" },
+  "models.trueNegative": { en: "True Negative", fr: "Vrai Négatif" },
+  "models.falsePositive": { en: "False Positive", fr: "Faux Positif" },
+  "models.falseNegative": { en: "False Negative", fr: "Faux Négatif" },
+  "models.threshold": { en: "Threshold", fr: "Seuil" },
+  "models.anomalyRate": { en: "Anomaly Rate", fr: "Taux d'Anomalies" },
+  "models.scoreDist": { en: "Score Distribution", fr: "Distribution des Scores" },
+  "models.modelArtifacts": { en: "Model Artifacts", fr: "Artéfacts du Modèle" },
+  "models.deployedOn": { en: "Deployed on", fr: "Déployé le" },
 
   // Settings page
   "settings.title": { en: "Settings", fr: "Paramètres" },

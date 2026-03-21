@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ArrowLeftRight,
-  BarChart3,
   ShieldAlert,
   Box,
   Settings,
@@ -27,7 +26,7 @@ const nav: {
 }[] = [
   { href: "/dashboard", labelKey: "nav.overview", icon: LayoutDashboard },
   { href: "/dashboard/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
-  { href: "/dashboard/analytics", labelKey: "nav.analytics", icon: BarChart3 },
+
   { href: "/dashboard/review", labelKey: "nav.reviewQueue", icon: ShieldAlert },
   { href: "/dashboard/models", labelKey: "nav.models", icon: Box },
   { href: "/dashboard/system", labelKey: "nav.system", icon: Monitor, adminOnly: true },

@@ -7,6 +7,7 @@ import type {
   FeedbackSummary,
   PhaseProgress,
   ScoringConfig,
+  ProductionModelsResponse,
   Period,
   Decision,
   SortOrder,
@@ -92,6 +93,10 @@ export function getReviewQueue(
 
 export function getModels() {
   return fetchAPI<ModelsResponse>(`${BASE}/models`);
+}
+
+export function getProductionModels() {
+  return fetchAPI<ProductionModelsResponse>(`${BASE}/models/production`);
 }
 
 export function getFeedbackSummary(period: Period = "30d") {

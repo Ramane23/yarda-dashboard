@@ -165,6 +165,36 @@ export interface PhaseProgress {
   phases: PhaseDefinition[];
 }
 
+export interface ProductionModel {
+  id: number;
+  model_name: string;
+  version: string;
+  framework: string | null;
+  stage: string | null;
+  created_at: string;
+  is_client_specific: boolean;
+  validation_metrics: Record<string, number> | null;
+  classifier_metrics: Record<string, number> | null;
+  anomaly_metrics: Record<string, number> | null;
+  confusion_matrix: {
+    true_positives: number;
+    true_negatives: number;
+    false_positives: number;
+    false_negatives: number;
+  } | null;
+  feature_importance: Record<string, number> | null;
+  params: Record<string, string> | null;
+  tags: string[];
+  comet_url: string | null;
+  assets: string[];
+}
+
+export interface ProductionModelsResponse {
+  client_id: string;
+  models: ProductionModel[];
+  comet_available: boolean;
+}
+
 export type Period = "24h" | "7d" | "30d" | "90d";
 export type Decision = "allow" | "review" | "alert" | "block";
 export type SortOrder = "newest" | "oldest" | "score_desc" | "score_asc";
