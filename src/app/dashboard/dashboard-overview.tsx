@@ -12,13 +12,14 @@ import {
   Brain,
   Gauge,
   Network,
+  Shield,
 } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { VolumeChart } from "@/components/charts/volume-chart";
 import { DecisionDonut } from "@/components/charts/decision-donut";
 import { ScoreHistogram } from "@/components/charts/score-histogram";
-import { getStats, getAnalytics, getPhaseProgress, getScoringConfig } from "@/lib/api";
+import { getStats, getAnalytics, getPhaseProgress, getScoringConfig, getImpact } from "@/lib/api";
 import { formatNumber, formatPercent, formatMs, cn, phaseLabel } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
@@ -49,7 +50,18 @@ export default function DashboardOverview() {
     queryFn: () => getScoringConfig(),
   });
 
+  const { data: impactData } = useQuery({
+    queryKey: ["impact", period],
+    queryFn: () => getImpact(period),
+  });
+
   const phase = stats ? phaseLabel(stats.phase, locale) : null;
+
+  const formatAmount = (amount: number, currency: string) => {
+    if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M ${currency}`;
+    if (amount >= 1_000) return `${(amount / 1_000).toFixed(0)}K ${currency}`;
+    return `${amount.toFixed(0)} ${currency}`;
+  };
 
   const decisionKeys: Record<string, TranslationKey> = {
     allow: "decision.allow",
@@ -161,6 +173,57 @@ export default function DashboardOverview() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Impact Metrics */}
+        {impactData && (
+          <div
+            className="animate-fade-in grid grid-cols-1 gap-4 sm:grid-cols-3"
+            style={{ animationDelay: "120ms" }}
+          >
+            <div className="card overflow-hidden border-l-4 border-l-emerald-500 p-4">
+              <div className="flex items-center gap-2">
+                <Shield size={14} className="text-emerald-500" />
+                <span className="text-xs font-medium uppercase tracking-wider text-surface-400">
+                  {t("impact.confirmedFraud")}
+                </span>
+              </div>
+              <p className="mt-1 font-mono text-xl font-bold text-emerald-700 dark:text-emerald-400">
+                {formatAmount(impactData.confirmed_fraud_intercepted, impactData.currency)}
+              </p>
+              <p className="text-[11px] text-surface-400">
+                {impactData.confirmed_fraud_count} {t("impact.transactions")}
+              </p>
+            </div>
+            <div className="card overflow-hidden border-l-4 border-l-amber-500 p-4">
+              <div className="flex items-center gap-2">
+                <Shield size={14} className="text-amber-500" />
+                <span className="text-xs font-medium uppercase tracking-wider text-surface-400">
+                  {t("impact.underSurveillance")}
+                </span>
+              </div>
+              <p className="mt-1 font-mono text-xl font-bold text-amber-700 dark:text-amber-400">
+                {formatAmount(impactData.amount_under_surveillance, impactData.currency)}
+              </p>
+              <p className="text-[11px] text-surface-400">
+                {impactData.surveillance_count} {t("impact.transactions")}
+              </p>
+            </div>
+            <div className="card overflow-hidden border-l-4 border-l-surface-300 dark:border-l-surface-600 p-4">
+              <div className="flex items-center gap-2">
+                <Shield size={14} className="text-surface-400" />
+                <span className="text-xs font-medium uppercase tracking-wider text-surface-400">
+                  {t("impact.totalProcessed")}
+                </span>
+              </div>
+              <p className="mt-1 font-mono text-xl font-bold text-surface-900 dark:text-white">
+                {formatAmount(impactData.total_amount_processed, impactData.currency)}
+              </p>
+              <p className="text-[11px] text-surface-400">
+                {impactData.total_transactions} {t("impact.transactions")}
+              </p>
+            </div>
           </div>
         )}
 

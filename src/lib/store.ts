@@ -9,11 +9,13 @@ interface AppState {
   period: Period;
   sidebarOpen: boolean;
   locale: Locale;
+  viewAsClient: string;
   setClientId: (id: string) => void;
   setApiKey: (key: string) => void;
   setPeriod: (p: Period) => void;
   toggleSidebar: () => void;
   setLocale: (l: Locale) => void;
+  setViewAsClient: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -24,6 +26,7 @@ export const useAppStore = create<AppState>()(
       period: "7d",
       sidebarOpen: true,
       locale: "en",
+      viewAsClient: "",
       setClientId: (id) => {
         localStorage.setItem("client_id", id);
         set({ clientId: id });
@@ -35,6 +38,14 @@ export const useAppStore = create<AppState>()(
       setPeriod: (period) => set({ period }),
       toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
       setLocale: (locale) => set({ locale }),
+      setViewAsClient: (id) => {
+        if (id) {
+          localStorage.setItem("view_as_client", id);
+        } else {
+          localStorage.removeItem("view_as_client");
+        }
+        set({ viewAsClient: id });
+      },
     }),
     { name: "yarda-store" },
   ),

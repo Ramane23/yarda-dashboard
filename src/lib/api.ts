@@ -29,8 +29,10 @@ async function fetchAPI<T>(
     "Content-Type": "application/json",
   };
 
-  // Client ID from localStorage or env
-  const clientId = typeof window !== "undefined" ? localStorage.getItem("client_id") : null;
+  // Admin "view as client" override, then fall back to actual client ID
+  const viewAs = typeof window !== "undefined" ? localStorage.getItem("view_as_client") : null;
+  const clientId =
+    viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
   if (clientId) headers["X-Client-ID"] = clientId;
 
   const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
@@ -104,13 +106,29 @@ export function getScoringConfig() {
   return fetchAPI<ScoringConfig>(`${BASE}/scoring-config`);
 }
 
+export interface ImpactData {
+  confirmed_fraud_intercepted: number;
+  confirmed_fraud_count: number;
+  amount_under_surveillance: number;
+  surveillance_count: number;
+  total_amount_processed: number;
+  total_transactions: number;
+  currency: string;
+}
+
+export function getImpact(period: Period = "30d") {
+  return fetchAPI<ImpactData>(`${BASE}/impact`, { period });
+}
+
 export function submitFeedback(
   requestId: string,
   feedback: { is_fraud: boolean; fraud_type?: string; notes?: string },
 ) {
   const url = new URL(`/api/v1/predictions/${requestId}/feedback`, window.location.origin);
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const clientId = typeof window !== "undefined" ? localStorage.getItem("client_id") : null;
+  const viewAs = typeof window !== "undefined" ? localStorage.getItem("view_as_client") : null;
+  const clientId =
+    viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
   if (clientId) headers["X-Client-ID"] = clientId;
   const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
   if (apiKey) headers["X-API-Key"] = apiKey;

@@ -6,6 +6,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   Database,
+  ExternalLink,
+  Filter,
   Globe,
   FlaskConical,
   Layers,
@@ -17,6 +19,7 @@ import {
   FileText,
   Cpu,
   BarChart3,
+  Microscope,
 } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
@@ -26,7 +29,6 @@ import { cn, formatNumber, formatMs } from "@/lib/utils";
 import {
   getSystemHealth,
   getIngestionStats,
-  getImpactMetrics,
   getPhaseManagement,
   getModelRegistry,
   getRetrainingStatus,
@@ -34,6 +36,8 @@ import {
   getFeedbackStats,
   getExperiments,
   getReports,
+  getAnomalyStatus,
+  getFeatureStats,
 } from "@/lib/admin-api";
 
 function StatusDot({ ok }: { ok: boolean }) {
@@ -77,34 +81,19 @@ function Stat({ label, value, sub }: { label: string; value: string | number; su
 export default function SystemPage() {
   const period = useAppStore((s) => s.period);
   const t = useT();
-  const [selectedClient, setSelectedClient] = useState<string>("");
+  const [clientFilter, setClientFilter] = useState<string>("");
 
-  // Parallel queries to all admin endpoints
+  // Global queries (not client-filtered)
   const health = useQuery({ queryKey: ["admin-health"], queryFn: getSystemHealth, retry: 1 });
   const ingestion = useQuery({
     queryKey: ["admin-ingestion"],
     queryFn: getIngestionStats,
     retry: 1,
   });
-  const impact = useQuery({
-    queryKey: ["admin-impact", period],
-    queryFn: () => getImpactMetrics(period),
-    retry: 1,
-  });
   const phases = useQuery({ queryKey: ["admin-phases"], queryFn: getPhaseManagement, retry: 1 });
-  const models = useQuery({
-    queryKey: ["admin-models"],
-    queryFn: () => getModelRegistry(),
-    retry: 1,
-  });
   const retraining = useQuery({
     queryKey: ["admin-retraining"],
     queryFn: getRetrainingStatus,
-    retry: 1,
-  });
-  const feedback = useQuery({
-    queryKey: ["admin-feedback", period],
-    queryFn: () => getFeedbackStats(period),
     retry: 1,
   });
   const experiments = useQuery({
@@ -112,7 +101,37 @@ export default function SystemPage() {
     queryFn: getExperiments,
     retry: 1,
   });
-  const reports = useQuery({ queryKey: ["admin-reports"], queryFn: () => getReports(), retry: 1 });
+
+  // Client-filtered queries
+  const models = useQuery({
+    queryKey: ["admin-models", clientFilter],
+    queryFn: () => getModelRegistry(clientFilter || undefined),
+    retry: 1,
+  });
+  const feedback = useQuery({
+    queryKey: ["admin-feedback", period, clientFilter],
+    queryFn: () => getFeedbackStats(period),
+    retry: 1,
+  });
+  const reports = useQuery({
+    queryKey: ["admin-reports", clientFilter],
+    queryFn: () => getReports(clientFilter || undefined),
+    retry: 1,
+  });
+
+  // Per-client queries (only when a client is selected)
+  const anomaly = useQuery({
+    queryKey: ["admin-anomaly", clientFilter],
+    queryFn: () => getAnomalyStatus(clientFilter),
+    enabled: !!clientFilter,
+    retry: 1,
+  });
+  const features = useQuery({
+    queryKey: ["admin-features", clientFilter],
+    queryFn: () => getFeatureStats(clientFilter),
+    enabled: !!clientFilter,
+    retry: 1,
+  });
 
   const retrainCheck = useMutation({
     mutationFn: (clientId: string) => checkRetraining(clientId),
@@ -140,13 +159,14 @@ export default function SystemPage() {
 
   const h = health.data;
   const ing = ingestion.data;
-  const imp = impact.data;
   const ph = phases.data;
   const mod = models.data;
   const ret = retraining.data;
   const fb = feedback.data;
   const exp = experiments.data;
   const rep = reports.data;
+  const anom = anomaly.data;
+  const feat = features.data;
 
   const formatUptime = (s: number) => {
     const d = Math.floor(s / 86400);
@@ -157,16 +177,47 @@ export default function SystemPage() {
     return `${mins}m`;
   };
 
-  const formatAmount = (amount: number, currency: string) => {
-    if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M ${currency}`;
-    if (amount >= 1_000) return `${(amount / 1_000).toFixed(0)}K ${currency}`;
-    return `${amount.toFixed(0)} ${currency}`;
-  };
-
   return (
     <>
       <Header title={t("system.title")} />
       <div className="flex-1 space-y-6 overflow-auto p-6">
+        {/* ── Client Filter Bar ── */}
+        {ph && ph.clients.length > 0 && (
+          <div className="flex items-center gap-3">
+            <Filter size={14} className="text-surface-400" />
+            <span className="text-xs font-medium text-surface-500">
+              {t("system.filterByClient")}
+            </span>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => setClientFilter("")}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
+                  !clientFilter
+                    ? "bg-brand-500 text-white shadow-sm"
+                    : "bg-surface-100 text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700",
+                )}
+              >
+                {t("system.allClients")}
+              </button>
+              {ph.clients.map((c) => (
+                <button
+                  key={c.client_id}
+                  onClick={() => setClientFilter(c.client_id)}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
+                    clientFilter === c.client_id
+                      ? "bg-brand-500 text-white shadow-sm"
+                      : "bg-surface-100 text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700",
+                  )}
+                >
+                  {c.client_name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── Row 1: Health + Ingestion ── */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* System Health */}
@@ -202,9 +253,9 @@ export default function SystemPage() {
                         )}
                       >
                         {h.database === "healthy" ? (
-                          <CheckCircle2 size={12} className="inline mr-1" />
+                          <CheckCircle2 size={12} className="mr-1 inline" />
                         ) : (
-                          <XCircle size={12} className="inline mr-1" />
+                          <XCircle size={12} className="mr-1 inline" />
                         )}
                         {h.database}
                       </p>
@@ -306,51 +357,7 @@ export default function SystemPage() {
           </div>
         </div>
 
-        {/* ── Row 2: Impact Metrics ── */}
-        <div className="card space-y-4 p-5">
-          <SectionTitle icon={Shield}>{t("system.impact")}</SectionTitle>
-          {imp ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
-                <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                  {t("system.confirmedFraud")}
-                </p>
-                <p className="mt-1 font-mono text-2xl font-bold text-emerald-800 dark:text-emerald-300">
-                  {formatAmount(imp.confirmed_fraud_intercepted, imp.currency)}
-                </p>
-                <p className="text-xs text-emerald-600 dark:text-emerald-500">
-                  {imp.confirmed_fraud_count} {t("system.transactions")}
-                </p>
-              </div>
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
-                <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-                  {t("system.underSurveillance")}
-                </p>
-                <p className="mt-1 font-mono text-2xl font-bold text-amber-800 dark:text-amber-300">
-                  {formatAmount(imp.amount_under_surveillance, imp.currency)}
-                </p>
-                <p className="text-xs text-amber-600 dark:text-amber-500">
-                  {imp.surveillance_count} {t("system.transactions")}
-                </p>
-              </div>
-              <div className="rounded-xl border border-surface-200 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800">
-                <p className="text-xs font-medium text-surface-500">{t("system.totalProcessed")}</p>
-                <p className="mt-1 font-mono text-2xl font-bold text-surface-900 dark:text-white">
-                  {formatAmount(imp.total_amount_processed, imp.currency)}
-                </p>
-                <p className="text-xs text-surface-400">
-                  {imp.total_transactions} {t("system.transactions")}
-                </p>
-              </div>
-            </div>
-          ) : impact.isLoading ? (
-            <div className="animate-pulse h-24 rounded bg-surface-200 dark:bg-surface-700" />
-          ) : (
-            <p className="text-sm text-red-500">{impact.error?.message}</p>
-          )}
-        </div>
-
-        {/* ── Row 3: Client Phases + Model Registry ── */}
+        {/* ── Row 2: Client Phases + Model Registry ── */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Client Phases */}
           <div className="card space-y-4 p-5">
@@ -361,40 +368,42 @@ export default function SystemPage() {
                   {ph.active_clients}/{ph.total_clients} {t("system.activeClients").toLowerCase()}
                 </p>
                 <div className="space-y-2">
-                  {ph.clients.map((c) => (
-                    <div
-                      key={c.client_id}
-                      className="flex items-center gap-3 rounded-lg border bg-surface-50 p-3 dark:border-surface-700 dark:bg-surface-800/50"
-                    >
-                      <StatusDot ok={c.is_active} />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-surface-900 dark:text-white">
-                          {c.client_name}
-                        </p>
-                        <p className="text-[11px] text-surface-400">
-                          {c.client_id} &middot; {c.operator_type}
-                        </p>
-                      </div>
-                      <span
-                        className={cn(
-                          "rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
-                          c.phase === "detection" &&
-                            "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-                          c.phase === "learning" &&
-                            "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-                          c.phase === "classification" &&
-                            "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
-                          c.phase === "intelligence" &&
-                            "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-                        )}
+                  {ph.clients
+                    .filter((c) => !clientFilter || c.client_id === clientFilter)
+                    .map((c) => (
+                      <div
+                        key={c.client_id}
+                        className="flex items-center gap-3 rounded-lg border bg-surface-50 p-3 dark:border-surface-700 dark:bg-surface-800/50"
                       >
-                        {c.phase}
-                      </span>
-                      <span className="font-mono text-xs text-surface-500">
-                        {c.labeled_count} labels
-                      </span>
-                    </div>
-                  ))}
+                        <StatusDot ok={c.is_active} />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-surface-900 dark:text-white">
+                            {c.client_name}
+                          </p>
+                          <p className="text-[11px] text-surface-400">
+                            {c.client_id} &middot; {c.operator_type}
+                          </p>
+                        </div>
+                        <span
+                          className={cn(
+                            "rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
+                            c.phase === "detection" &&
+                              "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+                            c.phase === "learning" &&
+                              "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+                            c.phase === "classification" &&
+                              "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+                            c.phase === "intelligence" &&
+                              "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+                          )}
+                        >
+                          {c.phase}
+                        </span>
+                        <span className="font-mono text-xs text-surface-500">
+                          {c.labeled_count} labels
+                        </span>
+                      </div>
+                    ))}
                 </div>
               </>
             ) : phases.isLoading ? (
@@ -414,7 +423,6 @@ export default function SystemPage() {
             {mod ? (
               <>
                 <p className="text-xs text-surface-400">{mod.total_models} models</p>
-                {/* Active per client */}
                 {Object.entries(mod.active_per_client).length > 0 && (
                   <div className="space-y-2">
                     {Object.entries(mod.active_per_client).map(([client, info]) => {
@@ -438,7 +446,6 @@ export default function SystemPage() {
                     })}
                   </div>
                 )}
-                {/* Recent models list */}
                 <div className="max-h-48 space-y-1 overflow-auto">
                   {mod.models.slice(0, 10).map((m) => (
                     <div key={m.id} className="flex items-center gap-2 text-xs">
@@ -478,6 +485,107 @@ export default function SystemPage() {
             )}
           </div>
         </div>
+
+        {/* ── Row 3b: Anomaly Detector + Feature Pipeline (only when client selected) ── */}
+        {clientFilter && (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Anomaly Detector */}
+            <div className="card space-y-4 p-5">
+              <SectionTitle icon={Microscope}>{t("system.anomaly")}</SectionTitle>
+              {anom ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <StatusDot ok={anom.is_fitted} />
+                    <span
+                      className={cn(
+                        "text-sm font-semibold",
+                        anom.is_fitted
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-surface-400",
+                      )}
+                    >
+                      {anom.is_fitted ? t("system.fitted") : t("system.notFitted")}
+                    </span>
+                  </div>
+                  {anom.is_fitted && (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {anom.contamination != null && (
+                        <Stat label="Contamination" value={anom.contamination.toFixed(3)} />
+                      )}
+                      {anom.n_estimators != null && (
+                        <Stat label="Estimators" value={anom.n_estimators} />
+                      )}
+                      {anom.n_samples_trained != null && (
+                        <Stat label="Samples" value={formatNumber(anom.n_samples_trained)} />
+                      )}
+                      {anom.n_features != null && <Stat label="Features" value={anom.n_features} />}
+                      {anom.threshold != null && (
+                        <Stat label="Threshold" value={anom.threshold.toFixed(4)} />
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : anomaly.isLoading ? (
+                <div className="animate-pulse h-16 rounded bg-surface-200 dark:bg-surface-700" />
+              ) : (
+                <p className="text-sm text-red-500">{anomaly.error?.message}</p>
+              )}
+            </div>
+
+            {/* Feature Pipeline */}
+            <div className="card space-y-4 p-5">
+              <SectionTitle icon={Layers}>{t("system.features")}</SectionTitle>
+              {feat ? (
+                feat.feature_file ? (
+                  <>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="font-mono text-surface-600 dark:text-surface-300">
+                        {feat.feature_file}
+                      </span>
+                      {feat.last_modified && (
+                        <span className="text-surface-400">
+                          &middot; {new Date(feat.last_modified).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {feat.n_rows != null && (
+                        <Stat label="Rows" value={formatNumber(feat.n_rows)} />
+                      )}
+                      {feat.n_features != null && <Stat label="Features" value={feat.n_features} />}
+                    </div>
+                    {feat.columns.length > 0 && (
+                      <div className="max-h-40 space-y-1 overflow-auto">
+                        {feat.columns.slice(0, 20).map((col) => (
+                          <div key={col.name} className="flex items-center gap-2 text-[11px]">
+                            <span className="min-w-0 flex-1 truncate font-mono text-surface-600 dark:text-surface-300">
+                              {col.name}
+                            </span>
+                            <span className="rounded bg-surface-100 px-1 text-[10px] text-surface-400 dark:bg-surface-800">
+                              {col.dtype}
+                            </span>
+                            {col.mean != null && (
+                              <span className="font-mono text-surface-500">μ={col.mean}</span>
+                            )}
+                            {col.nulls > 0 && (
+                              <span className="font-mono text-amber-500">{col.nulls} null</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-surface-400">No feature data available</p>
+                )
+              ) : features.isLoading ? (
+                <div className="animate-pulse h-16 rounded bg-surface-200 dark:bg-surface-700" />
+              ) : (
+                <p className="text-sm text-red-500">{features.error?.message}</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ── Row 4: Retraining + Feedback ── */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -527,24 +635,36 @@ export default function SystemPage() {
                   ))}
                 </div>
 
-                {/* Check retraining for a client */}
+                {/* Check retraining — uses clientFilter or manual select */}
                 {ph && ph.clients.length > 0 && (
                   <div className="flex items-center gap-2 border-t pt-3 dark:border-surface-700">
-                    <select
-                      value={selectedClient}
-                      onChange={(e) => setSelectedClient(e.target.value)}
-                      className="input-field flex-1 py-1.5 text-xs"
-                    >
-                      <option value="">{t("system.selectClient")}</option>
-                      {ph.clients.map((c) => (
-                        <option key={c.client_id} value={c.client_id}>
-                          {c.client_name}
-                        </option>
-                      ))}
-                    </select>
+                    {clientFilter ? (
+                      <span className="flex-1 text-xs font-medium text-surface-600 dark:text-surface-300">
+                        {ph.clients.find((c) => c.client_id === clientFilter)?.client_name ||
+                          clientFilter}
+                      </span>
+                    ) : (
+                      <select
+                        value={retrainCheck.variables || ""}
+                        onChange={(e) => e.target.value && retrainCheck.mutate(e.target.value)}
+                        className="input-field flex-1 py-1.5 text-xs"
+                      >
+                        <option value="">{t("system.selectClient")}</option>
+                        {ph.clients.map((c) => (
+                          <option key={c.client_id} value={c.client_id}>
+                            {c.client_name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                     <button
-                      onClick={() => selectedClient && retrainCheck.mutate(selectedClient)}
-                      disabled={!selectedClient || retrainCheck.isPending}
+                      onClick={() => {
+                        const cid = clientFilter || (retrainCheck.variables as string);
+                        if (cid) retrainCheck.mutate(cid);
+                      }}
+                      disabled={
+                        (!clientFilter && !retrainCheck.variables) || retrainCheck.isPending
+                      }
                       className="btn-primary px-3 py-1.5 text-xs disabled:opacity-50"
                     >
                       {retrainCheck.isPending ? (
@@ -625,17 +745,19 @@ export default function SystemPage() {
                 )}
                 {fb.per_client.length > 0 && (
                   <div className="space-y-1.5">
-                    {fb.per_client.map((c) => (
-                      <div key={c.client_name} className="flex items-center gap-2 text-xs">
-                        <span className="min-w-0 flex-1 text-surface-600 dark:text-surface-300">
-                          {c.client_name}
-                        </span>
-                        <span className="font-mono text-surface-900 dark:text-white">
-                          {c.total}
-                        </span>
-                        <span className="font-mono text-red-500">{c.fraud} fraud</span>
-                      </div>
-                    ))}
+                    {fb.per_client
+                      .filter((c) => !clientFilter || c.client_name === clientFilter)
+                      .map((c) => (
+                        <div key={c.client_name} className="flex items-center gap-2 text-xs">
+                          <span className="min-w-0 flex-1 text-surface-600 dark:text-surface-300">
+                            {c.client_name}
+                          </span>
+                          <span className="font-mono text-surface-900 dark:text-white">
+                            {c.total}
+                          </span>
+                          <span className="font-mono text-red-500">{c.fraud} fraud</span>
+                        </div>
+                      ))}
                   </div>
                 )}
               </>
@@ -766,6 +888,7 @@ export default function SystemPage() {
                           ? `${(r.size_bytes / 1024).toFixed(0)} KB`
                           : `${r.size_bytes} B`}
                       </span>
+                      <ExternalLink size={12} className="shrink-0 text-surface-400" />
                     </a>
                   ))}
                 </div>

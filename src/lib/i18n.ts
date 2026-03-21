@@ -256,6 +256,16 @@ const translations = {
     fr: "Détecteur de Réseaux (GNN)",
   },
 
+  // Impact metrics (dashboard)
+  "impact.title": { en: "Impact", fr: "Impact" },
+  "impact.confirmedFraud": {
+    en: "Confirmed Fraud Intercepted",
+    fr: "Fraude Confirmée Interceptée",
+  },
+  "impact.underSurveillance": { en: "Under Surveillance", fr: "Sous Surveillance" },
+  "impact.totalProcessed": { en: "Total Processed", fr: "Total Traité" },
+  "impact.transactions": { en: "transactions", fr: "transactions" },
+
   // System / Admin page
   "nav.system": { en: "System", fr: "Système" },
   "system.title": { en: "System", fr: "Système" },
@@ -306,6 +316,8 @@ const translations = {
   "system.reports": { en: "Training Reports", fr: "Rapports d'Entraînement" },
   "system.noReports": { en: "No reports available", fr: "Aucun rapport disponible" },
   "system.features": { en: "Feature Pipeline", fr: "Pipeline de Features" },
+  "system.allClients": { en: "All Clients", fr: "Tous les Clients" },
+  "system.filterByClient": { en: "Filter by client", fr: "Filtrer par client" },
   "system.selectClient": { en: "Select client...", fr: "Sélectionner un client..." },
   "system.checkRetraining": { en: "Check", fr: "Vérifier" },
   "system.shouldRetrain": { en: "Retraining recommended", fr: "Réentraînement recommandé" },
