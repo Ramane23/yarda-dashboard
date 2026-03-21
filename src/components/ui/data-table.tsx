@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { cn } from "@/lib/utils";
 
 interface Column<T> {
@@ -14,6 +15,7 @@ interface DataTableProps<T> {
   data: T[];
   keyFn: (item: T) => string;
   emptyMessage?: string;
+  renderExpandedRow?: (item: T) => React.ReactNode;
 }
 
 export function DataTable<T>({
@@ -21,6 +23,7 @@ export function DataTable<T>({
   data,
   keyFn,
   emptyMessage = "No data",
+  renderExpandedRow,
 }: DataTableProps<T>) {
   return (
     <div className="card overflow-hidden">
@@ -53,19 +56,21 @@ export function DataTable<T>({
               </tr>
             ) : (
               data.map((item, i) => (
-                <tr
-                  key={keyFn(item)}
-                  className={cn(
-                    "transition-colors hover:bg-surface-50 dark:hover:bg-surface-800/50",
-                    i % 2 === 1 && "bg-surface-50/40 dark:bg-surface-800/20",
-                  )}
-                >
-                  {columns.map((col) => (
-                    <td key={col.key} className={cn("px-4 py-3", col.className)}>
-                      {col.render(item)}
-                    </td>
-                  ))}
-                </tr>
+                <React.Fragment key={keyFn(item)}>
+                  <tr
+                    className={cn(
+                      "transition-colors hover:bg-surface-50 dark:hover:bg-surface-800/50",
+                      i % 2 === 1 && "bg-surface-50/40 dark:bg-surface-800/20",
+                    )}
+                  >
+                    {columns.map((col) => (
+                      <td key={col.key} className={cn("px-4 py-3", col.className)}>
+                        {col.render(item)}
+                      </td>
+                    ))}
+                  </tr>
+                  {renderExpandedRow?.(item)}
+                </React.Fragment>
               ))
             )}
           </tbody>

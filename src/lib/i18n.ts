@@ -166,6 +166,60 @@ const translations = {
   "legend.review": { en: "Review", fr: "Révision" },
   "legend.alert": { en: "Alert", fr: "Alerte" },
   "legend.blocked": { en: "Blocked", fr: "Bloquées" },
+
+  // Phase progress
+  "phase.semi_supervised": { en: "Semi-supervised", fr: "Semi-supervisé" },
+  "phase.production": { en: "Production", fr: "Production" },
+  "phase.progressTitle": { en: "Phase Progression", fr: "Progression de Phase" },
+  "phase.currentPhase": { en: "Current Phase", fr: "Phase Actuelle" },
+  "phase.nextPhase": { en: "Next Phase", fr: "Phase Suivante" },
+  "phase.labelsCollected": { en: "Labels Collected", fr: "Labels Collectés" },
+  "phase.labelsRemaining": { en: "labels remaining", fr: "labels restants" },
+  "phase.labelsNeeded": { en: "labels needed", fr: "labels nécessaires" },
+  "phase.reachedProduction": {
+    en: "Production phase reached",
+    fr: "Phase de production atteinte",
+  },
+
+  // Scoring
+  "scoring.title": { en: "Scoring Formula", fr: "Formule de Scoring" },
+  "scoring.anomalyDetector": { en: "Anomaly Detector", fr: "Détecteur d'Anomalies" },
+  "scoring.fraudDetector": { en: "Fraud Detector", fr: "Détecteur de Fraude" },
+  "scoring.rules": { en: "Rules Engine", fr: "Moteur de Règles" },
+  "scoring.plus": { en: "plus", fr: "plus" },
+
+  // Review / Labeling
+  "review.labelTransaction": { en: "Label Transaction", fr: "Étiqueter la Transaction" },
+  "review.markFraud": { en: "Fraud", fr: "Fraude" },
+  "review.markLegitimate": { en: "Legitimate", fr: "Légitime" },
+  "review.fraudType": { en: "Fraud Type", fr: "Type de Fraude" },
+  "review.selectFraudType": { en: "Select fraud type", fr: "Sélectionner le type de fraude" },
+  "review.notes": { en: "Notes", fr: "Notes" },
+  "review.submitLabel": { en: "Submit Label", fr: "Soumettre le Label" },
+  "review.submitting": { en: "Submitting...", fr: "Envoi..." },
+  "review.labelSubmitted": { en: "Label submitted!", fr: "Label soumis !" },
+  "review.coldStartBanner": {
+    en: "Cold Start: Label transactions to train the first fraud detection model",
+    fr: "Démarrage à froid : Étiquetez les transactions pour entraîner le premier modèle de détection de fraude",
+  },
+  "review.collectLabels": {
+    en: "Collect labels to improve detection",
+    fr: "Collectez des labels pour améliorer la détection",
+  },
+
+  // Fraud types taxonomy
+  "fraudType.account_takeover": { en: "Account Takeover", fr: "Prise de Contrôle de Compte" },
+  "fraudType.mule_account": { en: "Mule Account", fr: "Compte Mule" },
+  "fraudType.identity_theft": { en: "Identity Theft", fr: "Usurpation d'Identité" },
+  "fraudType.money_laundering": { en: "Money Laundering", fr: "Blanchiment d'Argent" },
+  "fraudType.structuring": { en: "Structuring / Smurfing", fr: "Fractionnement / Schtroumpfage" },
+  "fraudType.social_engineering": { en: "Social Engineering", fr: "Ingénierie Sociale" },
+  "fraudType.synthetic_identity": { en: "Synthetic Identity", fr: "Identité Synthétique" },
+  "fraudType.unauthorized_transfer": {
+    en: "Unauthorized Transfer",
+    fr: "Transfert Non Autorisé",
+  },
+  "fraudType.other": { en: "Other", fr: "Autre" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

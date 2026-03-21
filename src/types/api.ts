@@ -119,6 +119,28 @@ export interface FeedbackSummary {
   timestamp: string;
 }
 
+export interface PhaseDefinition {
+  phase: string;
+  min_labels: number;
+  max_labels: number | null;
+}
+
+export interface PhaseProgress {
+  client_id: string;
+  current_phase: string;
+  labeled_count: number;
+  next_phase: string | null;
+  next_phase_threshold: number | null;
+  progress_percent: number;
+  labels_remaining: number;
+  scoring_weights: {
+    anomaly: number;
+    ml: number;
+  };
+  phase_description: string;
+  phases: PhaseDefinition[];
+}
+
 export type Period = "24h" | "7d" | "30d" | "90d";
 export type Decision = "allow" | "review" | "alert" | "block";
 export type SortOrder = "newest" | "oldest" | "score_desc" | "score_asc";

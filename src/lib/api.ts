@@ -5,6 +5,7 @@ import type {
   PaginatedReviewQueue,
   ModelsResponse,
   FeedbackSummary,
+  PhaseProgress,
   Period,
   Decision,
   SortOrder,
@@ -92,4 +93,26 @@ export function getModels() {
 
 export function getFeedbackSummary(period: Period = "30d") {
   return fetchAPI<FeedbackSummary>(`${BASE}/feedback-summary`, { period });
+}
+
+export function getPhaseProgress() {
+  return fetchAPI<PhaseProgress>(`${BASE}/phase-progress`);
+}
+
+export function submitFeedback(
+  requestId: string,
+  feedback: { is_fraud: boolean; fraud_type?: string; notes?: string },
+) {
+  const url = new URL(`/api/v1/predictions/${requestId}/feedback`, window.location.origin);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const clientId = typeof window !== "undefined" ? localStorage.getItem("client_id") : null;
+  if (clientId) headers["X-Client-ID"] = clientId;
+  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
+  if (apiKey) headers["X-API-Key"] = apiKey;
+  return fetch(url.toString(), { method: "POST", headers, body: JSON.stringify(feedback) }).then(
+    (r) => {
+      if (!r.ok) throw new Error(`Feedback failed: ${r.status}`);
+      return r.json();
+    },
+  );
 }
