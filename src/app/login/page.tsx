@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Activity } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setClientId, setApiKey } = useAppStore();
+  const { clientId: storedClientId, setClientId, setApiKey } = useAppStore();
   const [clientId, setClientIdLocal] = useState("");
   const [apiKey, setApiKeyLocal] = useState("");
   const [error, setError] = useState("");
+
+  // Auto-redirect if already logged in
+  useEffect(() => {
+    if (storedClientId) router.replace("/dashboard");
+  }, [storedClientId, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
