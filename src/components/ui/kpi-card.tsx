@@ -19,7 +19,7 @@ export function KpiCard({ title, value, subtitle, icon: Icon, trend, accent }: K
       <div className={cn("absolute inset-x-0 top-0 h-0.5", accent || "bg-brand-500")} />
 
       <div className="flex items-start justify-between">
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <p className="text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
             {title}
           </p>
@@ -39,7 +39,7 @@ export function KpiCard({ title, value, subtitle, icon: Icon, trend, accent }: K
             </div>
           )}
         </div>
-        <div className="rounded-xl bg-brand-50 p-2.5 text-brand-600 dark:bg-brand-950/40 dark:text-brand-400">
+        <div className="flex-shrink-0 rounded-xl bg-brand-50 p-2.5 text-brand-600 dark:bg-brand-950/40 dark:text-brand-400">
           <Icon size={20} />
         </div>
       </div>
