@@ -2,6 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface KpiCardProps {
   title: string;
@@ -9,7 +10,7 @@ interface KpiCardProps {
   subtitle?: string;
   icon: LucideIcon;
   trend?: { value: string; positive: boolean };
-  accent?: string; // tailwind border-color class
+  accent?: string;
 }
 
 export function KpiCard({
@@ -18,36 +19,35 @@ export function KpiCard({
   subtitle,
   icon: Icon,
   trend,
-  accent = "border-brand-500",
+  accent,
 }: KpiCardProps) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border-l-4 bg-white p-5 shadow-sm",
-        accent,
-      )}
-    >
+    <div className="card group relative overflow-hidden p-5 transition-all duration-200 hover:shadow-card-hover dark:hover:shadow-glow">
+      {/* Top accent */}
+      <div className={cn("absolute inset-x-0 top-0 h-0.5", accent || "bg-brand-500")} />
+
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+        <div className="space-y-1">
+          <p className="text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
             {title}
           </p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
+          <p className="font-mono text-2xl font-bold text-surface-900 dark:text-white">
+            {value}
+          </p>
           {subtitle && (
-            <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
+            <p className="text-xs text-surface-500 dark:text-surface-400">{subtitle}</p>
           )}
           {trend && (
-            <p
-              className={cn(
-                "mt-1 text-xs font-medium",
-                trend.positive ? "text-emerald-600" : "text-red-600",
-              )}
-            >
-              {trend.positive ? "+" : ""}{trend.value}
-            </p>
+            <div className={cn(
+              "inline-flex items-center gap-1 text-xs font-semibold",
+              trend.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+            )}>
+              {trend.positive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+              {trend.value}
+            </div>
           )}
         </div>
-        <div className="rounded-lg bg-slate-50 p-2.5 text-slate-400">
+        <div className="rounded-xl bg-brand-50 p-2.5 text-brand-600 dark:bg-brand-950/40 dark:text-brand-400">
           <Icon size={20} />
         </div>
       </div>

@@ -7,7 +7,7 @@ import { DecisionDonut } from "@/components/charts/decision-donut";
 import { ScoreHistogram } from "@/components/charts/score-histogram";
 import { getAnalytics, getFeedbackSummary } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
-import { formatPercent } from "@/lib/utils";
+import { formatPercent, cn } from "@/lib/utils";
 
 export default function AnalyticsPage() {
   const period = useAppStore((s) => s.period);
@@ -26,36 +26,46 @@ export default function AnalyticsPage() {
     <>
       <Header title="Analytics" />
       <div className="flex-1 space-y-6 overflow-auto p-6">
-        {/* Charts */}
         {analytics && (
           <>
-            <VolumeChart data={analytics.time_series} />
+            <div className="animate-fade-in">
+              <VolumeChart data={analytics.time_series} />
+            </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="animate-fade-in grid grid-cols-1 gap-6 lg:grid-cols-2" style={{ animationDelay: "100ms" }}>
               <DecisionDonut data={analytics.decision_breakdown} />
               <ScoreHistogram data={analytics.score_distribution} />
             </div>
 
-            {/* Peak hours */}
+            {/* Peak Hours */}
             {analytics.top_hours.length > 0 && (
-              <div className="rounded-xl border border-slate-200 bg-white p-5">
-                <h3 className="mb-4 text-sm font-semibold text-slate-700">
-                  Peak Activity Hours (UTC)
-                </h3>
-                <div className="flex gap-3">
-                  {analytics.top_hours.map((h) => (
-                    <div
-                      key={h.hour}
-                      className="flex flex-col items-center rounded-lg bg-brand-50 px-4 py-3"
-                    >
-                      <span className="text-lg font-bold text-brand-700">
-                        {String(h.hour).padStart(2, "0")}:00
-                      </span>
-                      <span className="text-xs text-brand-600">
-                        {h.count.toLocaleString()} txn
-                      </span>
-                    </div>
-                  ))}
+              <div className="card animate-fade-in p-5" style={{ animationDelay: "200ms" }}>
+                <h3 className="section-title mb-4">Peak Activity Hours (UTC)</h3>
+                <div className="flex items-end gap-2">
+                  {Array.from({ length: 24 }, (_, i) => {
+                    const match = analytics.top_hours.find((h) => h.hour === i);
+                    const maxCount = Math.max(...analytics.top_hours.map((h) => h.count), 1);
+                    const heightPct = match ? (match.count / maxCount) * 100 : 5;
+                    const isTop = match && match.count === maxCount;
+                    return (
+                      <div key={i} className="flex flex-1 flex-col items-center gap-1" title={match ? `${match.count} txn` : "0 txn"}>
+                        <div
+                          className={cn(
+                            "w-full rounded-t transition-all duration-300",
+                            match
+                              ? isTop
+                                ? "bg-brand-500"
+                                : "bg-brand-400/60 dark:bg-brand-500/40"
+                              : "bg-surface-200 dark:bg-surface-700",
+                          )}
+                          style={{ height: `${Math.max(heightPct, 4)}px`, maxHeight: 80 }}
+                        />
+                        <span className="text-[9px] font-medium text-surface-400">
+                          {String(i).padStart(2, "0")}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -64,46 +74,95 @@ export default function AnalyticsPage() {
 
         {/* Model Performance */}
         {feedback && feedback.total_labeled > 0 && (
-          <div className="rounded-xl border border-slate-200 bg-white p-5">
-            <h3 className="mb-4 text-sm font-semibold text-slate-700">
-              Model Performance (from labeled data)
-            </h3>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              {[
-                { label: "Precision", value: feedback.precision },
-                { label: "Recall", value: feedback.recall },
-                { label: "F1 Score", value: feedback.f1_score },
-                { label: "Accuracy", value: feedback.accuracy },
-              ].map((m) => (
-                <div
-                  key={m.label}
-                  className="rounded-lg border border-slate-100 bg-slate-50 p-4 text-center"
-                >
-                  <p className="text-xs font-medium text-slate-400">
-                    {m.label}
-                  </p>
-                  <p className="mt-1 text-xl font-bold text-slate-900">
-                    {formatPercent(m.value)}
-                  </p>
+          <div className="animate-fade-in space-y-6" style={{ animationDelay: "300ms" }}>
+            {/* Labels Overview */}
+            <div className="card p-5">
+              <h3 className="section-title mb-4">Label Distribution</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <p className="font-mono text-2xl font-bold text-surface-900 dark:text-white">{feedback.total_labeled}</p>
+                  <p className="text-xs text-surface-400">Total Labeled</p>
                 </div>
-              ))}
+                <div className="text-center">
+                  <p className="font-mono text-2xl font-bold text-red-600 dark:text-red-400">{feedback.fraud_count}</p>
+                  <p className="text-xs text-surface-400">Fraud</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-mono text-2xl font-bold text-emerald-600 dark:text-emerald-400">{feedback.legitimate_count}</p>
+                  <p className="text-xs text-surface-400">Legitimate</p>
+                </div>
+              </div>
+              {/* Fraud/Legit bar */}
+              <div className="mt-4 flex h-3 overflow-hidden rounded-full">
+                <div
+                  className="bg-red-500 transition-all duration-500"
+                  style={{ width: `${feedback.total_labeled > 0 ? (feedback.fraud_count / feedback.total_labeled) * 100 : 0}%` }}
+                />
+                <div className="flex-1 bg-emerald-500" />
+              </div>
+              <div className="mt-1 flex justify-between text-[10px] text-surface-400">
+                <span>Fraud {feedback.total_labeled > 0 ? ((feedback.fraud_count / feedback.total_labeled) * 100).toFixed(1) : 0}%</span>
+                <span>Legitimate {feedback.total_labeled > 0 ? ((feedback.legitimate_count / feedback.total_labeled) * 100).toFixed(1) : 0}%</span>
+              </div>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <div className="text-center text-xs">
-                <span className="font-medium text-emerald-600">TP:</span>{" "}
-                {feedback.true_positives}
+
+            {/* Performance Metrics */}
+            <div className="card p-5">
+              <h3 className="section-title mb-4">Model Performance</h3>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {[
+                  { label: "Precision", value: feedback.precision, color: "text-brand-600 dark:text-brand-400" },
+                  { label: "Recall", value: feedback.recall, color: "text-emerald-600 dark:text-emerald-400" },
+                  { label: "F1 Score", value: feedback.f1_score, color: "text-amber-600 dark:text-amber-400" },
+                  { label: "Accuracy", value: feedback.accuracy, color: "text-violet-600 dark:text-violet-400" },
+                ].map((m) => (
+                  <div key={m.label} className="rounded-xl border bg-surface-50/50 p-4 text-center dark:bg-surface-800/50">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">{m.label}</p>
+                    <p className={cn("mt-1 font-mono text-2xl font-bold", m.color)}>
+                      {formatPercent(m.value)}
+                    </p>
+                    {/* Mini progress bar */}
+                    <div className="mx-auto mt-2 h-1 w-16 overflow-hidden rounded-full bg-surface-200 dark:bg-surface-700">
+                      <div
+                        className={cn("h-full rounded-full transition-all duration-500", m.color.replace("text-", "bg-"))}
+                        style={{ width: `${m.value * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="text-center text-xs">
-                <span className="font-medium text-red-600">FP:</span>{" "}
-                {feedback.false_positives}
-              </div>
-              <div className="text-center text-xs">
-                <span className="font-medium text-emerald-600">TN:</span>{" "}
-                {feedback.true_negatives}
-              </div>
-              <div className="text-center text-xs">
-                <span className="font-medium text-red-600">FN:</span>{" "}
-                {feedback.false_negatives}
+            </div>
+
+            {/* Confusion Matrix */}
+            <div className="card p-5">
+              <h3 className="section-title mb-4">Confusion Matrix</h3>
+              <div className="mx-auto max-w-xs">
+                <div className="mb-2 flex justify-end gap-1 pr-1">
+                  <span className="w-[calc(50%-4px)] text-center text-[10px] font-semibold uppercase tracking-wider text-surface-400">Predicted Fraud</span>
+                  <span className="w-[calc(50%-4px)] text-center text-[10px] font-semibold uppercase tracking-wider text-surface-400">Predicted Legit</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-lg bg-emerald-50 p-4 text-center dark:bg-emerald-950/30">
+                    <p className="text-[10px] font-semibold uppercase text-emerald-600 dark:text-emerald-400">True Positive</p>
+                    <p className="font-mono text-xl font-bold text-emerald-700 dark:text-emerald-300">{feedback.true_positives}</p>
+                  </div>
+                  <div className="rounded-lg bg-red-50 p-4 text-center dark:bg-red-950/30">
+                    <p className="text-[10px] font-semibold uppercase text-red-600 dark:text-red-400">False Negative</p>
+                    <p className="font-mono text-xl font-bold text-red-700 dark:text-red-300">{feedback.false_negatives}</p>
+                  </div>
+                  <div className="rounded-lg bg-red-50 p-4 text-center dark:bg-red-950/30">
+                    <p className="text-[10px] font-semibold uppercase text-red-600 dark:text-red-400">False Positive</p>
+                    <p className="font-mono text-xl font-bold text-red-700 dark:text-red-300">{feedback.false_positives}</p>
+                  </div>
+                  <div className="rounded-lg bg-emerald-50 p-4 text-center dark:bg-emerald-950/30">
+                    <p className="text-[10px] font-semibold uppercase text-emerald-600 dark:text-emerald-400">True Negative</p>
+                    <p className="font-mono text-xl font-bold text-emerald-700 dark:text-emerald-300">{feedback.true_negatives}</p>
+                  </div>
+                </div>
+                <div className="mt-2 flex gap-1 pl-1">
+                  <span className="w-[calc(50%-4px)] text-center text-[10px] font-semibold uppercase tracking-wider text-surface-400">Actual Fraud</span>
+                  <span className="w-[calc(50%-4px)] text-center text-[10px] font-semibold uppercase tracking-wider text-surface-400">Actual Legit</span>
+                </div>
               </div>
             </div>
           </div>

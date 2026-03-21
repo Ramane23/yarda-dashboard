@@ -23,46 +23,54 @@ export function DataTable<T>({
   emptyMessage = "No data",
 }: DataTableProps<T>) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-slate-100 bg-slate-50/50">
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={cn(
-                  "px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400",
-                  col.className,
-                )}
-              >
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {data.length === 0 ? (
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="px-4 py-12 text-center text-slate-400"
-              >
-                {emptyMessage}
-              </td>
+    <div className="card overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-surface-50/80 dark:bg-surface-800/50">
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  className={cn(
+                    "px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500",
+                    col.className,
+                  )}
+                >
+                  {col.header}
+                </th>
+              ))}
             </tr>
-          ) : (
-            data.map((item) => (
-              <tr key={keyFn(item)} className="hover:bg-slate-50/50 transition-colors">
-                {columns.map((col) => (
-                  <td key={col.key} className={cn("px-4 py-3", col.className)}>
-                    {col.render(item)}
-                  </td>
-                ))}
+          </thead>
+          <tbody className="divide-y divide-surface-100 dark:divide-surface-800">
+            {data.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="px-4 py-16 text-center text-sm text-surface-400"
+                >
+                  {emptyMessage}
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              data.map((item, i) => (
+                <tr
+                  key={keyFn(item)}
+                  className={cn(
+                    "transition-colors hover:bg-surface-50 dark:hover:bg-surface-800/50",
+                    i % 2 === 1 && "bg-surface-50/40 dark:bg-surface-800/20",
+                  )}
+                >
+                  {columns.map((col) => (
+                    <td key={col.key} className={cn("px-4 py-3", col.className)}>
+                      {col.render(item)}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

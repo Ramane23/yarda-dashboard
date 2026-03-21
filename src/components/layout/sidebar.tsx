@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ArrowLeftRight,
   BarChart3,
   ShieldAlert,
-  FileText,
+  Box,
   Settings,
   ChevronLeft,
   Activity,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -20,44 +21,58 @@ const nav = [
   { href: "/dashboard/transactions", label: "Transactions", icon: ArrowLeftRight },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/review", label: "Review Queue", icon: ShieldAlert },
-  { href: "/dashboard/reports", label: "Reports", icon: FileText },
+  { href: "/dashboard/models", label: "Models", icon: Box },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { sidebarOpen, toggleSidebar } = useAppStore();
+  const router = useRouter();
+  const { sidebarOpen, toggleSidebar, setClientId, setApiKey } = useAppStore();
+
+  const handleLogout = () => {
+    setClientId("");
+    setApiKey("");
+    localStorage.removeItem("client_id");
+    localStorage.removeItem("api_key");
+    router.push("/login");
+  };
 
   return (
     <aside
       className={cn(
-        "flex flex-col border-r border-slate-200 bg-white transition-all duration-200",
-        sidebarOpen ? "w-64" : "w-16",
+        "flex flex-col border-r bg-white transition-all duration-300 dark:bg-surface-900",
+        sidebarOpen ? "w-64" : "w-[68px]",
       )}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
-          <Activity size={18} />
+      <div className="flex h-16 items-center gap-3 border-b px-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-md shadow-brand-500/25">
+          <Activity size={18} strokeWidth={2.5} />
         </div>
         {sidebarOpen && (
-          <span className="text-lg font-bold tracking-tight text-slate-900">
-            YARDA
-          </span>
+          <div className="flex flex-col">
+            <span className="text-base font-bold tracking-tight text-surface-900 dark:text-white">
+              YARDA
+            </span>
+            <span className="text-[10px] font-medium uppercase tracking-widest text-surface-400">
+              Fraud Detection
+            </span>
+          </div>
         )}
         <button
           onClick={toggleSidebar}
-          className="ml-auto rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+          className="ml-auto rounded-lg p-1.5 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800 dark:hover:text-surface-300"
         >
           <ChevronLeft
-            size={18}
-            className={cn("transition-transform", !sidebarOpen && "rotate-180")}
+            size={16}
+            className={cn("transition-transform duration-300", !sidebarOpen && "rotate-180")}
           />
         </button>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 space-y-1 px-2 py-4">
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 px-3 py-4">
         {nav.map((item) => {
           const active =
             pathname === item.href ||
@@ -66,15 +81,19 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              title={!sidebarOpen ? item.label : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 active
-                  ? "bg-brand-50 text-brand-700"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                  ? "bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300"
+                  : "text-surface-500 hover:bg-surface-50 hover:text-surface-900 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200",
                 !sidebarOpen && "justify-center px-2",
               )}
             >
-              <item.icon size={20} />
+              {active && (
+                <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-brand-600 dark:bg-brand-400" />
+              )}
+              <item.icon size={20} strokeWidth={active ? 2.25 : 1.75} />
               {sidebarOpen && <span>{item.label}</span>}
             </Link>
           );
@@ -82,11 +101,23 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      {sidebarOpen && (
-        <div className="border-t border-slate-200 px-4 py-3">
-          <p className="text-xs text-slate-400">YARDA v0.1.0</p>
-        </div>
-      )}
+      <div className="border-t px-3 py-3 space-y-1">
+        <button
+          onClick={handleLogout}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-surface-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-surface-400 dark:hover:bg-red-950/30 dark:hover:text-red-400",
+            !sidebarOpen && "justify-center px-2",
+          )}
+        >
+          <LogOut size={18} />
+          {sidebarOpen && <span>Sign Out</span>}
+        </button>
+        {sidebarOpen && (
+          <p className="px-3 py-1 text-[10px] font-medium text-surface-400">
+            YARDA v1.0.0
+          </p>
+        )}
+      </div>
     </aside>
   );
 }

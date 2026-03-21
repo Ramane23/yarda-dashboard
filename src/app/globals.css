@@ -2,8 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+@layer base {
+  * {
+    @apply border-surface-200 dark:border-surface-700/60;
+  }
 
-body {
-  @apply bg-surface-secondary text-slate-900 antialiased;
+  body {
+    @apply bg-surface-50 text-surface-900 antialiased dark:bg-surface-950 dark:text-surface-100;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-surface-300 dark:bg-surface-700;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-400 dark:bg-surface-600;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border bg-white shadow-card dark:bg-surface-900 dark:shadow-dark-card;
+  }
+
+  .card-hover {
+    @apply card transition-shadow duration-200 hover:shadow-card-hover dark:hover:shadow-glow;
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border bg-white px-3 py-2.5 text-sm transition-colors
+      placeholder:text-surface-400
+      focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20
+      dark:bg-surface-800 dark:text-surface-100 dark:placeholder:text-surface-500
+      dark:focus:border-brand-400 dark:focus:ring-brand-400/20;
+  }
+
+  .btn-primary {
+    @apply rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm
+      transition-all hover:bg-brand-700 active:scale-[0.98]
+      dark:bg-brand-500 dark:hover:bg-brand-400;
+  }
+
+  .btn-ghost {
+    @apply rounded-lg px-3 py-2 text-sm font-medium text-surface-600 transition-colors
+      hover:bg-surface-100 hover:text-surface-900
+      dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-100;
+  }
+
+  .section-title {
+    @apply text-sm font-semibold text-surface-700 dark:text-surface-300;
+  }
+
+  .text-muted {
+    @apply text-surface-500 dark:text-surface-400;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
 }

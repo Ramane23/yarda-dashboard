@@ -11,25 +11,26 @@ interface PaginationProps {
 
 export function Pagination({ page, pages, total, onPageChange }: PaginationProps) {
   return (
-    <div className="flex items-center justify-between px-1 py-3">
-      <p className="text-xs text-slate-500">
-        {total.toLocaleString()} result{total !== 1 && "s"}
+    <div className="flex items-center justify-between py-3">
+      <p className="text-xs text-surface-500 dark:text-surface-400">
+        <span className="font-semibold text-surface-700 dark:text-surface-300">{total.toLocaleString()}</span>{" "}
+        result{total !== 1 && "s"}
       </p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30"
+          className="rounded-lg p-2 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-700 disabled:opacity-30 dark:hover:bg-surface-800 dark:hover:text-surface-200"
         >
           <ChevronLeft size={16} />
         </button>
-        <span className="px-3 text-xs font-medium text-slate-600">
+        <span className="min-w-[60px] text-center text-xs font-semibold text-surface-600 dark:text-surface-400">
           {page} / {pages}
         </span>
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page >= pages}
-          className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-30"
+          className="rounded-lg p-2 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-700 disabled:opacity-30 dark:hover:bg-surface-800 dark:hover:text-surface-200"
         >
           <ChevronRight size={16} />
         </button>

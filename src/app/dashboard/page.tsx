@@ -15,7 +15,7 @@ import { VolumeChart } from "@/components/charts/volume-chart";
 import { DecisionDonut } from "@/components/charts/decision-donut";
 import { ScoreHistogram } from "@/components/charts/score-histogram";
 import { getStats, getAnalytics } from "@/lib/api";
-import { formatNumber, formatPercent, formatMs } from "@/lib/utils";
+import { formatNumber, formatPercent, formatMs, cn, phaseLabel } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
 
 export default function DashboardOverview() {
@@ -26,65 +26,104 @@ export default function DashboardOverview() {
     queryFn: () => getStats(period),
   });
 
-  const { data: analytics, isLoading: analyticsLoading } = useQuery({
+  const { data: analytics } = useQuery({
     queryKey: ["analytics", period],
     queryFn: () => getAnalytics(period),
   });
+
+  const phase = stats ? phaseLabel(stats.phase) : null;
 
   return (
     <>
       <Header title="Overview" />
       <div className="flex-1 space-y-6 overflow-auto p-6">
         {/* KPI Grid */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="animate-fade-in grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <KpiCard
             title="Transactions"
-            value={statsLoading ? "..." : formatNumber(stats?.total_transactions ?? 0)}
+            value={statsLoading ? "\u2014" : formatNumber(stats?.total_transactions ?? 0)}
             icon={ArrowLeftRight}
-            accent="border-brand-500"
+            accent="bg-brand-500"
           />
           <KpiCard
             title="Flagged"
-            value={statsLoading ? "..." : formatNumber(stats?.total_flagged ?? 0)}
-            subtitle={statsLoading ? "" : formatPercent(stats?.flagged_rate ?? 0)}
+            value={statsLoading ? "\u2014" : formatNumber(stats?.total_flagged ?? 0)}
+            subtitle={statsLoading ? "" : `${formatPercent(stats?.flagged_rate ?? 0)} of total`}
             icon={ShieldAlert}
-            accent="border-risk-block"
+            accent="bg-red-500"
           />
           <KpiCard
-            title="Avg Score"
-            value={statsLoading ? "..." : (stats?.avg_score ?? 0).toFixed(3)}
+            title="Risk Score"
+            value={statsLoading ? "\u2014" : (stats?.avg_score ?? 0).toFixed(3)}
+            subtitle="Average"
             icon={TrendingUp}
-            accent="border-risk-review"
+            accent="bg-amber-500"
           />
           <KpiCard
-            title="Avg Latency"
-            value={statsLoading ? "..." : formatMs(stats?.avg_inference_time_ms ?? 0)}
+            title="Latency"
+            value={statsLoading ? "\u2014" : formatMs(stats?.avg_inference_time_ms ?? 0)}
+            subtitle="Avg inference"
             icon={Timer}
-            accent="border-emerald-500"
+            accent="bg-emerald-500"
           />
           <KpiCard
             title="Phase"
-            value={statsLoading ? "..." : (stats?.phase ?? "cold_start")}
+            value={statsLoading ? "\u2014" : (phase?.label ?? "\u2014")}
             subtitle={`${stats?.labeled_count ?? 0} labels`}
             icon={Layers}
-            accent="border-purple-500"
+            accent="bg-violet-500"
           />
           <KpiCard
             title="Pending Review"
-            value={statsLoading ? "..." : formatNumber(stats?.pending_review ?? 0)}
+            value={statsLoading ? "\u2014" : formatNumber(stats?.pending_review ?? 0)}
             icon={AlertCircle}
-            accent="border-amber-500"
+            accent="bg-orange-500"
           />
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {analytics && <VolumeChart data={analytics.time_series} />}
-          {analytics && <DecisionDonut data={analytics.decision_breakdown} />}
-        </div>
+        {/* Decision Quick Stats */}
+        {stats && (
+          <div className="animate-fade-in grid grid-cols-4 gap-3" style={{ animationDelay: "100ms" }}>
+            {(["allow", "review", "alert", "block"] as const).map((key) => {
+              const colorMap = {
+                allow: "from-emerald-500 to-emerald-600",
+                review: "from-amber-500 to-amber-600",
+                alert: "from-orange-500 to-orange-600",
+                block: "from-red-500 to-red-600",
+              };
+              const total = stats.total_transactions || 1;
+              const count = stats.decisions[key];
+              const pct = ((count / total) * 100).toFixed(1);
+              return (
+                <div key={key} className="card overflow-hidden p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                      {key}
+                    </span>
+                    <span className={cn("badge bg-gradient-to-r text-white text-[10px]", colorMap[key])}>
+                      {pct}%
+                    </span>
+                  </div>
+                  <p className="mt-1 font-mono text-xl font-bold text-surface-900 dark:text-white">
+                    {count.toLocaleString()}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
+        {/* Charts */}
         {analytics && (
-          <ScoreHistogram data={analytics.score_distribution} />
+          <>
+            <div className="animate-fade-in" style={{ animationDelay: "200ms" }}>
+              <VolumeChart data={analytics.time_series} />
+            </div>
+            <div className="animate-fade-in grid grid-cols-1 gap-6 lg:grid-cols-2" style={{ animationDelay: "300ms" }}>
+              <DecisionDonut data={analytics.decision_breakdown} />
+              <ScoreHistogram data={analytics.score_distribution} />
+            </div>
+          </>
         )}
       </div>
     </>

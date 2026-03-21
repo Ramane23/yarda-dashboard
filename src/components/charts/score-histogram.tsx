@@ -19,11 +19,7 @@ const BUCKET_COLORS: Record<string, string> = {
   "0.8-1.0": "#dc2626",
 };
 
-export function ScoreHistogram({
-  data,
-}: {
-  data: Record<string, number>;
-}) {
+export function ScoreHistogram({ data }: { data: Record<string, number> }) {
   const chartData = Object.entries(data).map(([bucket, count]) => ({
     bucket,
     count,
@@ -31,24 +27,35 @@ export function ScoreHistogram({
   }));
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
-      <h3 className="mb-4 text-sm font-semibold text-slate-700">
-        Score Distribution
-      </h3>
-      <div className="h-48">
+    <div className="card p-5">
+      <h3 className="section-title mb-4">Score Distribution</h3>
+      <div className="h-52">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: "#94a3b8" }} />
-            <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.1} />
+            <XAxis
+              dataKey="bucket"
+              tick={{ fontSize: 11, fill: "#94a3b8" }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 11, fill: "#94a3b8" }}
+              axisLine={false}
+              tickLine={false}
+            />
             <Tooltip
               contentStyle={{
-                borderRadius: 8,
-                border: "1px solid #e2e8f0",
+                borderRadius: 12,
+                border: "1px solid rgba(148, 163, 184, 0.2)",
+                backgroundColor: "rgba(15, 23, 42, 0.95)",
+                color: "#e2e8f0",
                 fontSize: 12,
+                padding: "8px 12px",
               }}
+              cursor={{ fill: "rgba(148, 163, 184, 0.08)" }}
             />
-            <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={48}>
               {chartData.map((entry) => (
                 <Cell key={entry.bucket} fill={entry.fill} />
               ))}

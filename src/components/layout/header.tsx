@@ -1,44 +1,54 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { cn } from "@/lib/utils";
 import type { Period } from "@/types/api";
 
 const periods: { value: Period; label: string }[] = [
   { value: "24h", label: "24h" },
-  { value: "7d", label: "7 days" },
-  { value: "30d", label: "30 days" },
-  { value: "90d", label: "90 days" },
+  { value: "7d", label: "7d" },
+  { value: "30d", label: "30d" },
+  { value: "90d", label: "90d" },
 ];
 
 export function Header({ title }: { title: string }) {
   const { period, setPeriod, clientId } = useAppStore();
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6">
-      <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
+    <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white/80 px-6 backdrop-blur-sm dark:bg-surface-900/80">
+      <h1 className="text-lg font-semibold text-surface-900 dark:text-white">
+        {title}
+      </h1>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Period selector */}
-        <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+        <div className="flex rounded-lg border bg-surface-50 p-0.5 dark:bg-surface-800">
           {periods.map((p) => (
             <button
               key={p.value}
               onClick={() => setPeriod(p.value)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={cn(
+                "rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-200",
                 period === p.value
-                  ? "bg-white text-brand-700 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
+                  ? "bg-white text-brand-700 shadow-sm dark:bg-surface-700 dark:text-brand-300"
+                  : "text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200",
+              )}
             >
               {p.label}
             </button>
           ))}
         </div>
 
+        <ThemeToggle />
+
         {/* Client badge */}
         {clientId && (
-          <div className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
-            {clientId.toUpperCase()}
+          <div className="flex items-center gap-2 rounded-full border bg-surface-50 px-3 py-1.5 dark:bg-surface-800">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+            <span className="text-xs font-semibold text-surface-700 dark:text-surface-300">
+              {clientId.toUpperCase()}
+            </span>
           </div>
         )}
       </div>
