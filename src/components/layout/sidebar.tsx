@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   Activity,
   LogOut,
+  Monitor,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -24,6 +25,7 @@ const nav: { href: string; labelKey: TranslationKey; icon: typeof LayoutDashboar
   { href: "/dashboard/analytics", labelKey: "nav.analytics", icon: BarChart3 },
   { href: "/dashboard/review", labelKey: "nav.reviewQueue", icon: ShieldAlert },
   { href: "/dashboard/models", labelKey: "nav.models", icon: Box },
+  { href: "/dashboard/system", labelKey: "nav.system", icon: Monitor },
   { href: "/dashboard/settings", labelKey: "nav.settings", icon: Settings },
 ];
 
