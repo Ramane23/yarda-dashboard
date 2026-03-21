@@ -19,20 +19,25 @@ import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
 import type { TranslationKey } from "@/lib/i18n";
 
-const nav: { href: string; labelKey: TranslationKey; icon: typeof LayoutDashboard }[] = [
+const nav: {
+  href: string;
+  labelKey: TranslationKey;
+  icon: typeof LayoutDashboard;
+  adminOnly?: boolean;
+}[] = [
   { href: "/dashboard", labelKey: "nav.overview", icon: LayoutDashboard },
   { href: "/dashboard/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
   { href: "/dashboard/analytics", labelKey: "nav.analytics", icon: BarChart3 },
   { href: "/dashboard/review", labelKey: "nav.reviewQueue", icon: ShieldAlert },
   { href: "/dashboard/models", labelKey: "nav.models", icon: Box },
-  { href: "/dashboard/system", labelKey: "nav.system", icon: Monitor },
+  { href: "/dashboard/system", labelKey: "nav.system", icon: Monitor, adminOnly: true },
   { href: "/dashboard/settings", labelKey: "nav.settings", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { sidebarOpen, toggleSidebar, setClientId, setApiKey } = useAppStore();
+  const { sidebarOpen, toggleSidebar, setClientId, setApiKey, clientId } = useAppStore();
   const t = useT();
 
   const handleLogout = () => {
@@ -78,32 +83,34 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {nav.map((item) => {
-          const label = t(item.labelKey);
-          const active =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname.startsWith(item.href));
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={!sidebarOpen ? label : undefined}
-              className={cn(
-                "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                active
-                  ? "bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300"
-                  : "text-surface-500 hover:bg-surface-50 hover:text-surface-900 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200",
-                !sidebarOpen && "justify-center px-2",
-              )}
-            >
-              {active && (
-                <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-brand-600 dark:bg-brand-400" />
-              )}
-              <item.icon size={20} strokeWidth={active ? 2.25 : 1.75} />
-              {sidebarOpen && <span>{label}</span>}
-            </Link>
-          );
-        })}
+        {nav
+          .filter((item) => !item.adminOnly || clientId === "admin")
+          .map((item) => {
+            const label = t(item.labelKey);
+            const active =
+              pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                title={!sidebarOpen ? label : undefined}
+                className={cn(
+                  "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                  active
+                    ? "bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300"
+                    : "text-surface-500 hover:bg-surface-50 hover:text-surface-900 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200",
+                  !sidebarOpen && "justify-center px-2",
+                )}
+              >
+                {active && (
+                  <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-brand-600 dark:bg-brand-400" />
+                )}
+                <item.icon size={20} strokeWidth={active ? 2.25 : 1.75} />
+                {sidebarOpen && <span>{label}</span>}
+              </Link>
+            );
+          })}
       </nav>
 
       {/* Footer */}
