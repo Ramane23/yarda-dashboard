@@ -1,7 +1,9 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { useT } from "@/lib/useT";
 import type { DecisionBreakdown } from "@/types/api";
+import type { TranslationKey } from "@/lib/i18n";
 
 const COLORS: Record<string, string> = {
   allow: "#059669",
@@ -10,14 +12,16 @@ const COLORS: Record<string, string> = {
   block: "#dc2626",
 };
 
-const LABELS: Record<string, string> = {
-  allow: "Allowed",
-  review: "Review",
-  alert: "Alert",
-  block: "Blocked",
+const LABEL_KEYS: Record<string, TranslationKey> = {
+  allow: "legend.allowed",
+  review: "legend.review",
+  alert: "legend.alert",
+  block: "legend.blocked",
 };
 
 export function DecisionDonut({ data }: { data: DecisionBreakdown }) {
+  const t = useT();
+
   const chartData = Object.entries(data).map(([name, value]) => ({
     name,
     value,
@@ -26,7 +30,7 @@ export function DecisionDonut({ data }: { data: DecisionBreakdown }) {
 
   return (
     <div className="card p-5">
-      <h3 className="section-title mb-4">Decision Breakdown</h3>
+      <h3 className="section-title mb-4">{t("chart.decisionBreakdown")}</h3>
       <div className="flex items-center gap-8">
         <div className="relative h-52 w-52 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
@@ -66,7 +70,7 @@ export function DecisionDonut({ data }: { data: DecisionBreakdown }) {
               {total.toLocaleString()}
             </span>
             <span className="text-[10px] font-medium uppercase tracking-wider text-surface-400">
-              Total
+              {t("chart.total")}
             </span>
           </div>
         </div>
@@ -75,6 +79,7 @@ export function DecisionDonut({ data }: { data: DecisionBreakdown }) {
         <div className="flex-1 space-y-3">
           {chartData.map((d) => {
             const pct = total > 0 ? (d.value / total) * 100 : 0;
+            const labelKey = LABEL_KEYS[d.name];
             return (
               <div key={d.name} className="space-y-1">
                 <div className="flex items-center justify-between">
@@ -84,7 +89,7 @@ export function DecisionDonut({ data }: { data: DecisionBreakdown }) {
                       style={{ backgroundColor: COLORS[d.name] }}
                     />
                     <span className="text-xs font-medium text-surface-600 dark:text-surface-300">
-                      {LABELS[d.name] || d.name}
+                      {labelKey ? t(labelKey) : d.name}
                     </span>
                   </div>
                   <span className="font-mono text-xs font-semibold text-surface-900 dark:text-white">

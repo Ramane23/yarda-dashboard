@@ -1,16 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Period } from "@/types/api";
+import type { Locale } from "@/lib/i18n";
 
 interface AppState {
   clientId: string;
   apiKey: string;
   period: Period;
   sidebarOpen: boolean;
+  locale: Locale;
   setClientId: (id: string) => void;
   setApiKey: (key: string) => void;
   setPeriod: (p: Period) => void;
   toggleSidebar: () => void;
+  setLocale: (l: Locale) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -20,6 +23,7 @@ export const useAppStore = create<AppState>()(
       apiKey: "",
       period: "7d",
       sidebarOpen: true,
+      locale: "en",
       setClientId: (id) => {
         localStorage.setItem("client_id", id);
         set({ clientId: id });
@@ -30,6 +34,7 @@ export const useAppStore = create<AppState>()(
       },
       setPeriod: (period) => set({ period }),
       toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+      setLocale: (locale) => set({ locale }),
     }),
     { name: "yarda-store" },
   ),

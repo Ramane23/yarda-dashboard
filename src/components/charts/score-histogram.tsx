@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { useT } from "@/lib/useT";
 
 const BUCKET_COLORS: Record<string, string> = {
   "0.0-0.2": "#059669",
@@ -20,6 +21,8 @@ const BUCKET_COLORS: Record<string, string> = {
 };
 
 export function ScoreHistogram({ data }: { data: Record<string, number> }) {
+  const t = useT();
+
   const chartData = Object.entries(data).map(([bucket, count]) => ({
     bucket,
     count,
@@ -28,7 +31,7 @@ export function ScoreHistogram({ data }: { data: Record<string, number> }) {
 
   return (
     <div className="card p-5">
-      <h3 className="section-title mb-4">Score Distribution</h3>
+      <h3 className="section-title mb-4">{t("chart.scoreDistribution")}</h3>
       <div className="h-52">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData}>

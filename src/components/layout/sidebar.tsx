@@ -15,20 +15,23 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
+import { useT } from "@/lib/useT";
+import type { TranslationKey } from "@/lib/i18n";
 
-const nav = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/transactions", label: "Transactions", icon: ArrowLeftRight },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/review", label: "Review Queue", icon: ShieldAlert },
-  { href: "/dashboard/models", label: "Models", icon: Box },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+const nav: { href: string; labelKey: TranslationKey; icon: typeof LayoutDashboard }[] = [
+  { href: "/dashboard", labelKey: "nav.overview", icon: LayoutDashboard },
+  { href: "/dashboard/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
+  { href: "/dashboard/analytics", labelKey: "nav.analytics", icon: BarChart3 },
+  { href: "/dashboard/review", labelKey: "nav.reviewQueue", icon: ShieldAlert },
+  { href: "/dashboard/models", labelKey: "nav.models", icon: Box },
+  { href: "/dashboard/settings", labelKey: "nav.settings", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { sidebarOpen, toggleSidebar, setClientId, setApiKey } = useAppStore();
+  const t = useT();
 
   const handleLogout = () => {
     setClientId("");
@@ -53,10 +56,10 @@ export function Sidebar() {
         {sidebarOpen && (
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight text-surface-900 dark:text-white">
-              YARDA
+              {t("app.name")}
             </span>
             <span className="text-[10px] font-medium uppercase tracking-widest text-surface-400">
-              Fraud Detection
+              {t("nav.fraudDetection")}
             </span>
           </div>
         )}
@@ -74,6 +77,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
         {nav.map((item) => {
+          const label = t(item.labelKey);
           const active =
             pathname === item.href ||
             (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -81,7 +85,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              title={!sidebarOpen ? item.label : undefined}
+              title={!sidebarOpen ? label : undefined}
               className={cn(
                 "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 active
@@ -94,7 +98,7 @@ export function Sidebar() {
                 <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-brand-600 dark:bg-brand-400" />
               )}
               <item.icon size={20} strokeWidth={active ? 2.25 : 1.75} />
-              {sidebarOpen && <span>{item.label}</span>}
+              {sidebarOpen && <span>{label}</span>}
             </Link>
           );
         })}
@@ -110,11 +114,11 @@ export function Sidebar() {
           )}
         >
           <LogOut size={18} />
-          {sidebarOpen && <span>Sign Out</span>}
+          {sidebarOpen && <span>{t("nav.signOut")}</span>}
         </button>
         {sidebarOpen && (
           <p className="px-3 py-1 text-[10px] font-medium text-surface-400">
-            YARDA v1.0.0
+            {t("app.version")}
           </p>
         )}
       </div>

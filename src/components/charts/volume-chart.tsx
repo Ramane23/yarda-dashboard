@@ -9,12 +9,15 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useT } from "@/lib/useT";
 import type { TimeSeriesPoint } from "@/types/api";
 
 export function VolumeChart({ data }: { data: TimeSeriesPoint[] }) {
+  const t = useT();
+
   return (
     <div className="card p-5">
-      <h3 className="section-title mb-4">Transaction Volume</h3>
+      <h3 className="section-title mb-4">{t("chart.transactionVolume")}</h3>
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
@@ -60,7 +63,7 @@ export function VolumeChart({ data }: { data: TimeSeriesPoint[] }) {
               stroke="#6366f1"
               fill="url(#gradTotal)"
               strokeWidth={2}
-              name="Total"
+              name={t("chart.total")}
               dot={false}
               activeDot={{ r: 4, strokeWidth: 2 }}
             />
@@ -70,7 +73,7 @@ export function VolumeChart({ data }: { data: TimeSeriesPoint[] }) {
               stroke="#ef4444"
               fill="url(#gradFlagged)"
               strokeWidth={2}
-              name="Flagged"
+              name={t("chart.flagged")}
               dot={false}
               activeDot={{ r: 4, strokeWidth: 2 }}
             />

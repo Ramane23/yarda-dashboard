@@ -55,12 +55,26 @@ export function scoreBgColor(score: number): string {
   return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400";
 }
 
-export function phaseLabel(phase: string): { label: string; color: string } {
-  const map: Record<string, { label: string; color: string }> = {
-    cold_start: { label: "Cold Start", color: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400" },
-    early: { label: "Early", color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
-    stable: { label: "Stable", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400" },
-    mature: { label: "Mature", color: "bg-brand-100 text-brand-700 dark:bg-brand-950/40 dark:text-brand-400" },
-  };
-  return map[phase] || { label: phase, color: "bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400" };
+import { t as translate } from "@/lib/i18n";
+import type { Locale, TranslationKey } from "@/lib/i18n";
+
+const phaseColors: Record<string, string> = {
+  cold_start: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400",
+  early: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400",
+  stable: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400",
+  mature: "bg-brand-100 text-brand-700 dark:bg-brand-950/40 dark:text-brand-400",
+};
+
+const phaseKeys: Record<string, TranslationKey> = {
+  cold_start: "phase.cold_start",
+  early: "phase.early",
+  stable: "phase.stable",
+  mature: "phase.mature",
+};
+
+export function phaseLabel(phase: string, locale: Locale = "en"): { label: string; color: string } {
+  const key = phaseKeys[phase];
+  const color = phaseColors[phase] || "bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400";
+  const label = key ? translate(key, locale) : phase;
+  return { label, color };
 }

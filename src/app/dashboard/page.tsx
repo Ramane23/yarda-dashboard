@@ -17,9 +17,13 @@ import { ScoreHistogram } from "@/components/charts/score-histogram";
 import { getStats, getAnalytics } from "@/lib/api";
 import { formatNumber, formatPercent, formatMs, cn, phaseLabel } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
+import { useT } from "@/lib/useT";
+import type { TranslationKey } from "@/lib/i18n";
 
 export default function DashboardOverview() {
   const period = useAppStore((s) => s.period);
+  const locale = useAppStore((s) => s.locale);
+  const t = useT();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["stats", period],
@@ -31,50 +35,57 @@ export default function DashboardOverview() {
     queryFn: () => getAnalytics(period),
   });
 
-  const phase = stats ? phaseLabel(stats.phase) : null;
+  const phase = stats ? phaseLabel(stats.phase, locale) : null;
+
+  const decisionKeys: Record<string, TranslationKey> = {
+    allow: "decision.allow",
+    review: "decision.review",
+    alert: "decision.alert",
+    block: "decision.block",
+  };
 
   return (
     <>
-      <Header title="Overview" />
+      <Header title={t("nav.overview")} />
       <div className="flex-1 space-y-6 overflow-auto p-6">
         {/* KPI Grid */}
         <div className="animate-fade-in grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <KpiCard
-            title="Transactions"
+            title={t("kpi.transactions")}
             value={statsLoading ? "\u2014" : formatNumber(stats?.total_transactions ?? 0)}
             icon={ArrowLeftRight}
             accent="bg-brand-500"
           />
           <KpiCard
-            title="Flagged"
+            title={t("kpi.flagged")}
             value={statsLoading ? "\u2014" : formatNumber(stats?.total_flagged ?? 0)}
-            subtitle={statsLoading ? "" : `${formatPercent(stats?.flagged_rate ?? 0)} of total`}
+            subtitle={statsLoading ? "" : `${formatPercent(stats?.flagged_rate ?? 0)} ${t("kpi.ofTotal")}`}
             icon={ShieldAlert}
             accent="bg-red-500"
           />
           <KpiCard
-            title="Risk Score"
+            title={t("kpi.riskScore")}
             value={statsLoading ? "\u2014" : (stats?.avg_score ?? 0).toFixed(3)}
-            subtitle="Average"
+            subtitle={t("kpi.average")}
             icon={TrendingUp}
             accent="bg-amber-500"
           />
           <KpiCard
-            title="Latency"
+            title={t("kpi.latency")}
             value={statsLoading ? "\u2014" : formatMs(stats?.avg_inference_time_ms ?? 0)}
-            subtitle="Avg inference"
+            subtitle={t("kpi.avgInference")}
             icon={Timer}
             accent="bg-emerald-500"
           />
           <KpiCard
-            title="Phase"
+            title={t("kpi.phase")}
             value={statsLoading ? "\u2014" : (phase?.label ?? "\u2014")}
-            subtitle={`${stats?.labeled_count ?? 0} labels`}
+            subtitle={`${stats?.labeled_count ?? 0} ${t("kpi.labels")}`}
             icon={Layers}
             accent="bg-violet-500"
           />
           <KpiCard
-            title="Pending Review"
+            title={t("kpi.pendingReview")}
             value={statsLoading ? "\u2014" : formatNumber(stats?.pending_review ?? 0)}
             icon={AlertCircle}
             accent="bg-orange-500"
@@ -98,7 +109,7 @@ export default function DashboardOverview() {
                 <div key={key} className="card overflow-hidden p-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                      {key}
+                      {t(decisionKeys[key])}
                     </span>
                     <span className={cn("badge bg-gradient-to-r text-white text-[10px]", colorMap[key])}>
                       {pct}%

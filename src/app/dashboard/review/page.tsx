@@ -11,10 +11,13 @@ import { ScoreBadge, DecisionBadge } from "@/components/ui/score-badge";
 import { getReviewQueue } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { cn, phaseLabel } from "@/lib/utils";
+import { useT } from "@/lib/useT";
 import type { ReviewItem } from "@/types/api";
 
 export default function ReviewQueuePage() {
   const period = useAppStore((s) => s.period);
+  const locale = useAppStore((s) => s.locale);
+  const t = useT();
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
@@ -25,7 +28,7 @@ export default function ReviewQueuePage() {
   const columns = [
     {
       key: "id",
-      header: "Transaction",
+      header: t("transactions.transaction"),
       render: (item: ReviewItem) => (
         <span className="font-mono text-xs text-surface-600 dark:text-surface-400">
           {item.transaction_id || item.request_id.slice(0, 12)}
@@ -34,17 +37,17 @@ export default function ReviewQueuePage() {
     },
     {
       key: "decision",
-      header: "Decision",
+      header: t("transactions.decision"),
       render: (item: ReviewItem) => <DecisionBadge decision={item.decision} />,
     },
     {
       key: "score",
-      header: "Risk Score",
+      header: t("review.riskScore"),
       render: (item: ReviewItem) => <ScoreBadge score={item.score} />,
     },
     {
       key: "features",
-      header: "Top Risk Factors",
+      header: t("review.topRiskFactors"),
       render: (item: ReviewItem) => (
         <div className="flex flex-wrap gap-1">
           {item.top_features.length > 0 ? (
@@ -64,16 +67,16 @@ export default function ReviewQueuePage() {
     },
     {
       key: "phase",
-      header: "Phase",
+      header: t("transactions.phase"),
       render: (item: ReviewItem) => {
         if (!item.phase) return <span className="text-xs text-surface-400">--</span>;
-        const p = phaseLabel(item.phase);
+        const p = phaseLabel(item.phase, locale);
         return <span className={cn("badge text-[10px]", p.color)}>{p.label}</span>;
       },
     },
     {
       key: "time",
-      header: "Time",
+      header: t("transactions.time"),
       render: (item: ReviewItem) => (
         <span className="text-xs text-surface-500 dark:text-surface-400">
           {item.timestamp ? format(new Date(item.timestamp), "MMM d, HH:mm") : "--"}
@@ -84,14 +87,14 @@ export default function ReviewQueuePage() {
 
   return (
     <>
-      <Header title="Review Queue" />
+      <Header title={t("review.title")} />
       <div className="flex-1 space-y-4 overflow-auto p-6">
         {/* Status bar */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800 dark:bg-amber-950/30">
             <ShieldAlert size={14} className="text-amber-600 dark:text-amber-400" />
             <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">
-              {isLoading ? "Loading..." : `${data?.total ?? 0} transactions pending review`}
+              {isLoading ? t("transactions.loading") : `${data?.total ?? 0} ${t("review.pendingReview")}`}
             </span>
           </div>
         </div>
@@ -100,7 +103,7 @@ export default function ReviewQueuePage() {
           columns={columns}
           data={data?.items ?? []}
           keyFn={(item) => item.request_id}
-          emptyMessage="No pending reviews \u2014 all caught up!"
+          emptyMessage={t("review.allCaughtUp")}
         />
 
         {data && data.pages > 0 && (

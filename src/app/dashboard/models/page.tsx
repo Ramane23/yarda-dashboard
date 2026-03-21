@@ -5,9 +5,11 @@ import { Box, Cpu, Calendar } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { getModels } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/useT";
 import { format } from "date-fns";
 
 export default function ModelsPage() {
+  const t = useT();
   const { data, isLoading } = useQuery({
     queryKey: ["models"],
     queryFn: getModels,
@@ -22,7 +24,7 @@ export default function ModelsPage() {
 
   return (
     <>
-      <Header title="Models" />
+      <Header title={t("models.title")} />
       <div className="flex-1 space-y-6 overflow-auto p-6">
         <div className="space-y-3">
           {data?.models.map((m) => (
@@ -38,7 +40,7 @@ export default function ModelsPage() {
                       <span className="font-mono text-xs text-surface-400">v{m.version}</span>
                       {m.is_client_specific && (
                         <span className="badge bg-brand-100 text-brand-700 text-[10px] dark:bg-brand-950/40 dark:text-brand-400">
-                          Client-specific
+                          {t("models.clientSpecific")}
                         </span>
                       )}
                     </div>
@@ -91,8 +93,8 @@ export default function ModelsPage() {
           {(!data || data.models.length === 0) && !isLoading && (
             <div className="card flex flex-col items-center py-16">
               <Box size={40} className="text-surface-300 dark:text-surface-600" />
-              <p className="mt-3 text-sm font-medium text-surface-400">No model versions found</p>
-              <p className="text-xs text-surface-400">Models will appear here after training</p>
+              <p className="mt-3 text-sm font-medium text-surface-400">{t("models.noModels")}</p>
+              <p className="text-xs text-surface-400">{t("models.noModelsDesc")}</p>
             </div>
           )}
         </div>

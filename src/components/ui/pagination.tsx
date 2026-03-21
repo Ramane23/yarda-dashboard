@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useT } from "@/lib/useT";
 
 interface PaginationProps {
   page: number;
@@ -10,11 +11,13 @@ interface PaginationProps {
 }
 
 export function Pagination({ page, pages, total, onPageChange }: PaginationProps) {
+  const t = useT();
+
   return (
     <div className="flex items-center justify-between py-3">
       <p className="text-xs text-surface-500 dark:text-surface-400">
         <span className="font-semibold text-surface-700 dark:text-surface-300">{total.toLocaleString()}</span>{" "}
-        result{total !== 1 && "s"}
+        {total !== 1 ? t("pagination.results") : t("pagination.result")}
       </p>
       <div className="flex items-center gap-1">
         <button

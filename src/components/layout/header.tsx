@@ -2,18 +2,22 @@
 
 import { useAppStore } from "@/lib/store";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LocaleToggle } from "@/components/locale-toggle";
+import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
 import type { Period } from "@/types/api";
+import type { TranslationKey } from "@/lib/i18n";
 
-const periods: { value: Period; label: string }[] = [
-  { value: "24h", label: "24h" },
-  { value: "7d", label: "7d" },
-  { value: "30d", label: "30d" },
-  { value: "90d", label: "90d" },
+const periods: { value: Period; key: TranslationKey }[] = [
+  { value: "24h", key: "period.24h" },
+  { value: "7d", key: "period.7d" },
+  { value: "30d", key: "period.30d" },
+  { value: "90d", key: "period.90d" },
 ];
 
 export function Header({ title }: { title: string }) {
   const { period, setPeriod, clientId } = useAppStore();
+  const t = useT();
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white/80 px-6 backdrop-blur-sm dark:bg-surface-900/80">
@@ -35,11 +39,12 @@ export function Header({ title }: { title: string }) {
                   : "text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200",
               )}
             >
-              {p.label}
+              {t(p.key)}
             </button>
           ))}
         </div>
 
+        <LocaleToggle />
         <ThemeToggle />
 
         {/* Client badge */}

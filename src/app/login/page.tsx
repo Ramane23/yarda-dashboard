@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Activity, Shield } from "lucide-react";
 import { useAppStore } from "@/lib/store";
+import { LocaleToggle } from "@/components/locale-toggle";
+import { useT } from "@/lib/useT";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +14,7 @@ export default function LoginPage() {
   const [apiKey, setApiKeyLocal] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     if (storedClientId) router.replace("/dashboard");
@@ -20,7 +23,7 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientId.trim()) {
-      setError("Client ID is required");
+      setError(t("login.clientIdRequired"));
       return;
     }
     setLoading(true);
@@ -41,6 +44,11 @@ export default function LoginPage() {
       <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-brand-600/10 blur-[128px]" />
       <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-brand-400/10 blur-[96px]" />
 
+      {/* Locale toggle in top-right */}
+      <div className="absolute right-6 top-6 z-20">
+        <LocaleToggle />
+      </div>
+
       <div className="relative z-10 w-full max-w-sm px-4">
         <div className="rounded-2xl border border-surface-800/50 bg-surface-900/80 p-8 shadow-2xl backdrop-blur-xl">
           {/* Logo */}
@@ -49,12 +57,12 @@ export default function LoginPage() {
               <Activity size={28} strokeWidth={2.5} />
             </div>
             <h1 className="mt-4 text-2xl font-bold tracking-tight text-white">
-              YARDA
+              {t("login.title")}
             </h1>
             <div className="mt-1 flex items-center gap-1.5 text-surface-400">
               <Shield size={12} />
               <span className="text-xs font-medium uppercase tracking-widest">
-                Fraud Detection Platform
+                {t("app.subtitle")}
               </span>
             </div>
           </div>
@@ -62,25 +70,25 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-surface-400">
-                Client ID
+                {t("login.clientId")}
               </label>
               <input
                 type="text"
                 value={clientId}
                 onChange={(e) => { setClientIdLocal(e.target.value); setError(""); }}
-                placeholder="e.g. sako"
+                placeholder={t("login.clientIdPlaceholder")}
                 className="w-full rounded-lg border border-surface-700 bg-surface-800/50 px-3 py-2.5 text-sm text-white placeholder:text-surface-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
               />
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-surface-400">
-                API Key
+                {t("login.apiKey")}
               </label>
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKeyLocal(e.target.value)}
-                placeholder="Your API key"
+                placeholder={t("login.apiKeyPlaceholder")}
                 className="w-full rounded-lg border border-surface-700 bg-surface-800/50 px-3 py-2.5 text-sm text-white placeholder:text-surface-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
               />
             </div>
@@ -94,12 +102,12 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full rounded-lg bg-gradient-to-r from-brand-600 to-brand-500 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:shadow-brand-500/40 active:scale-[0.98] disabled:opacity-70"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? t("login.signingIn") : t("login.signIn")}
             </button>
           </form>
         </div>
         <p className="mt-4 text-center text-[10px] font-medium uppercase tracking-widest text-surface-600">
-          YARDA v1.0.0
+          {t("app.version")}
         </p>
       </div>
     </div>
