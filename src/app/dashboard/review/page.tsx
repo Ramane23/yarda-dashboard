@@ -94,7 +94,9 @@ export default function ReviewQueuePage() {
           <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800 dark:bg-amber-950/30">
             <ShieldAlert size={14} className="text-amber-600 dark:text-amber-400" />
             <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">
-              {isLoading ? t("transactions.loading") : `${data?.total ?? 0} ${t("review.pendingReview")}`}
+              {isLoading
+                ? t("transactions.loading")
+                : `${data?.total ?? 0} ${t("review.pendingReview")}`}
             </span>
           </div>
         </div>

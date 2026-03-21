@@ -12,7 +12,10 @@ import type {
 
 const BASE = "/api/v1/dashboard";
 
-async function fetchAPI<T>(path: string, params?: Record<string, string | number | boolean | undefined>): Promise<T> {
+async function fetchAPI<T>(
+  path: string,
+  params?: Record<string, string | number | boolean | undefined>,
+): Promise<T> {
   const url = new URL(path, window.location.origin);
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
@@ -47,30 +50,40 @@ export function getStats(period: Period = "7d") {
   return fetchAPI<DashboardStats>(`${BASE}/stats`, { period });
 }
 
-export function getTransactions(opts: {
-  period?: Period;
-  decision?: Decision;
-  min_score?: number;
-  max_score?: number;
-  labeled?: boolean;
-  page?: number;
-  page_size?: number;
-  sort?: SortOrder;
-} = {}) {
-  return fetchAPI<PaginatedTransactions>(`${BASE}/transactions`, opts as Record<string, string | number | boolean>);
+export function getTransactions(
+  opts: {
+    period?: Period;
+    decision?: Decision;
+    min_score?: number;
+    max_score?: number;
+    labeled?: boolean;
+    page?: number;
+    page_size?: number;
+    sort?: SortOrder;
+  } = {},
+) {
+  return fetchAPI<PaginatedTransactions>(
+    `${BASE}/transactions`,
+    opts as Record<string, string | number | boolean>,
+  );
 }
 
 export function getAnalytics(period: Period = "30d") {
   return fetchAPI<AnalyticsData>(`${BASE}/analytics`, { period });
 }
 
-export function getReviewQueue(opts: {
-  period?: Period;
-  min_score?: number;
-  page?: number;
-  page_size?: number;
-} = {}) {
-  return fetchAPI<PaginatedReviewQueue>(`${BASE}/review-queue`, opts as Record<string, string | number | boolean>);
+export function getReviewQueue(
+  opts: {
+    period?: Period;
+    min_score?: number;
+    page?: number;
+    page_size?: number;
+  } = {},
+) {
+  return fetchAPI<PaginatedReviewQueue>(
+    `${BASE}/review-queue`,
+    opts as Record<string, string | number | boolean>,
+  );
 }
 
 export function getModels() {

@@ -10,9 +10,5 @@ export function ScoreBadge({ score }: { score: number }) {
 
 export function DecisionBadge({ decision }: { decision: string | null }) {
   if (!decision) return <span className="text-xs text-surface-400">—</span>;
-  return (
-    <span className={cn("badge border capitalize", decisionBg(decision))}>
-      {decision}
-    </span>
-  );
+  return <span className={cn("badge border capitalize", decisionBg(decision))}>{decision}</span>;
 }

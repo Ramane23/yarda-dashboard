@@ -33,12 +33,19 @@ export function decisionColor(decision: string): string {
 
 export function decisionBg(decision: string): string {
   const map: Record<string, string> = {
-    allow: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800",
-    review: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800",
-    alert: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-800",
-    block: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800",
+    allow:
+      "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800",
+    review:
+      "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800",
+    alert:
+      "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-800",
+    block:
+      "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800",
   };
-  return map[decision] || "bg-surface-50 text-surface-600 border-surface-200 dark:bg-surface-800 dark:text-surface-400 dark:border-surface-700";
+  return (
+    map[decision] ||
+    "bg-surface-50 text-surface-600 border-surface-200 dark:bg-surface-800 dark:text-surface-400 dark:border-surface-700"
+  );
 }
 
 export function scoreColor(score: number): string {
@@ -50,13 +57,13 @@ export function scoreColor(score: number): string {
 
 export function scoreBgColor(score: number): string {
   if (score >= 0.8) return "bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400";
-  if (score >= 0.6) return "bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-400";
+  if (score >= 0.6)
+    return "bg-orange-100 text-orange-700 dark:bg-orange-950/50 dark:text-orange-400";
   if (score >= 0.4) return "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400";
   return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400";
 }
 
-import { t as translate } from "@/lib/i18n";
-import type { Locale, TranslationKey } from "@/lib/i18n";
+import { t as translate, type Locale, type TranslationKey } from "@/lib/i18n";
 
 const phaseColors: Record<string, string> = {
   cold_start: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400",
@@ -74,7 +81,9 @@ const phaseKeys: Record<string, TranslationKey> = {
 
 export function phaseLabel(phase: string, locale: Locale = "en"): { label: string; color: string } {
   const key = phaseKeys[phase];
-  const color = phaseColors[phase] || "bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400";
+  const color =
+    phaseColors[phase] ||
+    "bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400";
   const label = key ? translate(key, locale) : phase;
   return { label, color };
 }

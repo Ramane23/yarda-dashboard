@@ -21,9 +21,7 @@ export function Header({ title }: { title: string }) {
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white/80 px-6 backdrop-blur-sm dark:bg-surface-900/80">
-      <h1 className="text-lg font-semibold text-surface-900 dark:text-white">
-        {title}
-      </h1>
+      <h1 className="text-lg font-semibold text-surface-900 dark:text-white">{title}</h1>
 
       <div className="flex items-center gap-3">
         {/* Period selector */}

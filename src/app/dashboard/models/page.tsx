@@ -36,7 +36,9 @@ export default function ModelsPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-semibold text-surface-900 dark:text-white">{m.model_name}</h4>
+                      <h4 className="font-semibold text-surface-900 dark:text-white">
+                        {m.model_name}
+                      </h4>
                       <span className="font-mono text-xs text-surface-400">v{m.version}</span>
                       {m.is_client_specific && (
                         <span className="badge bg-brand-100 text-brand-700 text-[10px] dark:bg-brand-950/40 dark:text-brand-400">
@@ -70,8 +72,13 @@ export default function ModelsPage() {
               {m.validation_metrics && Object.keys(m.validation_metrics).length > 0 && (
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {Object.entries(m.validation_metrics).map(([key, val]) => (
-                    <div key={key} className="rounded-lg border bg-surface-50/50 p-3 dark:bg-surface-800/50">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">{key}</p>
+                    <div
+                      key={key}
+                      className="rounded-lg border bg-surface-50/50 p-3 dark:bg-surface-800/50"
+                    >
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">
+                        {key}
+                      </p>
                       <p className="mt-0.5 font-mono text-sm font-bold text-surface-900 dark:text-white">
                         {typeof val === "number" ? val.toFixed(4) : val}
                       </p>

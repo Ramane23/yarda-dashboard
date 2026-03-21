@@ -117,9 +117,7 @@ export function Sidebar() {
           {sidebarOpen && <span>{t("nav.signOut")}</span>}
         </button>
         {sidebarOpen && (
-          <p className="px-3 py-1 text-[10px] font-medium text-surface-400">
-            {t("app.version")}
-          </p>
+          <p className="px-3 py-1 text-[10px] font-medium text-surface-400">{t("app.version")}</p>
         )}
       </div>
     </aside>

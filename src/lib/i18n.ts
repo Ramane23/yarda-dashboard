@@ -77,7 +77,10 @@ const translations = {
   "transactions.label": { en: "Label", fr: "Étiquette" },
   "transactions.labeled": { en: "Labeled", fr: "Étiquetée" },
   "transactions.time": { en: "Time", fr: "Date" },
-  "transactions.noData": { en: "No transactions found for this period", fr: "Aucune transaction trouvée pour cette période" },
+  "transactions.noData": {
+    en: "No transactions found for this period",
+    fr: "Aucune transaction trouvée pour cette période",
+  },
   "transactions.loading": { en: "Loading...", fr: "Chargement..." },
   "sort.newest": { en: "Newest first", fr: "Plus récentes" },
   "sort.oldest": { en: "Oldest first", fr: "Plus anciennes" },
@@ -113,14 +116,23 @@ const translations = {
   "review.title": { en: "Review Queue", fr: "File de Révision" },
   "review.riskScore": { en: "Risk Score", fr: "Score de Risque" },
   "review.topRiskFactors": { en: "Top Risk Factors", fr: "Principaux Facteurs de Risque" },
-  "review.pendingReview": { en: "transactions pending review", fr: "transactions en attente de révision" },
-  "review.allCaughtUp": { en: "No pending reviews \u2014 all caught up!", fr: "Aucune révision en attente \u2014 tout est à jour !" },
+  "review.pendingReview": {
+    en: "transactions pending review",
+    fr: "transactions en attente de révision",
+  },
+  "review.allCaughtUp": {
+    en: "No pending reviews \u2014 all caught up!",
+    fr: "Aucune révision en attente \u2014 tout est à jour !",
+  },
 
   // Models page
   "models.title": { en: "Models", fr: "Modèles" },
   "models.clientSpecific": { en: "Client-specific", fr: "Spécifique client" },
   "models.noModels": { en: "No model versions found", fr: "Aucune version de modèle trouvée" },
-  "models.noModelsDesc": { en: "Models will appear here after training", fr: "Les modèles apparaîtront ici après l'entraînement" },
+  "models.noModelsDesc": {
+    en: "Models will appear here after training",
+    fr: "Les modèles apparaîtront ici après l'entraînement",
+  },
 
   // Settings page
   "settings.title": { en: "Settings", fr: "Paramètres" },
@@ -135,9 +147,15 @@ const translations = {
   "settings.save": { en: "Save Configuration", fr: "Sauvegarder" },
   "settings.saved": { en: "Saved!", fr: "Sauvegardé !" },
   "settings.signOut": { en: "Sign Out", fr: "Déconnexion" },
-  "settings.signOutDesc": { en: "This will clear your credentials and return to the login page.", fr: "Cela effacera vos identifiants et vous ramènera à la page de connexion." },
+  "settings.signOutDesc": {
+    en: "This will clear your credentials and return to the login page.",
+    fr: "Cela effacera vos identifiants et vous ramènera à la page de connexion.",
+  },
   "settings.about": { en: "About", fr: "À propos" },
-  "settings.aboutDesc": { en: "YARDA v1.0.0 \u2014 Real-time fraud monitoring and analytics platform for MTO clients. Powered by machine learning with hybrid scoring (rules + anomaly detection + ML).", fr: "YARDA v1.0.0 \u2014 Plateforme de surveillance et d'analyse de fraude en temps réel pour les clients MTO. Propulsée par l'apprentissage automatique avec scoring hybride (règles + détection d'anomalies + ML)." },
+  "settings.aboutDesc": {
+    en: "YARDA v1.0.0 \u2014 Real-time fraud monitoring and analytics platform for MTO clients. Powered by machine learning with hybrid scoring (rules + anomaly detection + ML).",
+    fr: "YARDA v1.0.0 \u2014 Plateforme de surveillance et d'analyse de fraude en temps réel pour les clients MTO. Propulsée par l'apprentissage automatique avec scoring hybride (règles + détection d'anomalies + ML).",
+  },
 
   // Pagination
   "pagination.results": { en: "results", fr: "résultats" },

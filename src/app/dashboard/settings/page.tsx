@@ -138,10 +138,10 @@ export default function SettingsPage() {
 
           {/* Danger Zone */}
           <div className="card border-red-200 p-6 dark:border-red-900/50">
-            <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">{t("settings.signOut")}</h3>
-            <p className="mt-1 text-xs text-surface-500">
-              {t("settings.signOutDesc")}
-            </p>
+            <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
+              {t("settings.signOut")}
+            </h3>
+            <p className="mt-1 text-xs text-surface-500">{t("settings.signOutDesc")}</p>
             <button
               onClick={handleLogout}
               className="mt-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"

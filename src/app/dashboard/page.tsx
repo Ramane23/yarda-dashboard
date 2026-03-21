@@ -1,14 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowLeftRight,
-  ShieldAlert,
-  Timer,
-  TrendingUp,
-  Layers,
-  AlertCircle,
-} from "lucide-react";
+import { ArrowLeftRight, ShieldAlert, Timer, TrendingUp, Layers, AlertCircle } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { VolumeChart } from "@/components/charts/volume-chart";
@@ -59,7 +52,9 @@ export default function DashboardOverview() {
           <KpiCard
             title={t("kpi.flagged")}
             value={statsLoading ? "\u2014" : formatNumber(stats?.total_flagged ?? 0)}
-            subtitle={statsLoading ? "" : `${formatPercent(stats?.flagged_rate ?? 0)} ${t("kpi.ofTotal")}`}
+            subtitle={
+              statsLoading ? "" : `${formatPercent(stats?.flagged_rate ?? 0)} ${t("kpi.ofTotal")}`
+            }
             icon={ShieldAlert}
             accent="bg-red-500"
           />
@@ -94,7 +89,10 @@ export default function DashboardOverview() {
 
         {/* Decision Quick Stats */}
         {stats && (
-          <div className="animate-fade-in grid grid-cols-4 gap-3" style={{ animationDelay: "100ms" }}>
+          <div
+            className="animate-fade-in grid grid-cols-4 gap-3"
+            style={{ animationDelay: "100ms" }}
+          >
             {(["allow", "review", "alert", "block"] as const).map((key) => {
               const colorMap = {
                 allow: "from-emerald-500 to-emerald-600",
@@ -111,7 +109,9 @@ export default function DashboardOverview() {
                     <span className="text-xs font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
                       {t(decisionKeys[key])}
                     </span>
-                    <span className={cn("badge bg-gradient-to-r text-white text-[10px]", colorMap[key])}>
+                    <span
+                      className={cn("badge bg-gradient-to-r text-white text-[10px]", colorMap[key])}
+                    >
                       {pct}%
                     </span>
                   </div>
@@ -130,7 +130,10 @@ export default function DashboardOverview() {
             <div className="animate-fade-in" style={{ animationDelay: "200ms" }}>
               <VolumeChart data={analytics.time_series} />
             </div>
-            <div className="animate-fade-in grid grid-cols-1 gap-6 lg:grid-cols-2" style={{ animationDelay: "300ms" }}>
+            <div
+              className="animate-fade-in grid grid-cols-1 gap-6 lg:grid-cols-2"
+              style={{ animationDelay: "300ms" }}
+            >
               <DecisionDonut data={analytics.decision_breakdown} />
               <ScoreHistogram data={analytics.score_distribution} />
             </div>

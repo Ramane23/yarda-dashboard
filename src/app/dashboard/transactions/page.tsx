@@ -36,7 +36,8 @@ export default function TransactionsPage() {
       }),
   });
 
-  const selectClasses = "rounded-lg border bg-white px-3 py-2 text-xs font-medium text-surface-700 transition-colors focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:bg-surface-800 dark:text-surface-300 dark:border-surface-700";
+  const selectClasses =
+    "rounded-lg border bg-white px-3 py-2 text-xs font-medium text-surface-700 transition-colors focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:bg-surface-800 dark:text-surface-300 dark:border-surface-700";
 
   const columns = [
     {
@@ -62,21 +63,27 @@ export default function TransactionsPage() {
       key: "anomaly",
       header: t("transactions.anomaly"),
       render: (item: TransactionItem) => (
-        <span className="font-mono text-xs text-surface-500 dark:text-surface-400">{item.anomaly_score.toFixed(3)}</span>
+        <span className="font-mono text-xs text-surface-500 dark:text-surface-400">
+          {item.anomaly_score.toFixed(3)}
+        </span>
       ),
     },
     {
       key: "ml",
       header: t("transactions.mlScore"),
       render: (item: TransactionItem) => (
-        <span className="font-mono text-xs text-surface-500 dark:text-surface-400">{item.ml_score.toFixed(3)}</span>
+        <span className="font-mono text-xs text-surface-500 dark:text-surface-400">
+          {item.ml_score.toFixed(3)}
+        </span>
       ),
     },
     {
       key: "latency",
       header: t("transactions.latency"),
       render: (item: TransactionItem) => (
-        <span className="font-mono text-xs text-surface-500 dark:text-surface-400">{formatMs(item.inference_time_ms)}</span>
+        <span className="font-mono text-xs text-surface-500 dark:text-surface-400">
+          {formatMs(item.inference_time_ms)}
+        </span>
       ),
     },
     {
@@ -91,13 +98,14 @@ export default function TransactionsPage() {
     {
       key: "labeled",
       header: t("transactions.label"),
-      render: (item: TransactionItem) => (
+      render: (item: TransactionItem) =>
         item.ground_truth ? (
-          <span className="badge bg-brand-100 text-brand-700 dark:bg-brand-950/40 dark:text-brand-400">{t("transactions.labeled")}</span>
+          <span className="badge bg-brand-100 text-brand-700 dark:bg-brand-950/40 dark:text-brand-400">
+            {t("transactions.labeled")}
+          </span>
         ) : (
           <span className="text-xs text-surface-400">--</span>
-        )
-      ),
+        ),
     },
     {
       key: "time",
@@ -118,11 +126,16 @@ export default function TransactionsPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-surface-400">
             <Filter size={14} />
-            <span className="text-xs font-semibold uppercase tracking-wider">{t("transactions.filters")}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              {t("transactions.filters")}
+            </span>
           </div>
           <select
             value={decision}
-            onChange={(e) => { setDecision(e.target.value as Decision | ""); setPage(1); }}
+            onChange={(e) => {
+              setDecision(e.target.value as Decision | "");
+              setPage(1);
+            }}
             className={selectClasses}
           >
             <option value="">{t("decision.allDecisions")}</option>
@@ -145,7 +158,10 @@ export default function TransactionsPage() {
 
           <select
             value={labeled}
-            onChange={(e) => { setLabeled(e.target.value as "" | "true" | "false"); setPage(1); }}
+            onChange={(e) => {
+              setLabeled(e.target.value as "" | "true" | "false");
+              setPage(1);
+            }}
             className={selectClasses}
           >
             <option value="">{t("filter.allLabels")}</option>
