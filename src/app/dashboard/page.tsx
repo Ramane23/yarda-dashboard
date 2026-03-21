@@ -175,42 +175,45 @@ export default function DashboardOverview() {
               <h3 className="section-title mb-4">{t("phase.progressTitle")}</h3>
 
               {/* Phase steps */}
-              <div className="mb-5 flex items-center gap-1">
+              <div className="mb-5 flex items-center">
                 {phaseProgress.phases.map((p, i) => {
+                  const currentIdx = phaseProgress.phases.findIndex(
+                    (x) => x.phase === phaseProgress.current_phase,
+                  );
                   const isCurrent = p.phase === phaseProgress.current_phase;
-                  const isPast =
-                    phaseProgress.phases.findIndex((x) => x.phase === phaseProgress.current_phase) >
-                    i;
+                  const isPast = currentIdx > i;
                   const phaseInfo = phaseLabel(p.phase, locale);
                   return (
-                    <div key={p.phase} className="flex flex-1 flex-col items-center">
-                      <div
-                        className={cn(
-                          "mb-2 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all",
-                          isCurrent
-                            ? "bg-brand-500 text-white shadow-glow"
-                            : isPast
-                              ? "bg-emerald-500 text-white"
-                              : "bg-surface-200 text-surface-500 dark:bg-surface-700 dark:text-surface-400",
-                        )}
-                      >
-                        {i + 1}
+                    <div key={p.phase} className="flex flex-1 items-center">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={cn(
+                            "mb-2 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all",
+                            isCurrent
+                              ? "bg-brand-500 text-white shadow-glow"
+                              : isPast
+                                ? "bg-emerald-500 text-white"
+                                : "bg-surface-200 text-surface-500 dark:bg-surface-700 dark:text-surface-400",
+                          )}
+                        >
+                          {i + 1}
+                        </div>
+                        <span
+                          className={cn(
+                            "text-center text-[10px] font-medium",
+                            isCurrent
+                              ? "text-brand-600 dark:text-brand-400"
+                              : "text-surface-500 dark:text-surface-400",
+                          )}
+                        >
+                          {phaseInfo.label}
+                        </span>
                       </div>
-                      <span
-                        className={cn(
-                          "text-center text-[10px] font-medium",
-                          isCurrent
-                            ? "text-brand-600 dark:text-brand-400"
-                            : "text-surface-500 dark:text-surface-400",
-                        )}
-                      >
-                        {phaseInfo.label}
-                      </span>
                       {/* Connector line */}
                       {i < phaseProgress.phases.length - 1 && (
                         <div
                           className={cn(
-                            "absolute mt-4 h-0.5 w-full",
+                            "mb-5 h-0.5 flex-1",
                             isPast ? "bg-emerald-500" : "bg-surface-200 dark:bg-surface-700",
                           )}
                         />
@@ -316,13 +319,15 @@ export default function DashboardOverview() {
                   <p className="text-center font-mono text-[11px] leading-relaxed text-surface-600 dark:text-surface-400">
                     score ={" "}
                     <span className="font-semibold text-violet-600 dark:text-violet-400">
-                      {Math.round(phaseProgress.scoring_weights.anomaly * 100)}% anomaly
+                      {Math.round(phaseProgress.scoring_weights.anomaly * 100)}%{" "}
+                      {t("scoring.anomalyShort")}
                     </span>
                     {phaseProgress.scoring_weights.ml > 0 && (
                       <>
                         {" + "}
                         <span className="font-semibold text-brand-600 dark:text-brand-400">
-                          {Math.round(phaseProgress.scoring_weights.ml * 100)}% classifier
+                          {Math.round(phaseProgress.scoring_weights.ml * 100)}%{" "}
+                          {t("scoring.classifierShort")}
                         </span>
                       </>
                     )}
@@ -330,7 +335,8 @@ export default function DashboardOverview() {
                       <>
                         {" + "}
                         <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                          {Math.round((phaseProgress.scoring_weights.gnn ?? 0) * 100)}% network
+                          {Math.round((phaseProgress.scoring_weights.gnn ?? 0) * 100)}%{" "}
+                          {t("scoring.networkShort")}
                         </span>
                       </>
                     )}
@@ -343,82 +349,161 @@ export default function DashboardOverview() {
 
         {/* Scoring Configuration */}
         {scoringConfig && (
-          <div
-            className="animate-fade-in grid grid-cols-1 gap-6 lg:grid-cols-3"
-            style={{ animationDelay: "180ms" }}
-          >
-            {/* Decision Thresholds */}
-            <div className="card p-5">
-              <h3 className="section-title mb-4">{t("config.decisionThresholds")}</h3>
-              <div className="space-y-3">
-                {[
-                  {
-                    key: "allow",
-                    max: scoringConfig.thresholds.review,
-                    color: "emerald",
-                    translationKey: "config.threshold.allow" as const,
-                  },
-                  {
-                    key: "review",
-                    max: scoringConfig.thresholds.alert,
-                    color: "amber",
-                    translationKey: "config.threshold.review" as const,
-                  },
-                  {
-                    key: "alert",
-                    max: scoringConfig.thresholds.block,
-                    color: "orange",
-                    translationKey: "config.threshold.alert" as const,
-                  },
-                  {
-                    key: "block",
-                    max: 1.0,
-                    color: "red",
-                    translationKey: "config.threshold.block" as const,
-                  },
-                ].map((item) => {
-                  const from = item.key === "allow" ? 0 : (scoringConfig.thresholds[item.key] ?? 0);
-                  const colorMap: Record<string, string> = {
-                    emerald: "bg-emerald-500",
-                    amber: "bg-amber-500",
-                    orange: "bg-orange-500",
-                    red: "bg-red-500",
-                  };
-                  const textMap: Record<string, string> = {
-                    emerald: "text-emerald-600 dark:text-emerald-400",
-                    amber: "text-amber-600 dark:text-amber-400",
-                    orange: "text-orange-600 dark:text-orange-400",
-                    red: "text-red-600 dark:text-red-400",
-                  };
-                  return (
-                    <div key={item.key} className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-surface-600 dark:text-surface-400">
-                          {t(item.translationKey)}
-                        </span>
-                        <span className={cn("font-mono text-xs font-bold", textMap[item.color])}>
-                          {from.toFixed(2)} — {item.max.toFixed(2)}
-                        </span>
+          <div className="animate-fade-in space-y-6" style={{ animationDelay: "180ms" }}>
+            {/* Thresholds + Weights side by side */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {/* Decision Thresholds */}
+              <div className="card p-5">
+                <h3 className="section-title mb-4">{t("config.decisionThresholds")}</h3>
+                <div className="space-y-3">
+                  {[
+                    {
+                      key: "allow",
+                      max: scoringConfig.thresholds.review,
+                      color: "emerald",
+                      translationKey: "config.threshold.allow" as const,
+                    },
+                    {
+                      key: "review",
+                      max: scoringConfig.thresholds.alert,
+                      color: "amber",
+                      translationKey: "config.threshold.review" as const,
+                    },
+                    {
+                      key: "alert",
+                      max: scoringConfig.thresholds.block,
+                      color: "orange",
+                      translationKey: "config.threshold.alert" as const,
+                    },
+                    {
+                      key: "block",
+                      max: 1.0,
+                      color: "red",
+                      translationKey: "config.threshold.block" as const,
+                    },
+                  ].map((item) => {
+                    const from =
+                      item.key === "allow" ? 0 : (scoringConfig.thresholds[item.key] ?? 0);
+                    const colorMap: Record<string, string> = {
+                      emerald: "bg-emerald-500",
+                      amber: "bg-amber-500",
+                      orange: "bg-orange-500",
+                      red: "bg-red-500",
+                    };
+                    const textMap: Record<string, string> = {
+                      emerald: "text-emerald-600 dark:text-emerald-400",
+                      amber: "text-amber-600 dark:text-amber-400",
+                      orange: "text-orange-600 dark:text-orange-400",
+                      red: "text-red-600 dark:text-red-400",
+                    };
+                    return (
+                      <div key={item.key} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-surface-600 dark:text-surface-400">
+                            {t(item.translationKey)}
+                          </span>
+                          <span className={cn("font-mono text-xs font-bold", textMap[item.color])}>
+                            {from.toFixed(2)} — {item.max.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
+                          <div
+                            className={cn("h-full rounded-full", colorMap[item.color])}
+                            style={{
+                              marginLeft: `${from * 100}%`,
+                              width: `${(item.max - from) * 100}%`,
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-1.5 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
-                        <div
-                          className={cn("h-full rounded-full", colorMap[item.color])}
-                          style={{
-                            marginLeft: `${from * 100}%`,
-                            width: `${(item.max - from) * 100}%`,
-                          }}
-                        />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Weights by Phase */}
+              <div className="card p-5">
+                <h3 className="section-title mb-4">{t("config.weightsByPhase")}</h3>
+                <div className="space-y-3">
+                  {scoringConfig.phases.map((p) => {
+                    const w = scoringConfig.weights_by_phase[p.phase];
+                    if (!w) return null;
+                    const isCurrent = p.phase === scoringConfig.current_phase;
+                    const pInfo = phaseLabel(p.phase, locale);
+                    return (
+                      <div
+                        key={p.phase}
+                        className={cn(
+                          "rounded-lg border px-3 py-2.5",
+                          isCurrent
+                            ? "border-brand-300 bg-brand-50/50 dark:border-brand-700 dark:bg-brand-950/20"
+                            : "border-surface-100 dark:border-surface-800",
+                        )}
+                      >
+                        <div className="mb-1.5 flex items-center justify-between">
+                          <span
+                            className={cn(
+                              "text-xs font-semibold",
+                              isCurrent
+                                ? "text-brand-700 dark:text-brand-400"
+                                : "text-surface-600 dark:text-surface-400",
+                            )}
+                          >
+                            {pInfo.label}
+                            {isCurrent && " •"}
+                          </span>
+                        </div>
+                        <div className="flex gap-1">
+                          {w.anomaly > 0 && (
+                            <div
+                              className="h-2 rounded-full bg-violet-500"
+                              style={{ width: `${w.anomaly * 100}%` }}
+                              title={`${t("config.anomalyDetector")}: ${Math.round(w.anomaly * 100)}%`}
+                            />
+                          )}
+                          {w.ml > 0 && (
+                            <div
+                              className="h-2 rounded-full bg-brand-500"
+                              style={{ width: `${w.ml * 100}%` }}
+                              title={`${t("config.fraudClassifier")}: ${Math.round(w.ml * 100)}%`}
+                            />
+                          )}
+                          {w.gnn > 0 && (
+                            <div
+                              className="h-2 rounded-full bg-emerald-500"
+                              style={{ width: `${w.gnn * 100}%` }}
+                              title={`${t("config.networkDetector")}: ${Math.round(w.gnn * 100)}%`}
+                            />
+                          )}
+                        </div>
+                        <div className="mt-1 flex gap-3 text-[10px] text-surface-500 dark:text-surface-400">
+                          {w.anomaly > 0 && (
+                            <span>
+                              {Math.round(w.anomaly * 100)}% {t("scoring.anomalyShort")}
+                            </span>
+                          )}
+                          {w.ml > 0 && (
+                            <span>
+                              {Math.round(w.ml * 100)}% {t("scoring.classifierShort")}
+                            </span>
+                          )}
+                          {w.gnn > 0 && (
+                            <span>
+                              {Math.round(w.gnn * 100)}% {t("scoring.networkShort")}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
-            {/* Fraud Taxonomy */}
+            {/* Fraud Taxonomy - full width */}
             <div className="card p-5">
               <h3 className="section-title mb-4">{t("config.fraudTaxonomy")}</h3>
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {scoringConfig.fraud_taxonomy.map((ft) => (
                   <div
                     key={ft.key}
@@ -437,72 +522,6 @@ export default function DashboardOverview() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Weights by Phase */}
-            <div className="card p-5">
-              <h3 className="section-title mb-4">{t("config.weightsByPhase")}</h3>
-              <div className="space-y-3">
-                {scoringConfig.phases.map((p) => {
-                  const w = scoringConfig.weights_by_phase[p.phase];
-                  if (!w) return null;
-                  const isCurrent = p.phase === scoringConfig.current_phase;
-                  const pInfo = phaseLabel(p.phase, locale);
-                  return (
-                    <div
-                      key={p.phase}
-                      className={cn(
-                        "rounded-lg border px-3 py-2.5",
-                        isCurrent
-                          ? "border-brand-300 bg-brand-50/50 dark:border-brand-700 dark:bg-brand-950/20"
-                          : "border-surface-100 dark:border-surface-800",
-                      )}
-                    >
-                      <div className="mb-1.5 flex items-center justify-between">
-                        <span
-                          className={cn(
-                            "text-xs font-semibold",
-                            isCurrent
-                              ? "text-brand-700 dark:text-brand-400"
-                              : "text-surface-600 dark:text-surface-400",
-                          )}
-                        >
-                          {pInfo.label}
-                          {isCurrent && " •"}
-                        </span>
-                      </div>
-                      <div className="flex gap-1">
-                        {w.anomaly > 0 && (
-                          <div
-                            className="h-2 rounded-full bg-violet-500"
-                            style={{ width: `${w.anomaly * 100}%` }}
-                            title={`${t("config.anomalyDetector")}: ${Math.round(w.anomaly * 100)}%`}
-                          />
-                        )}
-                        {w.ml > 0 && (
-                          <div
-                            className="h-2 rounded-full bg-brand-500"
-                            style={{ width: `${w.ml * 100}%` }}
-                            title={`${t("config.fraudClassifier")}: ${Math.round(w.ml * 100)}%`}
-                          />
-                        )}
-                        {w.gnn > 0 && (
-                          <div
-                            className="h-2 rounded-full bg-emerald-500"
-                            style={{ width: `${w.gnn * 100}%` }}
-                            title={`${t("config.networkDetector")}: ${Math.round(w.gnn * 100)}%`}
-                          />
-                        )}
-                      </div>
-                      <div className="mt-1 flex gap-3 text-[10px] text-surface-500 dark:text-surface-400">
-                        {w.anomaly > 0 && <span>{Math.round(w.anomaly * 100)}% anomaly</span>}
-                        {w.ml > 0 && <span>{Math.round(w.ml * 100)}% classifier</span>}
-                        {w.gnn > 0 && <span>{Math.round(w.gnn * 100)}% network</span>}
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             </div>
           </div>

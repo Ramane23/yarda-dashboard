@@ -185,6 +185,9 @@ const translations = {
   "scoring.fraudDetector": { en: "Fraud Detector", fr: "Détecteur de Fraude" },
   "scoring.rules": { en: "Rules Engine", fr: "Moteur de Règles" },
   "scoring.plus": { en: "plus", fr: "plus" },
+  "scoring.anomalyShort": { en: "anomaly", fr: "anomalie" },
+  "scoring.classifierShort": { en: "classifier", fr: "classifieur" },
+  "scoring.networkShort": { en: "network", fr: "réseau" },
 
   // Review / Labeling
   "review.labelTransaction": { en: "Label Transaction", fr: "Étiqueter la Transaction" },
