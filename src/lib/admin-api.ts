@@ -33,9 +33,13 @@ async function fetchAdmin<T>(
     "Content-Type": "application/json",
   };
 
-  // Admin uses the same API key from localStorage
+  // JWT Bearer token (primary auth)
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  // Legacy API key fallback
   const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
-  if (apiKey) headers["X-API-Key"] = apiKey;
+  if (apiKey && !token) headers["X-API-Key"] = apiKey;
 
   const res = await fetch(url.toString(), { method, headers });
 

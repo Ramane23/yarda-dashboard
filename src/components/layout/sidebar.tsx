@@ -36,14 +36,11 @@ const nav: {
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { sidebarOpen, toggleSidebar, setClientId, setApiKey, clientId } = useAppStore();
+  const { sidebarOpen, toggleSidebar, logout, clientId } = useAppStore();
   const t = useT();
 
   const handleLogout = () => {
-    setClientId("");
-    setApiKey("");
-    localStorage.removeItem("client_id");
-    localStorage.removeItem("api_key");
+    logout();
     router.push("/login");
   };
 
@@ -83,7 +80,10 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
         {nav
-          .filter((item) => !item.adminOnly || clientId === "admin")
+          .filter((item) => {
+            const isAdmin = useAppStore.getState().userRole === "admin" || clientId === "admin";
+            return !item.adminOnly || isAdmin;
+          })
           .map((item) => {
             const label = t(item.labelKey);
             const active =

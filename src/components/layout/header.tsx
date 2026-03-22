@@ -18,19 +18,20 @@ const periods: { value: Period; key: TranslationKey }[] = [
 ];
 
 export function Header({ title }: { title: string }) {
-  const { period, setPeriod, clientId, viewAsClient, setViewAsClient } = useAppStore();
+  const { period, setPeriod, clientId, userRole, viewAsClient, setViewAsClient } = useAppStore();
   const t = useT();
-  const isAdmin = clientId === "admin";
+  const isAdmin = userRole === "admin" || clientId === "admin";
 
   // Fetch client list for admin selector
   const { data: clients } = useQuery({
     queryKey: ["admin-clients-header"],
     queryFn: async () => {
-      const res = await fetch("/api/v1/admin/clients/phases", {
-        headers: {
-          "X-API-Key": localStorage.getItem("api_key") || "",
-        },
-      });
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem("token");
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const apiKey = localStorage.getItem("api_key");
+      if (apiKey && !token) headers["X-API-Key"] = apiKey;
+      const res = await fetch("/api/v1/admin/clients/phases", { headers });
       if (!res.ok) return null;
       const data = await res.json();
       return data.clients as { client_id: string; client_name: string }[];

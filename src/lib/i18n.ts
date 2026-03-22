@@ -8,12 +8,26 @@ const translations = {
 
   // Login
   "login.title": { en: "YARDA", fr: "YARDA" },
+  "login.email": { en: "Email", fr: "Email" },
+  "login.emailPlaceholder": { en: "you@example.com", fr: "vous@exemple.com" },
+  "login.password": { en: "Password", fr: "Mot de passe" },
+  "login.passwordPlaceholder": { en: "Enter your password", fr: "Entrez votre mot de passe" },
+  "login.signIn": { en: "Sign In", fr: "Se Connecter" },
+  "login.signingIn": { en: "Signing in...", fr: "Connexion..." },
+  "login.fieldsRequired": { en: "Email and password required", fr: "Email et mot de passe requis" },
+  "login.invalidCredentials": {
+    en: "Invalid email or password",
+    fr: "Email ou mot de passe invalide",
+  },
+  "login.networkError": {
+    en: "Connection error. Try again.",
+    fr: "Erreur de connexion. Réessayez.",
+  },
+  // Legacy (kept for compat)
   "login.clientId": { en: "Client ID", fr: "Identifiant Client" },
   "login.clientIdPlaceholder": { en: "e.g. sako", fr: "ex. sako" },
   "login.apiKey": { en: "API Key", fr: "Clé API" },
   "login.apiKeyPlaceholder": { en: "Your API key", fr: "Votre clé API" },
-  "login.signIn": { en: "Sign In", fr: "Se Connecter" },
-  "login.signingIn": { en: "Signing in...", fr: "Connexion..." },
   "login.clientIdRequired": { en: "Client ID is required", fr: "L'identifiant client est requis" },
 
   // Sidebar navigation

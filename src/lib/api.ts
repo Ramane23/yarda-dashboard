@@ -36,8 +36,13 @@ async function fetchAPI<T>(
     viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
   if (clientId) headers["X-Client-ID"] = clientId;
 
+  // JWT Bearer token (primary auth)
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  // Legacy API key fallback
   const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
-  if (apiKey) headers["X-API-Key"] = apiKey;
+  if (apiKey && !token) headers["X-API-Key"] = apiKey;
 
   const res = await fetch(url.toString(), { headers });
 
