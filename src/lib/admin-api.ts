@@ -105,3 +105,49 @@ export function getExperiments() {
 export function getFeatureStats(clientId: string) {
   return fetchAdmin<FeatureStats>(`${BASE}/features/${clientId}`);
 }
+
+// User Management
+export interface UserItem {
+  id: number;
+  email: string;
+  display_name: string | null;
+  role: string;
+  client_id: string | null;
+  client_name: string | null;
+  is_active: boolean;
+  created_at: string | null;
+}
+
+export interface UserListResponse {
+  total: number;
+  users: UserItem[];
+}
+
+export function getUsers() {
+  return fetchAdmin<UserListResponse>(`${BASE}/users`);
+}
+
+export function registerUser(data: {
+  email: string;
+  password: string;
+  display_name?: string;
+  role: string;
+  client_id?: string;
+}) {
+  // Register goes through /auth/register, not /admin
+  const url = new URL("/api/v1/auth/register", window.location.origin);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
+  if (apiKey && !token) headers["X-API-Key"] = apiKey;
+  return fetch(url.toString(), {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  }).then(async (r) => {
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.detail || `Register failed: ${r.status}`);
+    return body;
+  });
+}

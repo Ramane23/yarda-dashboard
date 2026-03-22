@@ -363,9 +363,18 @@ const translations = {
   "system.anomaly": { en: "Anomaly Detector", fr: "Détecteur d'Anomalies" },
   "system.fitted": { en: "Fitted", fr: "Entraîné" },
   "system.notFitted": { en: "Not fitted", fr: "Non entraîné" },
+  "system.users": { en: "User Management", fr: "Gestion des Utilisateurs" },
+  "system.addUser": { en: "Add User", fr: "Ajouter un Utilisateur" },
+  "system.userEmail": { en: "Email", fr: "Email" },
+  "system.userPassword": { en: "Password", fr: "Mot de passe" },
+  "system.userName": { en: "Display Name", fr: "Nom d'affichage" },
+  "system.userRole": { en: "Role", fr: "Rôle" },
+  "system.userClient": { en: "Client", fr: "Client" },
+  "system.userCreated": { en: "User created successfully", fr: "Utilisateur créé avec succès" },
+  "system.noClient": { en: "None (Admin)", fr: "Aucun (Admin)" },
   "system.unauthorized": {
-    en: "Unauthorized — Admin API key required",
-    fr: "Non autorisé — Clé API admin requise",
+    en: "Unauthorized — Admin access required",
+    fr: "Non autorisé — Accès admin requis",
   },
 } as const;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import {
   Activity,
   AlertTriangle,
@@ -15,6 +15,7 @@ import {
   Server,
   Shield,
   Users,
+  UserPlus,
   XCircle,
   FileText,
   Cpu,
@@ -38,6 +39,8 @@ import {
   getReports,
   getAnomalyStatus,
   getFeatureStats,
+  getUsers,
+  registerUser,
 } from "@/lib/admin-api";
 
 function StatusDot({ ok }: { ok: boolean }) {
@@ -82,6 +85,17 @@ export default function SystemPage() {
   const period = useAppStore((s) => s.period);
   const t = useT();
   const [clientFilter, setClientFilter] = useState<string>("");
+  const queryClient = useQueryClient();
+
+  // User management state
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: "",
+    password: "",
+    display_name: "",
+    role: "client",
+    client_id: "",
+  });
 
   // Global queries (not client-filtered)
   const health = useQuery({ queryKey: ["admin-health"], queryFn: getSystemHealth, retry: 1 });
@@ -135,6 +149,17 @@ export default function SystemPage() {
 
   const retrainCheck = useMutation({
     mutationFn: (clientId: string) => checkRetraining(clientId),
+  });
+
+  // User management
+  const users = useQuery({ queryKey: ["admin-users"], queryFn: getUsers, retry: 1 });
+  const registerMutation = useMutation({
+    mutationFn: registerUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setShowAddUser(false);
+      setNewUser({ email: "", password: "", display_name: "", role: "client", client_id: "" });
+    },
   });
 
   // Check if we got a 403 (unauthorized)
@@ -899,6 +924,202 @@ export default function SystemPage() {
               <p className="text-sm text-red-500">{reports.error?.message}</p>
             )}
           </div>
+        </div>
+
+        {/* ── Row 6: User Management ── */}
+        <div className="card space-y-4 p-5">
+          <div className="flex items-center justify-between">
+            <SectionTitle icon={Users}>{t("system.users")}</SectionTitle>
+            <button
+              onClick={() => setShowAddUser(!showAddUser)}
+              className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs"
+            >
+              <UserPlus size={14} />
+              {t("system.addUser")}
+            </button>
+          </div>
+
+          {/* Add User Form */}
+          {showAddUser && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                registerMutation.mutate({
+                  email: newUser.email,
+                  password: newUser.password,
+                  display_name: newUser.display_name || undefined,
+                  role: newUser.role,
+                  client_id: newUser.client_id || undefined,
+                });
+              }}
+              className="rounded-lg border bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/50"
+            >
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-surface-500">
+                    {t("system.userEmail")} *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    className="input-field w-full py-1.5 text-sm"
+                    placeholder="user@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-surface-500">
+                    {t("system.userPassword")} *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    className="input-field w-full py-1.5 text-sm"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-surface-500">
+                    {t("system.userName")}
+                  </label>
+                  <input
+                    type="text"
+                    value={newUser.display_name}
+                    onChange={(e) => setNewUser({ ...newUser, display_name: e.target.value })}
+                    className="input-field w-full py-1.5 text-sm"
+                    placeholder="Display name"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-surface-500">
+                    {t("system.userRole")}
+                  </label>
+                  <select
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                    className="input-field w-full py-1.5 text-sm"
+                  >
+                    <option value="client">Client</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-surface-500">
+                    {t("system.userClient")}
+                  </label>
+                  <select
+                    value={newUser.client_id}
+                    onChange={(e) => setNewUser({ ...newUser, client_id: e.target.value })}
+                    className="input-field w-full py-1.5 text-sm"
+                  >
+                    <option value="">{t("system.noClient")}</option>
+                    {ph?.clients.map((c) => (
+                      <option key={c.client_id} value={c.client_id}>
+                        {c.client_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <button
+                    type="submit"
+                    disabled={registerMutation.isPending}
+                    className="btn-primary w-full py-1.5 text-sm disabled:opacity-50"
+                  >
+                    {registerMutation.isPending ? (
+                      <RefreshCw size={14} className="mx-auto animate-spin" />
+                    ) : (
+                      t("system.addUser")
+                    )}
+                  </button>
+                </div>
+              </div>
+              {registerMutation.isError && (
+                <p className="mt-2 text-xs text-red-500">
+                  {registerMutation.error?.message || "Registration failed"}
+                </p>
+              )}
+              {registerMutation.isSuccess && (
+                <p className="mt-2 text-xs text-emerald-600">User created successfully</p>
+              )}
+            </form>
+          )}
+
+          {/* User List */}
+          {users.data ? (
+            users.data.users.length === 0 ? (
+              <p className="text-xs text-surface-400">No users found</p>
+            ) : (
+              <div className="overflow-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b text-left text-surface-400 dark:border-surface-700">
+                      <th className="pb-2 pr-4 font-medium">{t("system.userEmail")}</th>
+                      <th className="pb-2 pr-4 font-medium">{t("system.userName")}</th>
+                      <th className="pb-2 pr-4 font-medium">{t("system.userRole")}</th>
+                      <th className="pb-2 pr-4 font-medium">{t("system.userClient")}</th>
+                      <th className="pb-2 font-medium">{t("system.userCreated")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.data.users.map((u) => (
+                      <tr
+                        key={u.id}
+                        className="border-b border-surface-100 dark:border-surface-800"
+                      >
+                        <td className="py-2.5 pr-4">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={cn(
+                                "h-2 w-2 rounded-full",
+                                u.is_active ? "bg-emerald-500" : "bg-surface-300",
+                              )}
+                            />
+                            <span className="font-medium text-surface-900 dark:text-white">
+                              {u.email}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-2.5 pr-4 text-surface-600 dark:text-surface-300">
+                          {u.display_name || "—"}
+                        </td>
+                        <td className="py-2.5 pr-4">
+                          <span
+                            className={cn(
+                              "rounded-full px-2 py-0.5 text-[10px] font-bold",
+                              u.role === "admin"
+                                ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                                : "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+                            )}
+                          >
+                            {u.role}
+                          </span>
+                        </td>
+                        <td className="py-2.5 pr-4 text-surface-600 dark:text-surface-300">
+                          {u.client_name || t("system.noClient")}
+                        </td>
+                        <td className="py-2.5 text-surface-400">
+                          {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          ) : users.isLoading ? (
+            <div className="animate-pulse space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-8 rounded bg-surface-200 dark:bg-surface-700" />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-red-500">{users.error?.message}</p>
+          )}
         </div>
       </div>
     </>
