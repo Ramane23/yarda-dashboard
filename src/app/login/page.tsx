@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, Shield, AlertCircle } from "lucide-react";
+import Image from "next/image";
+import { Shield, AlertCircle } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { useT } from "@/lib/useT";
@@ -62,7 +63,7 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-950">
       {/* Background grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
       <div className="absolute inset-0 bg-gradient-to-br from-brand-950/50 via-transparent to-surface-950" />
 
       {/* Glow orbs */}
@@ -78,13 +79,15 @@ export default function LoginPage() {
         <div className="rounded-2xl border border-surface-800/50 bg-surface-900/80 p-8 shadow-2xl backdrop-blur-xl">
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-500/30">
-              <Activity size={28} strokeWidth={2.5} />
-            </div>
-            <h1 className="mt-4 text-2xl font-bold tracking-tight text-white">
-              {t("login.title")}
-            </h1>
-            <div className="mt-1 flex items-center gap-1.5 text-surface-400">
+            <Image
+              src="/logo.png"
+              alt="YARDA"
+              width={220}
+              height={56}
+              className="h-14 w-auto"
+              priority
+            />
+            <div className="mt-3 flex items-center gap-1.5 text-surface-400">
               <Shield size={12} />
               <span className="text-xs font-medium uppercase tracking-widest">
                 {t("app.subtitle")}

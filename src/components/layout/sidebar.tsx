@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -9,7 +10,6 @@ import {
   Box,
   Settings,
   ChevronLeft,
-  Activity,
   LogOut,
   Monitor,
   Workflow,
@@ -55,9 +55,7 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b px-4">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-md shadow-brand-500/25">
-          <Activity size={18} strokeWidth={2.5} />
-        </div>
+        <Image src="/icon.png" alt="YARDA" width={36} height={36} className="h-9 w-9 shrink-0" />
         {sidebarOpen && (
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight text-surface-900 dark:text-white">

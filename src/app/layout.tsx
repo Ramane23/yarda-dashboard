@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "YARDA — Fraud Detection Dashboard",
   description: "Real-time fraud monitoring and analytics for MTO clients",
-  icons: { icon: "/favicon.ico" },
+  icons: { icon: "/icon.png", apple: "/icon.png" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
