@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Shield, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { useT } from "@/lib/useT";
@@ -90,12 +90,9 @@ export default function LoginPage() {
             <h1 className="mt-4 text-2xl font-bold tracking-tight text-white">
               {t("login.title")}
             </h1>
-            <div className="mt-1 flex items-center gap-1.5 text-surface-400">
-              <Shield size={12} />
-              <span className="text-xs font-medium uppercase tracking-widest">
-                {t("app.subtitle")}
-              </span>
-            </div>
+            <p className="mt-1 text-center text-xs font-medium uppercase tracking-widest text-surface-400">
+              {t("app.subtitle")}
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
