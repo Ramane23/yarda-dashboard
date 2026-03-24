@@ -306,6 +306,7 @@ const translations = {
 
   // System / Admin page
   "nav.system": { en: "System", fr: "Système" },
+  "nav.pipeline": { en: "Pipeline", fr: "Pipeline" },
   "system.title": { en: "System", fr: "Système" },
   "system.health": { en: "System Health", fr: "Santé Système" },
   "system.healthy": { en: "Healthy", fr: "Sain" },
@@ -376,6 +377,45 @@ const translations = {
     en: "Unauthorized — Admin access required",
     fr: "Non autorisé — Accès admin requis",
   },
+
+  // Pipeline page
+  "pipeline.title": { en: "Pipeline Flow", fr: "Flux du Pipeline" },
+  "pipeline.selectTransaction": {
+    en: "Select a transaction to inspect the full pipeline flow",
+    fr: "Sélectionnez une transaction pour inspecter le flux complet du pipeline",
+  },
+  "pipeline.rawInput": { en: "Raw Input", fr: "Données Brutes" },
+  "pipeline.rawInputDesc": { en: "Data sent by client", fr: "Données envoyées par le client" },
+  "pipeline.featureEng": { en: "Feature Engineering", fr: "Feature Engineering" },
+  "pipeline.featureEngDesc": {
+    en: "Transformed & encoded features",
+    fr: "Features transformées et encodées",
+  },
+  "pipeline.modelInput": { en: "Model Input", fr: "Entrée Modèle" },
+  "pipeline.modelInputDesc": {
+    en: "Final feature vector sent to model",
+    fr: "Vecteur de features final envoyé au modèle",
+  },
+  "pipeline.results": { en: "Results", fr: "Résultats" },
+  "pipeline.resultsDesc": { en: "Scores, weights & decision", fr: "Scores, poids et décision" },
+  "pipeline.noData": {
+    en: "No pipeline data stored for this prediction",
+    fr: "Aucune donnée de pipeline stockée pour cette prédiction",
+  },
+  "pipeline.recentTransactions": { en: "Recent Transactions", fr: "Transactions Récentes" },
+  "pipeline.inspect": { en: "Inspect", fr: "Inspecter" },
+  "pipeline.scoring": { en: "Scoring Breakdown", fr: "Détail du Scoring" },
+  "pipeline.finalScore": { en: "Final Score", fr: "Score Final" },
+  "pipeline.model": { en: "Model", fr: "Modèle" },
+  "pipeline.latency": { en: "Latency", fr: "Latence" },
+  "pipeline.features": { en: "features", fr: "features" },
+  "pipeline.field": { en: "Field", fr: "Champ" },
+  "pipeline.value": { en: "Value", fr: "Valeur" },
+  "pipeline.feature": { en: "Feature", fr: "Feature" },
+  "pipeline.weight": { en: "Weight", fr: "Poids" },
+  "pipeline.score": { en: "Score", fr: "Score" },
+  "pipeline.weighted": { en: "Weighted", fr: "Pondéré" },
+  "pipeline.thresholds": { en: "Thresholds", fr: "Seuils" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

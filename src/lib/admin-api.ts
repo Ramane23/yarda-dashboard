@@ -12,6 +12,7 @@ import type {
   TuningResults,
   ExperimentList,
   FeatureStats,
+  PredictionDetail,
 } from "@/types/admin";
 import type { Period } from "@/types/api";
 
@@ -104,6 +105,24 @@ export function getExperiments() {
 
 export function getFeatureStats(clientId: string) {
   return fetchAdmin<FeatureStats>(`${BASE}/features/${clientId}`);
+}
+
+// Pipeline flow — uses dashboard endpoint (needs X-Client-ID header)
+export async function getPredictionDetail(requestId: string): Promise<PredictionDetail> {
+  const url = new URL(`/api/v1/dashboard/predictions/${requestId}`, window.location.origin);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const viewAs = typeof window !== "undefined" ? localStorage.getItem("view_as_client") : null;
+  const clientId =
+    viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
+  if (clientId) headers["X-Client-ID"] = clientId;
+  const res = await fetch(url.toString(), { headers });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `API error ${res.status}`);
+  }
+  return res.json();
 }
 
 // User Management

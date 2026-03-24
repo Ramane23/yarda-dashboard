@@ -157,6 +157,31 @@ export interface ExperimentList {
   experiments: ExperimentInfo[];
 }
 
+export interface PredictionDetail {
+  request_id: string;
+  transaction_id: string | null;
+  client_id: string;
+  timestamp: string | null;
+  inference_time_ms: number;
+  // Step 1: Raw input
+  raw_input: Record<string, unknown>;
+  // Step 2: Engineered features
+  engineered_features: Record<string, number>;
+  feature_names: string[];
+  // Step 3: Model
+  model_name: string | null;
+  model_version_id: number | null;
+  // Step 4: Results
+  decision: string | null;
+  final_score: number;
+  anomaly_score: number;
+  ml_score: number;
+  weights: Record<string, number>;
+  thresholds: Record<string, number>;
+  phase: string | null;
+  ground_truth: Record<string, unknown> | null;
+}
+
 export interface FeatureStats {
   client_id: string;
   feature_file: string | null;

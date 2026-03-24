@@ -12,6 +12,7 @@ import {
   Activity,
   LogOut,
   Monitor,
+  Workflow,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -28,7 +29,8 @@ const nav: {
   { href: "/dashboard/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
 
   { href: "/dashboard/review", labelKey: "nav.reviewQueue", icon: ShieldAlert },
-  { href: "/dashboard/models", labelKey: "nav.models", icon: Box },
+  { href: "/dashboard/models", labelKey: "nav.models", icon: Box, adminOnly: true },
+  { href: "/dashboard/pipeline", labelKey: "nav.pipeline", icon: Workflow, adminOnly: true },
   { href: "/dashboard/system", labelKey: "nav.system", icon: Monitor, adminOnly: true },
   { href: "/dashboard/settings", labelKey: "nav.settings", icon: Settings },
 ];
