@@ -208,81 +208,126 @@ export default function SystemPage() {
         {/* ── Row 1: Health + Ingestion ── */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* System Health */}
-          <div className="card space-y-4 p-5">
+          <div className="card flex flex-col p-5">
             <SectionTitle icon={Server}>{t("system.health")}</SectionTitle>
+
             {h ? (
-              <>
-                <div className="flex items-center gap-3">
-                  <StatusDot ok={h.status === "healthy"} />
-                  <span
-                    className={cn(
-                      "text-sm font-semibold",
-                      h.status === "healthy"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-red-600 dark:text-red-400",
-                    )}
-                  >
-                    {h.status === "healthy" ? t("system.healthy") : t("system.degraded")}
-                  </span>
-                  <span className="ml-auto text-xs text-surface-400">
+              <div className="mt-4 flex flex-1 flex-col justify-between gap-5">
+                {/* Status banner */}
+                <div
+                  className={cn(
+                    "flex items-center justify-between rounded-xl border px-4 py-3",
+                    h.status === "healthy"
+                      ? "border-emerald-200 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-950/20"
+                      : "border-red-200 bg-red-50/60 dark:border-red-800 dark:bg-red-950/20",
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <StatusDot ok={h.status === "healthy"} />
+                    <span
+                      className={cn(
+                        "text-sm font-bold",
+                        h.status === "healthy"
+                          ? "text-emerald-700 dark:text-emerald-400"
+                          : "text-red-700 dark:text-red-400",
+                      )}
+                    >
+                      {h.status === "healthy" ? t("system.healthy") : t("system.degraded")}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium text-surface-500 dark:text-surface-400">
                     {t("system.uptime")}: {formatUptime(h.uptime_seconds)}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  <div className="flex items-center gap-2">
-                    <Database size={14} className="text-surface-400" />
-                    <div>
-                      <p className="text-[11px] text-surface-400">{t("system.database")}</p>
-                      <p
+
+                {/* Services grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Database */}
+                  <div className="rounded-lg border bg-surface-50/50 p-3 dark:border-surface-700 dark:bg-surface-800/50">
+                    <div className="mb-1.5 flex items-center gap-2">
+                      <Database size={14} className="text-surface-400" />
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-surface-400">
+                        {t("system.database")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {h.database === "healthy" ? (
+                        <CheckCircle2 size={14} className="text-emerald-500" />
+                      ) : (
+                        <XCircle size={14} className="text-red-500" />
+                      )}
+                      <span
                         className={cn(
-                          "text-xs font-semibold",
-                          h.database === "healthy" ? "text-emerald-600" : "text-red-600",
+                          "text-sm font-semibold",
+                          h.database === "healthy"
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400",
                         )}
                       >
-                        {h.database === "healthy" ? (
-                          <CheckCircle2 size={12} className="mr-1 inline" />
-                        ) : (
-                          <XCircle size={12} className="mr-1 inline" />
-                        )}
                         {h.database}
-                      </p>
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Layers size={14} className="text-surface-400" />
-                    <div>
-                      <p className="text-[11px] text-surface-400">{t("system.redis")}</p>
-                      <p
+
+                  {/* Redis */}
+                  <div className="rounded-lg border bg-surface-50/50 p-3 dark:border-surface-700 dark:bg-surface-800/50">
+                    <div className="mb-1.5 flex items-center gap-2">
+                      <Layers size={14} className="text-surface-400" />
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-surface-400">
+                        {t("system.redis")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {h.redis === "healthy" ? (
+                        <CheckCircle2 size={14} className="text-emerald-500" />
+                      ) : (
+                        <XCircle size={14} className="text-amber-500" />
+                      )}
+                      <span
                         className={cn(
-                          "text-xs font-semibold",
-                          h.redis === "healthy" ? "text-emerald-600" : "text-amber-600",
+                          "text-sm font-semibold",
+                          h.redis === "healthy"
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-amber-600 dark:text-amber-400",
                         )}
                       >
                         {h.redis}
-                      </p>
+                      </span>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-[11px] text-surface-400">{t("system.activeClients")}</p>
-                    <p className="font-mono text-lg font-bold text-surface-900 dark:text-white">
+
+                  {/* Active Clients */}
+                  <div className="rounded-lg border bg-surface-50/50 p-3 dark:border-surface-700 dark:bg-surface-800/50">
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-surface-400">
+                      {t("system.activeClients")}
+                    </p>
+                    <p className="font-mono text-xl font-bold text-surface-900 dark:text-white">
                       {h.clients_active}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-[11px] text-surface-400">{t("system.prodModels")}</p>
-                    <p className="font-mono text-lg font-bold text-surface-900 dark:text-white">
+
+                  {/* Production Models */}
+                  <div className="rounded-lg border bg-surface-50/50 p-3 dark:border-surface-700 dark:bg-surface-800/50">
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-surface-400">
+                      {t("system.prodModels")}
+                    </p>
+                    <p className="font-mono text-xl font-bold text-surface-900 dark:text-white">
                       {h.models_in_production}
                     </p>
                   </div>
                 </div>
-              </>
+              </div>
             ) : health.isLoading ? (
-              <div className="animate-pulse space-y-3">
-                <div className="h-4 w-32 rounded bg-surface-200 dark:bg-surface-700" />
-                <div className="h-8 w-full rounded bg-surface-200 dark:bg-surface-700" />
+              <div className="mt-4 animate-pulse space-y-3">
+                <div className="h-12 w-full rounded-xl bg-surface-200 dark:bg-surface-700" />
+                <div className="grid grid-cols-2 gap-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-16 rounded-lg bg-surface-200 dark:bg-surface-700" />
+                  ))}
+                </div>
               </div>
             ) : (
-              <p className="text-sm text-red-500">{health.error?.message}</p>
+              <p className="mt-4 text-sm text-red-500">{health.error?.message}</p>
             )}
           </div>
 
