@@ -41,7 +41,6 @@ import {
   getFeedbackStats,
   getExperiments,
   getReports,
-  getAnomalyStatus,
   getFeatureStats,
   getUsers,
   registerUser,
@@ -140,12 +139,6 @@ export default function SystemPage() {
   });
 
   // Per-client queries (only when a client is selected)
-  const anomaly = useQuery({
-    queryKey: ["admin-anomaly", viewAsClient],
-    queryFn: () => getAnomalyStatus(viewAsClient),
-    enabled: !!viewAsClient,
-    retry: 1,
-  });
   const features = useQuery({
     queryKey: ["admin-features", viewAsClient],
     queryFn: () => getFeatureStats(viewAsClient),
@@ -204,7 +197,6 @@ export default function SystemPage() {
   const fb = feedback.data;
   const exp = experiments.data;
   const rep = reports.data;
-  const anom = anomaly.data;
   const feat = features.data;
 
   const formatUptime = (s: number) => {
@@ -533,50 +525,150 @@ export default function SystemPage() {
           </div>
         </div>
 
-        {/* ── Row 3b: Anomaly Detector + Feature Pipeline (only when client selected) ── */}
+        {/* ── Row 3b: Model Stack + Feature Pipeline (only when client selected) ── */}
         {viewAsClient && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Anomaly Detector */}
+            {/* Model Stack — all 3 models */}
             <div className="card space-y-4 p-5">
-              <SectionTitle icon={Microscope}>{t("system.anomaly")}</SectionTitle>
-              {anom ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    <StatusDot ok={anom.is_fitted} />
-                    <span
+              <SectionTitle icon={Microscope}>{t("system.modelStack")}</SectionTitle>
+              {(() => {
+                const allModels = models.data?.models || [];
+                const anomalyModel = allModels.find(
+                  (m) =>
+                    m.model_name.toLowerCase().includes("anomaly") ||
+                    m.model_name.toLowerCase().includes("isolation"),
+                );
+                const classifierModel = allModels.find(
+                  (m) =>
+                    !m.model_name.toLowerCase().includes("anomaly") &&
+                    !m.model_name.toLowerCase().includes("isolation") &&
+                    !m.model_name.toLowerCase().includes("gnn"),
+                );
+                const gnnModel = allModels.find((m) => m.model_name.toLowerCase().includes("gnn"));
+
+                const ModelCard = ({
+                  icon: Icon,
+                  label,
+                  accent,
+                  model,
+                  comingSoon,
+                }: {
+                  icon: typeof Microscope;
+                  label: string;
+                  accent: string;
+                  model: (typeof allModels)[0] | undefined;
+                  comingSoon?: boolean;
+                }) => {
+                  const vm = model?.validation_metrics || {};
+                  const metricKeys = Object.keys(vm).filter(
+                    (k) => !k.startsWith("sys.") && k !== "process duration",
+                  );
+                  return (
+                    <div
                       className={cn(
-                        "text-sm font-semibold",
-                        anom.is_fitted
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-surface-400",
+                        "rounded-lg border p-3 transition-all",
+                        comingSoon
+                          ? "border-dashed border-surface-200 bg-surface-50/30 dark:border-surface-700 dark:bg-surface-800/20"
+                          : model
+                            ? "border-surface-200 bg-surface-50/50 dark:border-surface-700 dark:bg-surface-800/50"
+                            : "border-surface-100 dark:border-surface-800",
                       )}
                     >
-                      {anom.is_fitted ? t("system.fitted") : t("system.notFitted")}
-                    </span>
-                  </div>
-                  {anom.is_fitted && (
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                      {anom.contamination != null && (
-                        <Stat label="Contamination" value={anom.contamination.toFixed(3)} />
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={cn(
+                              "flex h-7 w-7 items-center justify-center rounded-lg",
+                              accent,
+                            )}
+                          >
+                            <Icon size={14} className="text-white" />
+                          </div>
+                          <span className="text-xs font-semibold text-surface-700 dark:text-surface-200">
+                            {label}
+                          </span>
+                        </div>
+                        {comingSoon ? (
+                          <span className="rounded-full bg-surface-100 px-2 py-0.5 text-[10px] font-bold text-surface-400 dark:bg-surface-800">
+                            {t("system.comingSoon")}
+                          </span>
+                        ) : model ? (
+                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                            {model.stage === "production"
+                              ? t("system.production")
+                              : model.stage || t("system.fitted")}
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-surface-100 px-2 py-0.5 text-[10px] font-bold text-surface-400 dark:bg-surface-800">
+                            {t("system.noModel")}
+                          </span>
+                        )}
+                      </div>
+
+                      {model && (
+                        <div className="space-y-1.5">
+                          <p className="font-mono text-[11px] text-surface-500 dark:text-surface-400">
+                            {model.model_name} v{model.version}
+                            {model.framework && (
+                              <span className="ml-1.5 rounded bg-surface-100 px-1 py-0.5 text-[9px] font-bold uppercase dark:bg-surface-700">
+                                {model.framework}
+                              </span>
+                            )}
+                          </p>
+                          {metricKeys.length > 0 && (
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                              {metricKeys.slice(0, 6).map((k) => (
+                                <div key={k} className="flex items-baseline justify-between">
+                                  <span className="truncate text-[10px] text-surface-400">
+                                    {k.replace(/_/g, " ")}
+                                  </span>
+                                  <span className="ml-1 font-mono text-[10px] font-semibold text-surface-700 dark:text-surface-200">
+                                    {typeof vm[k] === "number"
+                                      ? vm[k] < 1 && vm[k] > 0
+                                        ? (vm[k] * 100).toFixed(1) + "%"
+                                        : vm[k].toFixed(3)
+                                      : String(vm[k])}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       )}
-                      {anom.n_estimators != null && (
-                        <Stat label="Estimators" value={anom.n_estimators} />
-                      )}
-                      {anom.n_samples_trained != null && (
-                        <Stat label="Samples" value={formatNumber(anom.n_samples_trained)} />
-                      )}
-                      {anom.n_features != null && <Stat label="Features" value={anom.n_features} />}
-                      {anom.threshold != null && (
-                        <Stat label="Threshold" value={anom.threshold.toFixed(4)} />
+
+                      {comingSoon && (
+                        <p className="mt-1 text-[10px] italic text-surface-400">
+                          Graph Neural Network for fraud ring detection
+                        </p>
                       )}
                     </div>
-                  )}
-                </>
-              ) : anomaly.isLoading ? (
-                <div className="animate-pulse h-16 rounded bg-surface-200 dark:bg-surface-700" />
-              ) : (
-                <p className="text-sm text-red-500">{anomaly.error?.message}</p>
-              )}
+                  );
+                };
+
+                return (
+                  <div className="space-y-3">
+                    <ModelCard
+                      icon={Microscope}
+                      label={t("system.anomaly")}
+                      accent="bg-violet-500"
+                      model={anomalyModel}
+                    />
+                    <ModelCard
+                      icon={Shield}
+                      label={t("system.classifier")}
+                      accent="bg-brand-500"
+                      model={classifierModel}
+                    />
+                    <ModelCard
+                      icon={Activity}
+                      label={t("system.gnn")}
+                      accent="bg-emerald-500"
+                      model={gnnModel}
+                      comingSoon={!gnnModel}
+                    />
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Feature Pipeline */}
