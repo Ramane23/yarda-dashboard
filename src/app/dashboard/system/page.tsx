@@ -219,7 +219,7 @@ export default function SystemPage() {
             <SectionTitle icon={Server}>{t("system.health")}</SectionTitle>
 
             {h ? (
-              <div className="mt-4 flex flex-1 flex-col justify-between gap-5">
+              <div className="mt-4 flex flex-col gap-4">
                 {/* Status banner */}
                 <div
                   className={cn(
@@ -271,7 +271,9 @@ export default function SystemPage() {
                             : "text-red-600 dark:text-red-400",
                         )}
                       >
-                        {h.database}
+                        {h.database === "healthy"
+                          ? t("system.statusHealthy")
+                          : t("system.statusDown")}
                       </span>
                     </div>
                   </div>
@@ -298,7 +300,11 @@ export default function SystemPage() {
                             : "text-amber-600 dark:text-amber-400",
                         )}
                       >
-                        {h.redis}
+                        {h.redis === "healthy"
+                          ? t("system.statusHealthy")
+                          : h.redis === "not_installed"
+                            ? t("system.statusNotInstalled")
+                            : t("system.statusDown")}
                       </span>
                     </div>
                   </div>
