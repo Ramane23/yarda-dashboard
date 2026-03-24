@@ -17,6 +17,7 @@ import type { TransactionItem, Decision, SortOrder } from "@/types/api";
 export default function TransactionsPage() {
   const period = useAppStore((s) => s.period);
   const locale = useAppStore((s) => s.locale);
+  const viewAsClient = useAppStore((s) => s.viewAsClient);
   const t = useT();
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortOrder>("newest");
@@ -24,7 +25,7 @@ export default function TransactionsPage() {
   const [labeled, setLabeled] = useState<"" | "true" | "false">("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["transactions", period, page, sort, decision, labeled],
+    queryKey: ["transactions", period, page, sort, decision, labeled, viewAsClient],
     queryFn: () =>
       getTransactions({
         period,

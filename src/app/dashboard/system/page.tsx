@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Database,
   ExternalLink,
-  Filter,
   Globe,
   FlaskConical,
   Layers,
@@ -83,8 +82,8 @@ function Stat({ label, value, sub }: { label: string; value: string | number; su
 
 export default function SystemPage() {
   const period = useAppStore((s) => s.period);
+  const viewAsClient = useAppStore((s) => s.viewAsClient);
   const t = useT();
-  const [clientFilter, setClientFilter] = useState<string>("");
   const queryClient = useQueryClient();
 
   // User management state
@@ -118,32 +117,32 @@ export default function SystemPage() {
 
   // Client-filtered queries
   const models = useQuery({
-    queryKey: ["admin-models", clientFilter],
-    queryFn: () => getModelRegistry(clientFilter || undefined),
+    queryKey: ["admin-models", viewAsClient],
+    queryFn: () => getModelRegistry(viewAsClient || undefined),
     retry: 1,
   });
   const feedback = useQuery({
-    queryKey: ["admin-feedback", period, clientFilter],
+    queryKey: ["admin-feedback", period, viewAsClient],
     queryFn: () => getFeedbackStats(period),
     retry: 1,
   });
   const reports = useQuery({
-    queryKey: ["admin-reports", clientFilter],
-    queryFn: () => getReports(clientFilter || undefined),
+    queryKey: ["admin-reports", viewAsClient],
+    queryFn: () => getReports(viewAsClient || undefined),
     retry: 1,
   });
 
   // Per-client queries (only when a client is selected)
   const anomaly = useQuery({
-    queryKey: ["admin-anomaly", clientFilter],
-    queryFn: () => getAnomalyStatus(clientFilter),
-    enabled: !!clientFilter,
+    queryKey: ["admin-anomaly", viewAsClient],
+    queryFn: () => getAnomalyStatus(viewAsClient),
+    enabled: !!viewAsClient,
     retry: 1,
   });
   const features = useQuery({
-    queryKey: ["admin-features", clientFilter],
-    queryFn: () => getFeatureStats(clientFilter),
-    enabled: !!clientFilter,
+    queryKey: ["admin-features", viewAsClient],
+    queryFn: () => getFeatureStats(viewAsClient),
+    enabled: !!viewAsClient,
     retry: 1,
   });
 
@@ -206,43 +205,6 @@ export default function SystemPage() {
     <>
       <Header title={t("system.title")} />
       <div className="flex-1 space-y-6 overflow-auto p-6">
-        {/* ── Client Filter Bar ── */}
-        {ph && ph.clients.length > 0 && (
-          <div className="flex items-center gap-3">
-            <Filter size={14} className="text-surface-400" />
-            <span className="text-xs font-medium text-surface-500">
-              {t("system.filterByClient")}
-            </span>
-            <div className="flex gap-1.5">
-              <button
-                onClick={() => setClientFilter("")}
-                className={cn(
-                  "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
-                  !clientFilter
-                    ? "bg-brand-500 text-white shadow-sm"
-                    : "bg-surface-100 text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700",
-                )}
-              >
-                {t("system.allClients")}
-              </button>
-              {ph.clients.map((c) => (
-                <button
-                  key={c.client_id}
-                  onClick={() => setClientFilter(c.client_id)}
-                  className={cn(
-                    "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
-                    clientFilter === c.client_id
-                      ? "bg-brand-500 text-white shadow-sm"
-                      : "bg-surface-100 text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700",
-                  )}
-                >
-                  {c.client_name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* ── Row 1: Health + Ingestion ── */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* System Health */}
@@ -394,7 +356,7 @@ export default function SystemPage() {
                 </p>
                 <div className="space-y-2">
                   {ph.clients
-                    .filter((c) => !clientFilter || c.client_id === clientFilter)
+                    .filter((c) => !viewAsClient || c.client_id === viewAsClient)
                     .map((c) => (
                       <div
                         key={c.client_id}
@@ -512,7 +474,7 @@ export default function SystemPage() {
         </div>
 
         {/* ── Row 3b: Anomaly Detector + Feature Pipeline (only when client selected) ── */}
-        {clientFilter && (
+        {viewAsClient && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Anomaly Detector */}
             <div className="card space-y-4 p-5">
@@ -660,13 +622,13 @@ export default function SystemPage() {
                   ))}
                 </div>
 
-                {/* Check retraining — uses clientFilter or manual select */}
+                {/* Check retraining — uses viewAsClient or manual select */}
                 {ph && ph.clients.length > 0 && (
                   <div className="flex items-center gap-2 border-t pt-3 dark:border-surface-700">
-                    {clientFilter ? (
+                    {viewAsClient ? (
                       <span className="flex-1 text-xs font-medium text-surface-600 dark:text-surface-300">
-                        {ph.clients.find((c) => c.client_id === clientFilter)?.client_name ||
-                          clientFilter}
+                        {ph.clients.find((c) => c.client_id === viewAsClient)?.client_name ||
+                          viewAsClient}
                       </span>
                     ) : (
                       <select
@@ -684,11 +646,11 @@ export default function SystemPage() {
                     )}
                     <button
                       onClick={() => {
-                        const cid = clientFilter || (retrainCheck.variables as string);
+                        const cid = viewAsClient || (retrainCheck.variables as string);
                         if (cid) retrainCheck.mutate(cid);
                       }}
                       disabled={
-                        (!clientFilter && !retrainCheck.variables) || retrainCheck.isPending
+                        (!viewAsClient && !retrainCheck.variables) || retrainCheck.isPending
                       }
                       className="btn-primary px-3 py-1.5 text-xs disabled:opacity-50"
                     >
@@ -771,7 +733,7 @@ export default function SystemPage() {
                 {fb.per_client.length > 0 && (
                   <div className="space-y-1.5">
                     {fb.per_client
-                      .filter((c) => !clientFilter || c.client_name === clientFilter)
+                      .filter((c) => !viewAsClient || c.client_name === viewAsClient)
                       .map((c) => (
                         <div key={c.client_name} className="flex items-center gap-2 text-xs">
                           <span className="min-w-0 flex-1 text-surface-600 dark:text-surface-300">

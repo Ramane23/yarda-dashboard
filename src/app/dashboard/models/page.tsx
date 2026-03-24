@@ -20,6 +20,7 @@ import {
 import { Header } from "@/components/layout/header";
 import { getProductionModels } from "@/lib/api";
 import { cn, formatNumber } from "@/lib/utils";
+import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
 import { format } from "date-fns";
 import type { ProductionModel } from "@/types/api";
@@ -456,8 +457,9 @@ function ModelCard({ model, t }: { model: ProductionModel; t: (key: TranslationK
 
 export default function ModelsPage() {
   const t = useT();
+  const viewAsClient = useAppStore((s) => s.viewAsClient);
   const { data, isLoading } = useQuery({
-    queryKey: ["production-models"],
+    queryKey: ["production-models", viewAsClient],
     queryFn: getProductionModels,
     staleTime: 60_000,
   });

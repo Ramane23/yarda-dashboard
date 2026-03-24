@@ -28,30 +28,31 @@ import type { TranslationKey } from "@/lib/i18n";
 export default function DashboardOverview() {
   const period = useAppStore((s) => s.period);
   const locale = useAppStore((s) => s.locale);
+  const viewAsClient = useAppStore((s) => s.viewAsClient);
   const t = useT();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["stats", period],
+    queryKey: ["stats", period, viewAsClient],
     queryFn: () => getStats(period),
   });
 
   const { data: analytics } = useQuery({
-    queryKey: ["analytics", period],
+    queryKey: ["analytics", period, viewAsClient],
     queryFn: () => getAnalytics(period),
   });
 
   const { data: phaseProgress } = useQuery({
-    queryKey: ["phase-progress"],
+    queryKey: ["phase-progress", viewAsClient],
     queryFn: () => getPhaseProgress(),
   });
 
   const { data: scoringConfig } = useQuery({
-    queryKey: ["scoring-config"],
+    queryKey: ["scoring-config", viewAsClient],
     queryFn: () => getScoringConfig(),
   });
 
   const { data: impactData } = useQuery({
-    queryKey: ["impact", period],
+    queryKey: ["impact", period, viewAsClient],
     queryFn: () => getImpact(period),
   });
 

@@ -38,6 +38,7 @@ const FRAUD_TYPES: { value: string; key: TranslationKey }[] = [
 export default function ReviewQueuePage() {
   const period = useAppStore((s) => s.period);
   const locale = useAppStore((s) => s.locale);
+  const viewAsClient = useAppStore((s) => s.viewAsClient);
   const t = useT();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -50,12 +51,12 @@ export default function ReviewQueuePage() {
   const [successId, setSuccessId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["review-queue", period, page],
+    queryKey: ["review-queue", period, page, viewAsClient],
     queryFn: () => getReviewQueue({ period, page, page_size: 50 }),
   });
 
   const { data: phaseProgress } = useQuery({
-    queryKey: ["phase-progress"],
+    queryKey: ["phase-progress", viewAsClient],
     queryFn: () => getPhaseProgress(),
   });
 

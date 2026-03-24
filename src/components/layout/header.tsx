@@ -54,6 +54,7 @@ export function Header({ title }: { title: string }) {
               onChange={(e) => setViewAsClient(e.target.value)}
               className="bg-transparent text-xs font-semibold text-brand-700 outline-none dark:text-brand-300"
             >
+              <option value="">{t("system.allClients")}</option>
               {clients.map((c) => (
                 <option key={c.client_id} value={c.client_id}>
                   {c.client_name}
