@@ -20,6 +20,11 @@ import {
   Cpu,
   BarChart3,
   Microscope,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  Mail,
+  Calendar,
 } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
@@ -40,6 +45,7 @@ import {
   getFeatureStats,
   getUsers,
   registerUser,
+  deleteUser,
 } from "@/lib/admin-api";
 
 function StatusDot({ ok }: { ok: boolean }) {
@@ -88,6 +94,7 @@ export default function SystemPage() {
 
   // User management state
   const [showAddUser, setShowAddUser] = useState(false);
+  const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
   const [newUser, setNewUser] = useState({
     email: "",
     password: "",
@@ -158,6 +165,14 @@ export default function SystemPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setShowAddUser(false);
       setNewUser({ email: "", password: "", display_name: "", role: "client", client_id: "" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setExpandedUserId(null);
     },
   });
 
@@ -1061,67 +1076,146 @@ export default function SystemPage() {
             users.data.users.length === 0 ? (
               <p className="text-xs text-surface-400">No users found</p>
             ) : (
-              <div className="overflow-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b text-left text-surface-400 dark:border-surface-700">
-                      <th className="pb-2 pr-4 font-medium">{t("system.userEmail")}</th>
-                      <th className="pb-2 pr-4 font-medium">{t("system.userName")}</th>
-                      <th className="pb-2 pr-4 font-medium">{t("system.userRole")}</th>
-                      <th className="pb-2 pr-4 font-medium">{t("system.userClient")}</th>
-                      <th className="pb-2 font-medium">{t("system.userCreated")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.data.users.map((u) => (
-                      <tr
-                        key={u.id}
-                        className="border-b border-surface-100 dark:border-surface-800"
+              <div className="space-y-2">
+                {users.data.users.map((u) => {
+                  const isExpanded = expandedUserId === u.id;
+                  return (
+                    <div
+                      key={u.id}
+                      className={cn(
+                        "rounded-lg border transition-all",
+                        isExpanded
+                          ? "border-brand-200 bg-brand-50/30 dark:border-brand-800 dark:bg-brand-950/10"
+                          : "border-surface-100 bg-surface-50/50 dark:border-surface-800 dark:bg-surface-800/30",
+                      )}
+                    >
+                      {/* Row header */}
+                      <button
+                        onClick={() => setExpandedUserId(isExpanded ? null : u.id)}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left"
                       >
-                        <td className="py-2.5 pr-4">
+                        <span
+                          className={cn(
+                            "h-2.5 w-2.5 shrink-0 rounded-full",
+                            u.is_active ? "bg-emerald-500" : "bg-surface-300",
+                          )}
+                        />
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-surface-900 dark:text-white">
+                              {u.display_name || u.email.split("@")[0]}
+                            </span>
                             <span
                               className={cn(
-                                "h-2 w-2 rounded-full",
-                                u.is_active ? "bg-emerald-500" : "bg-surface-300",
+                                "rounded-full px-2 py-0.5 text-[10px] font-bold",
+                                u.role === "admin"
+                                  ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                                  : "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
                               )}
-                            />
-                            <span className="font-medium text-surface-900 dark:text-white">
-                              {u.email}
+                            >
+                              {u.role}
                             </span>
                           </div>
-                        </td>
-                        <td className="py-2.5 pr-4 text-surface-600 dark:text-surface-300">
-                          {u.display_name || "—"}
-                        </td>
-                        <td className="py-2.5 pr-4">
-                          <span
-                            className={cn(
-                              "rounded-full px-2 py-0.5 text-[10px] font-bold",
-                              u.role === "admin"
-                                ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
-                                : "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
-                            )}
-                          >
-                            {u.role}
-                          </span>
-                        </td>
-                        <td className="py-2.5 pr-4 text-surface-600 dark:text-surface-300">
+                          <p className="text-[11px] text-surface-400">{u.email}</p>
+                        </div>
+                        <span className="text-xs text-surface-400">
                           {u.client_name || t("system.noClient")}
-                        </td>
-                        <td className="py-2.5 text-surface-400">
-                          {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </span>
+                        {isExpanded ? (
+                          <ChevronUp size={16} className="shrink-0 text-surface-400" />
+                        ) : (
+                          <ChevronDown size={16} className="shrink-0 text-surface-400" />
+                        )}
+                      </button>
+
+                      {/* Expanded detail panel */}
+                      {isExpanded && (
+                        <div className="border-t px-4 pb-4 pt-3 dark:border-surface-700">
+                          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                            <div className="flex items-start gap-2">
+                              <Mail size={14} className="mt-0.5 shrink-0 text-surface-400" />
+                              <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">
+                                  Email
+                                </p>
+                                <p className="text-xs font-medium text-surface-700 dark:text-surface-200">
+                                  {u.email}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <Users size={14} className="mt-0.5 shrink-0 text-surface-400" />
+                              <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">
+                                  {t("system.userRole")}
+                                </p>
+                                <p className="text-xs font-medium text-surface-700 dark:text-surface-200">
+                                  {u.role}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <Shield size={14} className="mt-0.5 shrink-0 text-surface-400" />
+                              <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">
+                                  {t("system.userClient")}
+                                </p>
+                                <p className="text-xs font-medium text-surface-700 dark:text-surface-200">
+                                  {u.client_name || t("system.noClient")}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <Calendar size={14} className="mt-0.5 shrink-0 text-surface-400" />
+                              <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">
+                                  {t("system.userCreated")}
+                                </p>
+                                <p className="text-xs font-medium text-surface-700 dark:text-surface-200">
+                                  {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Delete button */}
+                          <div className="mt-4 flex items-center justify-end border-t pt-3 dark:border-surface-700">
+                            <button
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    `Delete user "${u.email}"? This action cannot be undone.`,
+                                  )
+                                ) {
+                                  deleteMutation.mutate(u.id);
+                                }
+                              }}
+                              disabled={deleteMutation.isPending}
+                              className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+                            >
+                              <Trash2 size={13} />
+                              {deleteMutation.isPending
+                                ? "Deleting..."
+                                : `Delete ${u.display_name || u.email.split("@")[0]}`}
+                            </button>
+                          </div>
+
+                          {deleteMutation.isError && (
+                            <p className="mt-2 text-xs text-red-500">
+                              {deleteMutation.error?.message || "Delete failed"}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )
           ) : users.isLoading ? (
             <div className="animate-pulse space-y-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-8 rounded bg-surface-200 dark:bg-surface-700" />
+                <div key={i} className="h-14 rounded-lg bg-surface-200 dark:bg-surface-700" />
               ))}
             </div>
           ) : (

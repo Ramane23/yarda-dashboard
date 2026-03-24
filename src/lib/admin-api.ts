@@ -21,7 +21,7 @@ const BASE = "/api/v1/admin";
 async function fetchAdmin<T>(
   path: string,
   params?: Record<string, string | number | boolean | undefined>,
-  method: "GET" | "POST" = "GET",
+  method: "GET" | "POST" | "DELETE" = "GET",
 ): Promise<T> {
   const url = new URL(path, window.location.origin);
   if (params) {
@@ -144,6 +144,10 @@ export interface UserListResponse {
 
 export function getUsers() {
   return fetchAdmin<UserListResponse>(`${BASE}/users`);
+}
+
+export function deleteUser(userId: number) {
+  return fetchAdmin<{ ok: boolean }>(`${BASE}/users/${userId}`, undefined, "DELETE");
 }
 
 export function registerUser(data: {
