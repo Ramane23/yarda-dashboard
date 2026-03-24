@@ -80,7 +80,7 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center">
             <Image
-              src="/logo.png"
+              src="/logo-light.png"
               alt="YARDA"
               width={220}
               height={56}
