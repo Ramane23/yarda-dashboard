@@ -57,6 +57,7 @@ export function Sidebar() {
       <div className="flex h-16 items-center gap-3 border-b px-4">
         {sidebarOpen ? (
           <>
+            {/* Light mode: full logo with dark text */}
             <Image
               src="/logo.png"
               alt="YARDA"
@@ -64,13 +65,24 @@ export function Sidebar() {
               height={40}
               className="h-9 w-auto dark:hidden"
             />
-            <Image
-              src="/logo-light.png"
-              alt="YARDA"
-              width={160}
-              height={40}
-              className="hidden h-9 w-auto dark:block"
-            />
+            {/* Dark mode: icon + text (logo text is dark, not visible on dark bg) */}
+            <div className="hidden items-center gap-2.5 dark:flex">
+              <Image
+                src="/icon.png"
+                alt="YARDA"
+                width={36}
+                height={36}
+                className="h-9 w-9 shrink-0"
+              />
+              <div className="flex flex-col">
+                <span className="text-base font-bold tracking-tight text-white">
+                  {t("app.name")}
+                </span>
+                <span className="text-[10px] font-medium uppercase tracking-widest text-surface-400">
+                  {t("nav.fraudDetection")}
+                </span>
+              </div>
+            </div>
           </>
         ) : (
           <Image src="/icon.png" alt="YARDA" width={36} height={36} className="h-9 w-9 shrink-0" />

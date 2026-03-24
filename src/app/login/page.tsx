@@ -80,14 +80,17 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center">
             <Image
-              src="/logo-light.png"
+              src="/icon.png"
               alt="YARDA"
-              width={220}
-              height={56}
-              className="h-14 w-auto"
+              width={64}
+              height={64}
+              className="h-16 w-16"
               priority
             />
-            <div className="mt-3 flex items-center gap-1.5 text-surface-400">
+            <h1 className="mt-4 text-2xl font-bold tracking-tight text-white">
+              {t("login.title")}
+            </h1>
+            <div className="mt-1 flex items-center gap-1.5 text-surface-400">
               <Shield size={12} />
               <span className="text-xs font-medium uppercase tracking-widest">
                 {t("app.subtitle")}
