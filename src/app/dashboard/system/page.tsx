@@ -894,7 +894,7 @@ export default function SystemPage() {
                   {rep.reports.map((r) => (
                     <a
                       key={`${r.client_id}-${r.filename}`}
-                      href={`/api/v1/admin/reports/${r.client_id}/${r.filename}`}
+                      href={r.url || `/api/v1/admin/reports/${r.client_id}/${r.filename}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 rounded-lg border bg-surface-50 p-2.5 text-xs transition-colors hover:bg-surface-100 dark:border-surface-700 dark:bg-surface-800/50 dark:hover:bg-surface-800"

@@ -70,6 +70,9 @@ export interface ReportInfo {
   client_id: string;
   generated_at: string;
   size_bytes: number;
+  url?: string | null;
+  experiment_url?: string | null;
+  source?: string;
 }
 
 export interface ReportList {
