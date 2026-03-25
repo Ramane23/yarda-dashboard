@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { LocaleToggle } from "@/components/locale-toggle";
@@ -127,6 +128,15 @@ export default function LoginPage() {
                 className="w-full rounded-lg border border-surface-700 bg-surface-800/50 px-3 py-2.5 text-sm text-white placeholder:text-surface-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                 autoComplete="current-password"
               />
+            </div>
+
+            <div className="flex justify-end">
+              <Link
+                href="/set-password?mode=forgot"
+                className="text-xs text-brand-400 transition-colors hover:text-brand-300"
+              >
+                {t("login.forgotPassword")}
+              </Link>
             </div>
 
             {error && (

@@ -125,6 +125,62 @@ export async function getPredictionDetail(requestId: string): Promise<Prediction
   return res.json();
 }
 
+// API Key Management
+export interface ApiKeyItem {
+  key_id: string;
+  client_id: string;
+  scopes: string[];
+  created_at: string | null;
+  expires_at: string | null;
+  is_active: boolean;
+}
+
+export interface ApiKeyListResponse {
+  total: number;
+  keys: ApiKeyItem[];
+}
+
+export interface ApiKeyCreateResponse {
+  api_key: string;
+  key_id: string;
+  client_id: string;
+  scopes: string[];
+  expires_at: string | null;
+  created_at: string;
+}
+
+export function getApiKeys(clientId?: string) {
+  return fetchAdmin<ApiKeyListResponse>(`${BASE}/api-keys`, { client_id: clientId });
+}
+
+export function createApiKey(data: {
+  client_id: string;
+  scopes?: string[];
+  expires_in_days?: number;
+  description?: string;
+  send_to_email?: string;
+}) {
+  const url = new URL(`${BASE}/api-keys`, window.location.origin);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
+  if (apiKey && !token) headers["X-API-Key"] = apiKey;
+  return fetch(url.toString(), {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  }).then(async (r) => {
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.detail || `Create API key failed: ${r.status}`);
+    return body as ApiKeyCreateResponse;
+  });
+}
+
+export function revokeApiKey(keyId: string) {
+  return fetchAdmin<{ ok: boolean }>(`${BASE}/api-keys/${keyId}`, undefined, "DELETE");
+}
+
 // User Management
 export interface UserItem {
   id: number;
@@ -171,6 +227,27 @@ export function registerUser(data: {
   }).then(async (r) => {
     const body = await r.json();
     if (!r.ok) throw new Error(body.detail || `Register failed: ${r.status}`);
+    return body;
+  });
+}
+
+export function inviteUser(data: {
+  email: string;
+  display_name?: string;
+  role: string;
+  client_id?: string;
+}) {
+  const url = new URL("/api/v1/auth/invite", window.location.origin);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return fetch(url.toString(), {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  }).then(async (r) => {
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.detail || `Invite failed: ${r.status}`);
     return body;
   });
 }

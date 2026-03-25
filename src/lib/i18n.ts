@@ -24,11 +24,48 @@ const translations = {
     fr: "Erreur de connexion. Réessayez.",
   },
   // Legacy (kept for compat)
+  "login.forgotPassword": { en: "Forgot password?", fr: "Mot de passe oubli\u00e9 ?" },
   "login.clientId": { en: "Client ID", fr: "Identifiant Client" },
   "login.clientIdPlaceholder": { en: "e.g. sako", fr: "ex. sako" },
   "login.apiKey": { en: "API Key", fr: "Clé API" },
   "login.apiKeyPlaceholder": { en: "Your API key", fr: "Votre clé API" },
   "login.clientIdRequired": { en: "Client ID is required", fr: "L'identifiant client est requis" },
+
+  // Set Password / Invite / Reset
+  "setPassword.title": { en: "Set Your Password", fr: "D\u00e9finir votre mot de passe" },
+  "setPassword.resetTitle": {
+    en: "Reset Your Password",
+    fr: "R\u00e9initialiser votre mot de passe",
+  },
+  "setPassword.forgotTitle": { en: "Forgot Password", fr: "Mot de passe oubli\u00e9" },
+  "setPassword.newPassword": { en: "New Password", fr: "Nouveau mot de passe" },
+  "setPassword.confirm": { en: "Confirm Password", fr: "Confirmer le mot de passe" },
+  "setPassword.submit": { en: "Set Password", fr: "D\u00e9finir le mot de passe" },
+  "setPassword.submitting": { en: "Setting password...", fr: "Mise \u00e0 jour..." },
+  "setPassword.success": {
+    en: "Password set successfully! You can now sign in.",
+    fr: "Mot de passe d\u00e9fini ! Vous pouvez maintenant vous connecter.",
+  },
+  "setPassword.invalidToken": {
+    en: "Invalid or expired link. Please request a new one.",
+    fr: "Lien invalide ou expir\u00e9. Veuillez en demander un nouveau.",
+  },
+  "setPassword.emailSent": {
+    en: "If an account exists with that email, a reset link has been sent.",
+    fr: "Si un compte existe avec cet email, un lien de r\u00e9initialisation a \u00e9t\u00e9 envoy\u00e9.",
+  },
+  "setPassword.enterEmail": { en: "Enter your email address", fr: "Entrez votre adresse email" },
+  "setPassword.sendReset": { en: "Send Reset Link", fr: "Envoyer le lien" },
+  "setPassword.sending": { en: "Sending...", fr: "Envoi..." },
+  "setPassword.backToLogin": { en: "Back to sign in", fr: "Retour \u00e0 la connexion" },
+  "setPassword.mismatch": {
+    en: "Passwords do not match",
+    fr: "Les mots de passe ne correspondent pas",
+  },
+  "setPassword.tooShort": {
+    en: "Password must be at least 8 characters",
+    fr: "Le mot de passe doit contenir au moins 8 caract\u00e8res",
+  },
 
   // Sidebar navigation
   "nav.overview": { en: "Overview", fr: "Vue d'ensemble" },
@@ -373,6 +410,28 @@ const translations = {
   "system.modelStack": { en: "Model Stack", fr: "Stack de Modèles" },
   "system.production": { en: "Production", fr: "Production" },
   "system.noModel": { en: "No model deployed", fr: "Aucun modèle déployé" },
+  "system.apiKeys": { en: "API Keys", fr: "Clés API" },
+  "system.createKey": { en: "Create Key", fr: "Créer une Clé" },
+  "system.revokeKey": { en: "Revoke", fr: "Révoquer" },
+  "system.keyClient": { en: "Client", fr: "Client" },
+  "system.keyScopes": { en: "Scopes", fr: "Permissions" },
+  "system.keyExpiry": { en: "Expires in (days)", fr: "Expire dans (jours)" },
+  "system.keyDescription": { en: "Description", fr: "Description" },
+  "system.keyCreated": { en: "Created", fr: "Créé" },
+  "system.keyExpires": { en: "Expires", fr: "Expire" },
+  "system.keyNeverExpires": { en: "Never", fr: "Jamais" },
+  "system.keyActive": { en: "Active", fr: "Active" },
+  "system.keyRevoked": { en: "Revoked", fr: "Révoquée" },
+  "system.keyCopyWarning": {
+    en: "Copy this key now — it will not be shown again.",
+    fr: "Copiez cette clé maintenant — elle ne sera plus affichée.",
+  },
+  "system.keyCopied": { en: "Copied!", fr: "Copié !" },
+  "system.keyNoKeys": { en: "No API keys found", fr: "Aucune clé API trouvée" },
+  "system.keyRevokeConfirm": {
+    en: "Revoke this API key? The client will no longer be able to authenticate.",
+    fr: "Révoquer cette clé API ? Le client ne pourra plus s'authentifier.",
+  },
   "system.users": { en: "User Management", fr: "Gestion des Utilisateurs" },
   "system.addUser": { en: "Add User", fr: "Ajouter un Utilisateur" },
   "system.userEmail": { en: "Email", fr: "Email" },
@@ -382,6 +441,13 @@ const translations = {
   "system.userClient": { en: "Client", fr: "Client" },
   "system.userCreated": { en: "User created successfully", fr: "Utilisateur créé avec succès" },
   "system.noClient": { en: "None (Admin)", fr: "Aucun (Admin)" },
+  "system.sendInvite": { en: "Send Invite", fr: "Envoyer l'invitation" },
+  "system.inviteSent": {
+    en: "Invite sent successfully",
+    fr: "Invitation envoy\u00e9e avec succ\u00e8s",
+  },
+  "system.recipientEmail": { en: "Recipient Email", fr: "Email du destinataire" },
+  "system.sendViaEmail": { en: "Send via email", fr: "Envoyer par email" },
   "system.unauthorized": {
     en: "Unauthorized — Admin access required",
     fr: "Non autorisé — Accès admin requis",

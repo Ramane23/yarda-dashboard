@@ -25,6 +25,10 @@ import {
   ChevronUp,
   Mail,
   Calendar,
+  KeyRound,
+  Copy,
+  Check,
+  Plus,
 } from "lucide-react";
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
@@ -43,8 +47,12 @@ import {
   getReports,
   getFeatureStats,
   getUsers,
-  registerUser,
+  inviteUser,
   deleteUser,
+  getApiKeys,
+  createApiKey,
+  revokeApiKey,
+  type ApiKeyCreateResponse,
 } from "@/lib/admin-api";
 
 function StatusDot({ ok }: { ok: boolean }) {
@@ -96,11 +104,21 @@ export default function SystemPage() {
   const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
   const [newUser, setNewUser] = useState({
     email: "",
-    password: "",
     display_name: "",
     role: "client",
     client_id: "",
   });
+
+  // API key management state
+  const [showCreateKey, setShowCreateKey] = useState(false);
+  const [newKey, setNewKey] = useState({
+    client_id: "",
+    description: "",
+    expires_in_days: "",
+    send_to_email: "",
+  });
+  const [createdKey, setCreatedKey] = useState<ApiKeyCreateResponse | null>(null);
+  const [copiedKey, setCopiedKey] = useState(false);
 
   // Global queries (not client-filtered)
   const health = useQuery({ queryKey: ["admin-health"], queryFn: getSystemHealth, retry: 1 });
@@ -150,14 +168,32 @@ export default function SystemPage() {
     mutationFn: (clientId: string) => checkRetraining(clientId),
   });
 
+  // API key management
+  const apiKeys = useQuery({ queryKey: ["admin-api-keys"], queryFn: () => getApiKeys(), retry: 1 });
+  const createKeyMutation = useMutation({
+    mutationFn: createApiKey,
+    onSuccess: (data) => {
+      setCreatedKey(data);
+      setShowCreateKey(false);
+      setNewKey({ client_id: "", description: "", expires_in_days: "", send_to_email: "" });
+      queryClient.invalidateQueries({ queryKey: ["admin-api-keys"] });
+    },
+  });
+  const revokeKeyMutation = useMutation({
+    mutationFn: revokeApiKey,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-api-keys"] });
+    },
+  });
+
   // User management
   const users = useQuery({ queryKey: ["admin-users"], queryFn: getUsers, retry: 1 });
   const registerMutation = useMutation({
-    mutationFn: registerUser,
+    mutationFn: inviteUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setShowAddUser(false);
-      setNewUser({ email: "", password: "", display_name: "", role: "client", client_id: "" });
+      setNewUser({ email: "", display_name: "", role: "client", client_id: "" });
     },
   });
 
@@ -1046,7 +1082,240 @@ export default function SystemPage() {
           </div>
         </div>
 
-        {/* ── Row 6: User Management ── */}
+        {/* ── Row 6: API Key Management ── */}
+        <div className="card space-y-4 p-5">
+          <div className="flex items-center justify-between">
+            <SectionTitle icon={KeyRound}>{t("system.apiKeys")}</SectionTitle>
+            <button
+              onClick={() => {
+                setShowCreateKey(!showCreateKey);
+                setCreatedKey(null);
+              }}
+              className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs"
+            >
+              <Plus size={14} />
+              {t("system.createKey")}
+            </button>
+          </div>
+
+          {/* Newly created key banner — show once */}
+          {createdKey && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/20">
+              <p className="mb-2 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                {t("system.keyCopyWarning")}
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 rounded bg-surface-900 px-3 py-2 font-mono text-sm text-emerald-400 select-all">
+                  {createdKey.api_key}
+                </code>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(createdKey.api_key);
+                    setCopiedKey(true);
+                    setTimeout(() => setCopiedKey(false), 2000);
+                  }}
+                  className="rounded-lg border border-surface-200 bg-white p-2 text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300"
+                >
+                  {copiedKey ? (
+                    <Check size={16} className="text-emerald-500" />
+                  ) : (
+                    <Copy size={16} />
+                  )}
+                </button>
+              </div>
+              <p className="mt-1.5 text-[11px] text-surface-500">
+                {t("system.keyClient")}: <strong>{createdKey.client_id}</strong> &middot;{" "}
+                {t("system.keyScopes")}: {createdKey.scopes.join(", ")}
+              </p>
+            </div>
+          )}
+
+          {/* Create Key Form */}
+          {showCreateKey && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createKeyMutation.mutate({
+                  client_id: newKey.client_id,
+                  scopes: ["read", "write", "feedback"],
+                  expires_in_days: newKey.expires_in_days
+                    ? parseInt(newKey.expires_in_days)
+                    : undefined,
+                  description: newKey.description || undefined,
+                  send_to_email: newKey.send_to_email || undefined,
+                });
+              }}
+              className="rounded-lg border bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/50"
+            >
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-surface-500">
+                    {t("system.keyClient")} *
+                  </label>
+                  <select
+                    required
+                    value={newKey.client_id}
+                    onChange={(e) => setNewKey({ ...newKey, client_id: e.target.value })}
+                    className="input-field w-full py-1.5 text-sm"
+                  >
+                    <option value="">{t("system.selectClient")}</option>
+                    {ph?.clients.map((c) => (
+                      <option key={c.client_id} value={c.client_id}>
+                        {c.client_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-surface-500">
+                    {t("system.keyDescription")}
+                  </label>
+                  <input
+                    type="text"
+                    value={newKey.description}
+                    onChange={(e) => setNewKey({ ...newKey, description: e.target.value })}
+                    className="input-field w-full py-1.5 text-sm"
+                    placeholder="Production key"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-surface-500">
+                    {t("system.keyExpiry")}
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={newKey.expires_in_days}
+                    onChange={(e) => setNewKey({ ...newKey, expires_in_days: e.target.value })}
+                    className="input-field w-full py-1.5 text-sm"
+                    placeholder={t("system.keyNeverExpires")}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-surface-500">
+                    {t("system.recipientEmail")}
+                  </label>
+                  <input
+                    type="email"
+                    value={newKey.send_to_email}
+                    onChange={(e) => setNewKey({ ...newKey, send_to_email: e.target.value })}
+                    className="input-field w-full py-1.5 text-sm"
+                    placeholder={t("system.sendViaEmail")}
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button
+                    type="submit"
+                    disabled={createKeyMutation.isPending || !newKey.client_id}
+                    className="btn-primary w-full py-1.5 text-sm disabled:opacity-50"
+                  >
+                    {createKeyMutation.isPending ? (
+                      <RefreshCw size={14} className="mx-auto animate-spin" />
+                    ) : (
+                      t("system.createKey")
+                    )}
+                  </button>
+                </div>
+              </div>
+              {createKeyMutation.isError && (
+                <p className="mt-2 text-xs text-red-500">
+                  {createKeyMutation.error?.message || "Failed to create API key"}
+                </p>
+              )}
+            </form>
+          )}
+
+          {/* Key List */}
+          {apiKeys.data ? (
+            apiKeys.data.keys.length === 0 ? (
+              <p className="text-xs text-surface-400">{t("system.keyNoKeys")}</p>
+            ) : (
+              <div className="space-y-2">
+                {apiKeys.data.keys.map((k) => (
+                  <div
+                    key={k.key_id}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg border px-4 py-3",
+                      k.is_active
+                        ? "border-surface-100 bg-surface-50/50 dark:border-surface-800 dark:bg-surface-800/30"
+                        : "border-surface-100 bg-surface-50/30 opacity-50 dark:border-surface-800 dark:bg-surface-800/20",
+                    )}
+                  >
+                    <KeyRound
+                      size={16}
+                      className={cn(
+                        "shrink-0",
+                        k.is_active ? "text-brand-500" : "text-surface-400",
+                      )}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm font-medium text-surface-900 dark:text-white">
+                          {k.key_id}
+                        </span>
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-[10px] font-bold",
+                            k.is_active
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
+                              : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+                          )}
+                        >
+                          {k.is_active ? t("system.keyActive") : t("system.keyRevoked")}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-surface-400">
+                        {k.client_id} &middot; {k.scopes.join(", ")}
+                        {k.created_at && (
+                          <>
+                            {" "}
+                            &middot; {t("system.keyCreated")}{" "}
+                            {new Date(k.created_at).toLocaleDateString()}
+                          </>
+                        )}
+                        {k.expires_at ? (
+                          <>
+                            {" "}
+                            &middot; {t("system.keyExpires")}{" "}
+                            {new Date(k.expires_at).toLocaleDateString()}
+                          </>
+                        ) : (
+                          <>
+                            {" "}
+                            &middot; {t("system.keyExpires")}: {t("system.keyNeverExpires")}
+                          </>
+                        )}
+                      </p>
+                    </div>
+                    {k.is_active && (
+                      <button
+                        onClick={() => {
+                          if (window.confirm(t("system.keyRevokeConfirm"))) {
+                            revokeKeyMutation.mutate(k.key_id);
+                          }
+                        }}
+                        disabled={revokeKeyMutation.isPending}
+                        className="shrink-0 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+                      >
+                        {t("system.revokeKey")}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )
+          ) : apiKeys.isLoading ? (
+            <div className="animate-pulse space-y-2">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-14 rounded-lg bg-surface-200 dark:bg-surface-700" />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-red-500">{apiKeys.error?.message}</p>
+          )}
+        </div>
+
+        {/* ── Row 7: User Management ── */}
         <div className="card space-y-4 p-5">
           <div className="flex items-center justify-between">
             <SectionTitle icon={Users}>{t("system.users")}</SectionTitle>
@@ -1066,7 +1335,6 @@ export default function SystemPage() {
                 e.preventDefault();
                 registerMutation.mutate({
                   email: newUser.email,
-                  password: newUser.password,
                   display_name: newUser.display_name || undefined,
                   role: newUser.role,
                   client_id: newUser.client_id || undefined,
@@ -1086,20 +1354,6 @@ export default function SystemPage() {
                     onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                     className="input-field w-full py-1.5 text-sm"
                     placeholder="user@example.com"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-surface-500">
-                    {t("system.userPassword")} *
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={newUser.password}
-                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                    className="input-field w-full py-1.5 text-sm"
-                    placeholder="••••••••"
                   />
                 </div>
                 <div>
@@ -1153,7 +1407,7 @@ export default function SystemPage() {
                     {registerMutation.isPending ? (
                       <RefreshCw size={14} className="mx-auto animate-spin" />
                     ) : (
-                      t("system.addUser")
+                      t("system.sendInvite")
                     )}
                   </button>
                 </div>
@@ -1164,7 +1418,7 @@ export default function SystemPage() {
                 </p>
               )}
               {registerMutation.isSuccess && (
-                <p className="mt-2 text-xs text-emerald-600">User created successfully</p>
+                <p className="mt-2 text-xs text-emerald-600">{t("system.inviteSent")}</p>
               )}
             </form>
           )}
