@@ -16,14 +16,15 @@ import { Header } from "@/components/layout/header";
 import { DataTable } from "@/components/ui/data-table";
 import { Pagination } from "@/components/ui/pagination";
 import { ScoreBadge, DecisionBadge } from "@/components/ui/score-badge";
-import { getReviewQueue, getPhaseProgress, submitFeedback } from "@/lib/api";
+import { getReviewQueue, getPhaseProgress, getScoringConfig, submitFeedback } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { cn, phaseLabel } from "@/lib/utils";
 import { useT } from "@/lib/useT";
 import type { ReviewItem } from "@/types/api";
 import type { TranslationKey } from "@/lib/i18n";
 
-const FRAUD_TYPES: { value: string; key: TranslationKey }[] = [
+// Fallback fraud types (used while scoring config loads)
+const DEFAULT_FRAUD_TYPES: { value: string; key: TranslationKey }[] = [
   { value: "account_takeover", key: "fraudType.account_takeover" },
   { value: "mule_account", key: "fraudType.mule_account" },
   { value: "identity_theft", key: "fraudType.identity_theft" },
@@ -59,6 +60,20 @@ export default function ReviewQueuePage() {
     queryKey: ["phase-progress", viewAsClient],
     queryFn: () => getPhaseProgress(),
   });
+
+  const { data: scoringConfig } = useQuery({
+    queryKey: ["scoring-config", viewAsClient],
+    queryFn: () => getScoringConfig(),
+  });
+
+  // Use client's fraud taxonomy from config, fallback to defaults
+  const FRAUD_TYPES: { value: string; key: TranslationKey }[] = scoringConfig?.fraud_taxonomy
+    ?.length
+    ? scoringConfig.fraud_taxonomy.map((t) => ({
+        value: t.key,
+        key: `fraudType.${t.key}` as TranslationKey,
+      }))
+    : DEFAULT_FRAUD_TYPES;
 
   const feedbackMutation = useMutation({
     mutationFn: ({

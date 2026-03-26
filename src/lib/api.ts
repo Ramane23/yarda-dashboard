@@ -140,8 +140,12 @@ export function submitFeedback(
   const clientId =
     viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
   if (clientId) headers["X-Client-ID"] = clientId;
+  // JWT token (primary auth for dashboard)
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  // Legacy API key fallback
   const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
-  if (apiKey) headers["X-API-Key"] = apiKey;
+  if (apiKey && !token) headers["X-API-Key"] = apiKey;
   return fetch(url.toString(), { method: "POST", headers, body: JSON.stringify(feedback) }).then(
     (r) => {
       if (!r.ok) throw new Error(`Feedback failed: ${r.status}`);
