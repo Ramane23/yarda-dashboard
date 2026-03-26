@@ -265,12 +265,19 @@ const translations = {
   "scoring.networkShort": { en: "network", fr: "réseau" },
 
   // Review / Labeling
-  "review.labelTransaction": { en: "Label Transaction", fr: "Étiqueter la Transaction" },
+  "review.labelTransaction": { en: "Label", fr: "Étiqueter" },
+  "review.step": { en: "Step", fr: "Étape" },
+  "review.verdict": { en: "Verdict", fr: "Verdict" },
   "review.markFraud": { en: "Fraud", fr: "Fraude" },
   "review.markLegitimate": { en: "Legitimate", fr: "Légitime" },
   "review.fraudType": { en: "Fraud Type", fr: "Type de Fraude" },
-  "review.selectFraudType": { en: "Select fraud type", fr: "Sélectionner le type de fraude" },
+  "review.selectFraudType": { en: "Select a fraud type", fr: "Sélectionnez un type de fraude" },
   "review.notes": { en: "Notes", fr: "Notes" },
+  "review.optional": { en: "optional", fr: "optionnel" },
+  "review.notesPlaceholder": {
+    en: "Additional context about this transaction...",
+    fr: "Contexte additionnel sur cette transaction...",
+  },
   "review.submitLabel": { en: "Submit Label", fr: "Soumettre le Label" },
   "review.submitting": { en: "Submitting...", fr: "Envoi..." },
   "review.labelSubmitted": { en: "Label submitted!", fr: "Label soumis !" },
