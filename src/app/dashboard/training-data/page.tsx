@@ -346,8 +346,8 @@ export default function TrainingDataPage() {
           </button>
         </div>
 
-        {/* Tab content */}
-        {tab === "overview" && (
+        {/* Tab content — only one rendered at a time */}
+        {tab === "overview" ? (
           <div className="rounded-xl border border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
             <DataTable
               columns={recentColumns}
@@ -356,12 +356,10 @@ export default function TrainingDataPage() {
               emptyMessage={t("training.noData")}
             />
           </div>
-        )}
-
-        {tab === "table" && (
+        ) : (
           <div className="rounded-xl border border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
-            <div className="overflow-auto" style={{ maxHeight: "70vh" }}>
-              <table className="w-max min-w-full text-left">
+            <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: "60vh" }}>
+              <table className="min-w-max text-left">
                 <thead className="sticky top-0 z-10 bg-surface-50 dark:bg-surface-800">
                   <tr>
                     {/* Meta columns */}
