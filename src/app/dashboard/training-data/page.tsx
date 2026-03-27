@@ -348,16 +348,14 @@ export default function TrainingDataPage() {
 
         {/* Tab content — only one rendered at a time */}
         {tab === "overview" ? (
-          <div className="rounded-xl border border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
-            <DataTable
-              columns={recentColumns}
-              data={data?.recent_labels ?? []}
-              keyFn={(item) => item.request_id}
-              emptyMessage={t("training.noData")}
-            />
-          </div>
+          <DataTable
+            columns={recentColumns}
+            data={data?.recent_labels ?? []}
+            keyFn={(item) => item.request_id}
+            emptyMessage={t("training.noData")}
+          />
         ) : (
-          <div className="rounded-xl border border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
+          <div className="card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-max text-left">
                 <thead className="bg-surface-50 dark:bg-surface-800">
