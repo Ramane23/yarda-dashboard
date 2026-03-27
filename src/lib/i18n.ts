@@ -548,6 +548,9 @@ const translations = {
   "training.auto": { en: "Auto", fr: "Auto" },
   "training.noData": { en: "No labeled data yet", fr: "Aucune donnée étiquetée" },
   "training.labelsPerDay": { en: "labels/day", fr: "labels/jour" },
+  "training.featureMatrix": { en: "Feature Matrix", fr: "Matrice de Features" },
+  "training.triggerTraining": { en: "Train Model", fr: "Entraîner le Modèle" },
+  "training.trainingStarted": { en: "Training...", fr: "Entraînement..." },
 } as const;
 
 export type TranslationKey = keyof typeof translations;
