@@ -83,9 +83,9 @@ export default function LoginPage() {
             <Image
               src="/icon.png"
               alt="YARDA"
-              width={64}
-              height={64}
-              className="h-16 w-16"
+              width={80}
+              height={80}
+              className="h-20 w-20"
               priority
             />
             <h1 className="mt-4 text-2xl font-bold tracking-tight text-white">
