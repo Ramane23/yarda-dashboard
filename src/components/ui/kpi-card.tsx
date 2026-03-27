@@ -20,15 +20,13 @@ export function KpiCard({ title, value, subtitle, icon: Icon, trend, accent }: K
 
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1 space-y-1">
-          <p className="truncate text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
+          <p className="text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
             {title}
           </p>
-          <p className="truncate font-mono text-2xl font-bold text-surface-900 dark:text-white">
+          <p className="font-mono text-2xl font-bold leading-tight text-surface-900 dark:text-white">
             {value}
           </p>
-          {subtitle && (
-            <p className="truncate text-xs text-surface-500 dark:text-surface-400">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-xs text-surface-500 dark:text-surface-400">{subtitle}</p>}
           {trend && (
             <div
               className={cn(
