@@ -165,9 +165,10 @@ export interface PredictionDetail {
   inference_time_ms: number;
   // Step 1: Raw input
   raw_input: Record<string, unknown>;
-  // Step 2: Engineered features
+  // Step 2: Engineered features + lineage
   engineered_features: Record<string, number>;
   feature_names: string[];
+  feature_lineage: Record<string, { source: string; transform: string; description: string }>;
   // Step 3: Model
   model_name: string | null;
   model_version_id: number | null;

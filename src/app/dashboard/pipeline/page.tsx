@@ -456,7 +456,46 @@ export default function PipelinePage() {
                 accent="bg-violet-500"
               >
                 {hasEngineered ? (
-                  <KVTable data={detail.engineered_features} maxRows={12} />
+                  <div className="space-y-1">
+                    {Object.entries(detail.engineered_features)
+                      .slice(0, 15)
+                      .map(([name, value]) => {
+                        const lineage = detail.feature_lineage?.[name];
+                        return (
+                          <div
+                            key={name}
+                            className="group flex items-start gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-surface-50 dark:hover:bg-surface-800/50"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-xs font-semibold text-surface-700 dark:text-surface-200">
+                                  {name}
+                                </span>
+                                {lineage && (
+                                  <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-violet-600 dark:bg-violet-900/40 dark:text-violet-400">
+                                    {lineage.transform}
+                                  </span>
+                                )}
+                              </div>
+                              {lineage && (
+                                <p className="mt-0.5 text-[10px] leading-tight text-surface-400 dark:text-surface-500">
+                                  {lineage.description}
+                                </p>
+                              )}
+                            </div>
+                            <span className="shrink-0 font-mono text-xs tabular-nums text-surface-500 dark:text-surface-400">
+                              {typeof value === "number" ? value.toFixed(4) : String(value)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    {Object.keys(detail.engineered_features).length > 15 && (
+                      <p className="px-2 text-[10px] text-surface-400">
+                        +{Object.keys(detail.engineered_features).length - 15}{" "}
+                        {t("pipeline.moreFeatures")}
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <p className="text-xs italic text-surface-400">{t("pipeline.noData")}</p>
                 )}

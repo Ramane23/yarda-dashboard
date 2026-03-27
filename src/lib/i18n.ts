@@ -489,6 +489,7 @@ const translations = {
   },
   "pipeline.results": { en: "Final Decision", fr: "Décision Finale" },
   "pipeline.resultsDesc": { en: "Weighted scores & decision", fr: "Scores pondérés et décision" },
+  "pipeline.moreFeatures": { en: "more features", fr: "features supplémentaires" },
   "pipeline.noData": {
     en: "No pipeline data stored for this prediction",
     fr: "Aucune donnée de pipeline stockée pour cette prédiction",
