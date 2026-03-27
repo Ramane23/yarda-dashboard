@@ -154,7 +154,7 @@ export default function ReviewQueuePage() {
           <div className="flex flex-col gap-1 py-0.5" style={{ minWidth: 140 }}>
             {factors.slice(0, 3).map((f) => (
               <div key={f.name} className="flex items-center gap-1.5">
-                <div className="h-1 w-12 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
+                <div className="h-1 w-10 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
                   <div
                     className="h-full rounded-full bg-orange-400"
                     style={{ width: `${Math.min(f.value * 100, 100)}%` }}
@@ -162,6 +162,9 @@ export default function ReviewQueuePage() {
                 </div>
                 <span className="truncate font-mono text-[10px] text-surface-500 dark:text-surface-400">
                   {f.name}
+                </span>
+                <span className="font-mono text-[10px] font-semibold text-surface-600 dark:text-surface-300">
+                  {Math.round(f.value * 100)}%
                 </span>
               </div>
             ))}
