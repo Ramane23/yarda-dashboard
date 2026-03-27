@@ -8,6 +8,7 @@ import type {
   PhaseProgress,
   ScoringConfig,
   ProductionModelsResponse,
+  TrainingDataResponse,
   Period,
   Decision,
   SortOrder,
@@ -128,6 +129,10 @@ export interface ImpactData {
 
 export function getImpact(period: Period = "30d") {
   return fetchAPI<ImpactData>(`${BASE}/impact`, { period });
+}
+
+export function getTrainingData(page = 1, pageSize = 50) {
+  return fetchAPI<TrainingDataResponse>(`${BASE}/training-data`, { page, page_size: pageSize });
 }
 
 export function submitFeedback(requestId: string, feedback: { label: string; notes?: string }) {

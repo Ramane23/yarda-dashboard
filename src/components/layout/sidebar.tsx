@@ -13,6 +13,7 @@ import {
   LogOut,
   Monitor,
   Workflow,
+  Database,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -29,6 +30,7 @@ const nav: {
   { href: "/dashboard/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
 
   { href: "/dashboard/review", labelKey: "nav.reviewQueue", icon: ShieldAlert },
+  { href: "/dashboard/training-data", labelKey: "nav.trainingData", icon: Database },
   { href: "/dashboard/models", labelKey: "nav.models", icon: Box, adminOnly: true },
   { href: "/dashboard/pipeline", labelKey: "nav.pipeline", icon: Workflow, adminOnly: true },
   { href: "/dashboard/system", labelKey: "nav.system", icon: Monitor, adminOnly: true },

@@ -72,6 +72,7 @@ const translations = {
   "nav.transactions": { en: "Transactions", fr: "Transactions" },
   "nav.analytics": { en: "Analytics", fr: "Analytique" },
   "nav.reviewQueue": { en: "Review Queue", fr: "File de Révision" },
+  "nav.trainingData": { en: "Training Data", fr: "Données d'Entraînement" },
   "nav.models": { en: "Models", fr: "Modèles" },
   "nav.settings": { en: "Settings", fr: "Paramètres" },
   "nav.signOut": { en: "Sign Out", fr: "Déconnexion" },
@@ -523,6 +524,30 @@ const translations = {
   "pipeline.score": { en: "Score", fr: "Score" },
   "pipeline.weighted": { en: "Weighted", fr: "Pondéré" },
   "pipeline.thresholds": { en: "Thresholds", fr: "Seuils" },
+
+  // Training Data page
+  "training.title": { en: "Training Data", fr: "Données d'Entraînement" },
+  "training.subtitle": {
+    en: "Labeled transactions building the supervised model",
+    fr: "Transactions étiquetées alimentant le modèle supervisé",
+  },
+  "training.totalLabeled": { en: "Total Labeled", fr: "Total Étiquetés" },
+  "training.humanLabeled": { en: "Human Labels", fr: "Labels Humains" },
+  "training.autoLabeled": { en: "Auto Labels", fr: "Labels Auto" },
+  "training.unlabeled": { en: "Unlabeled", fr: "Non Étiquetés" },
+  "training.classesObserved": { en: "Classes Observed", fr: "Classes Observées" },
+  "training.classDistribution": { en: "Class Distribution", fr: "Distribution des Classes" },
+  "training.labelVelocity": { en: "Label Velocity (7d)", fr: "Vélocité Labels (7j)" },
+  "training.recentLabels": { en: "Recent Labels", fr: "Labels Récents" },
+  "training.label": { en: "Label", fr: "Label" },
+  "training.source": { en: "Source", fr: "Source" },
+  "training.originalScore": { en: "Original Score", fr: "Score Original" },
+  "training.originalDecision": { en: "Decision", fr: "Décision" },
+  "training.labeledAt": { en: "Labeled At", fr: "Étiqueté Le" },
+  "training.human": { en: "Human", fr: "Humain" },
+  "training.auto": { en: "Auto", fr: "Auto" },
+  "training.noData": { en: "No labeled data yet", fr: "Aucune donnée étiquetée" },
+  "training.labelsPerDay": { en: "labels/day", fr: "labels/jour" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

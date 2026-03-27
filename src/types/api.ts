@@ -202,6 +202,35 @@ export interface ProductionModelsResponse {
   comet_available: boolean;
 }
 
+export interface LabeledSample {
+  request_id: string;
+  transaction_id: string | null;
+  label: string;
+  is_fraud: boolean;
+  source: "human" | "auto";
+  original_score: number;
+  original_decision: string | null;
+  labeled_at: string | null;
+}
+
+export interface ClassDistribution {
+  label: string;
+  count: number;
+  percent: number;
+}
+
+export interface TrainingDataResponse {
+  client_id: string;
+  total_labeled: number;
+  human_labeled: number;
+  auto_labeled: number;
+  unlabeled: number;
+  classes_observed: number;
+  class_distribution: ClassDistribution[];
+  daily_labels: { date: string; count: number }[];
+  recent_labels: LabeledSample[];
+}
+
 export type Period = "24h" | "7d" | "30d" | "90d";
 export type Decision = "allow" | "review" | "alert" | "block";
 export type SortOrder = "newest" | "oldest" | "score_desc" | "score_asc";
