@@ -18,13 +18,17 @@ export function KpiCard({ title, value, subtitle, icon: Icon, trend, accent }: K
       {/* Top accent */}
       <div className={cn("absolute inset-x-0 top-0 h-0.5", accent || "bg-brand-500")} />
 
-      <div className="flex items-start justify-between">
-        <div className="min-w-0 space-y-1">
-          <p className="text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="truncate text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
             {title}
           </p>
-          <p className="font-mono text-2xl font-bold text-surface-900 dark:text-white">{value}</p>
-          {subtitle && <p className="text-xs text-surface-500 dark:text-surface-400">{subtitle}</p>}
+          <p className="truncate font-mono text-2xl font-bold text-surface-900 dark:text-white">
+            {value}
+          </p>
+          {subtitle && (
+            <p className="truncate text-xs text-surface-500 dark:text-surface-400">{subtitle}</p>
+          )}
           {trend && (
             <div
               className={cn(
