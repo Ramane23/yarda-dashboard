@@ -66,12 +66,18 @@ export interface AnalyticsData {
   timestamp: string;
 }
 
+export interface RiskFactor {
+  name: string;
+  value: number;
+}
+
 export interface ReviewItem {
   request_id: string;
   transaction_id: string | null;
   decision: string | null;
   score: number;
   top_features: string[];
+  risk_factors: RiskFactor[];
   phase: string | null;
   timestamp: string | null;
 }

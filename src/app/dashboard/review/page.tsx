@@ -15,7 +15,7 @@ import {
 import { Header } from "@/components/layout/header";
 import { DataTable } from "@/components/ui/data-table";
 import { Pagination } from "@/components/ui/pagination";
-import { ScoreBadge, DecisionBadge } from "@/components/ui/score-badge";
+import { DecisionBadge } from "@/components/ui/score-badge";
 import { getReviewQueue, getPhaseProgress, getScoringConfig, submitFeedback } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { cn, phaseLabel } from "@/lib/utils";
@@ -136,27 +136,38 @@ export default function ReviewQueuePage() {
     {
       key: "score",
       header: t("review.riskScore"),
-      render: (item: ReviewItem) => <ScoreBadge score={item.score} />,
+      render: (item: ReviewItem) => (
+        <span className="font-mono text-xs font-semibold text-surface-700 dark:text-surface-200">
+          {Math.round(item.score * 100)}%
+        </span>
+      ),
     },
     {
       key: "features",
       header: t("review.topRiskFactors"),
-      render: (item: ReviewItem) => (
-        <div className="flex flex-wrap gap-1">
-          {item.top_features.length > 0 ? (
-            item.top_features.map((f) => (
-              <span
-                key={f}
-                className="rounded-md bg-surface-100 px-1.5 py-0.5 font-mono text-[10px] text-surface-600 dark:bg-surface-800 dark:text-surface-400"
-              >
-                {f}
-              </span>
-            ))
-          ) : (
-            <span className="text-xs text-surface-400">--</span>
-          )}
-        </div>
-      ),
+      render: (item: ReviewItem) => {
+        const factors = item.risk_factors?.length ? item.risk_factors : [];
+        if (factors.length === 0) {
+          return <span className="text-xs text-surface-400">--</span>;
+        }
+        return (
+          <div className="flex flex-col gap-1 py-0.5" style={{ minWidth: 140 }}>
+            {factors.slice(0, 3).map((f) => (
+              <div key={f.name} className="flex items-center gap-1.5">
+                <div className="h-1 w-12 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
+                  <div
+                    className="h-full rounded-full bg-orange-400"
+                    style={{ width: `${Math.min(f.value * 100, 100)}%` }}
+                  />
+                </div>
+                <span className="truncate font-mono text-[10px] text-surface-500 dark:text-surface-400">
+                  {f.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        );
+      },
     },
     {
       key: "phase",
