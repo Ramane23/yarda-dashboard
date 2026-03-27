@@ -56,23 +56,28 @@ export function Sidebar() {
       )}
     >
       {/* Logo */}
-      <div className="flex h-20 items-center gap-3 border-b px-4">
+      <div
+        className={cn(
+          "flex items-center border-b",
+          sidebarOpen ? "h-16 gap-3 px-4" : "h-16 justify-center px-2",
+        )}
+      >
         {sidebarOpen ? (
           <Image
             src="/logo.png"
             alt="YARDA"
-            width={240}
-            height={60}
-            className="h-14 w-auto"
+            width={480}
+            height={136}
+            className="h-10 w-auto object-contain"
             priority
           />
         ) : (
           <Image
             src="/icon.png"
             alt="YARDA"
-            width={48}
-            height={48}
-            className="h-12 w-12 shrink-0"
+            width={356}
+            height={358}
+            className="h-9 w-9 object-contain"
             priority
           />
         )}
