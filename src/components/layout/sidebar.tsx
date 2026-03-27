@@ -96,7 +96,9 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 px-3 py-4">
         {nav
           .filter((item) => {
-            const isAdmin = useAppStore.getState().userRole === "admin" || clientId === "admin";
+            const storeRole = useAppStore.getState().userRole;
+            const lsRole = typeof window !== "undefined" ? localStorage.getItem("user_role") : null;
+            const isAdmin = storeRole === "admin" || lsRole === "admin" || clientId === "admin";
             return !item.adminOnly || isAdmin;
           })
           .map((item) => {

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { LocaleToggle } from "@/components/locale-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useT } from "@/lib/useT";
 
 export default function LoginPage() {
@@ -71,8 +72,9 @@ export default function LoginPage() {
       <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-brand-600/10 blur-[128px]" />
       <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-brand-400/10 blur-[96px]" />
 
-      {/* Locale toggle in top-right */}
-      <div className="absolute right-6 top-6 z-20">
+      {/* Theme + Locale toggle in top-right */}
+      <div className="absolute right-6 top-6 z-20 flex items-center gap-2">
+        <ThemeToggle />
         <LocaleToggle />
       </div>
 
