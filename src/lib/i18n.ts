@@ -478,8 +478,17 @@ const translations = {
     en: "Final feature vector sent to model",
     fr: "Vecteur de features final envoyé au modèle",
   },
-  "pipeline.results": { en: "Results", fr: "Résultats" },
-  "pipeline.resultsDesc": { en: "Scores, weights & decision", fr: "Scores, poids et décision" },
+  "pipeline.modelOutput": { en: "Model Output", fr: "Sortie Modèle" },
+  "pipeline.modelOutputDesc": {
+    en: "Raw scores & risk factors",
+    fr: "Scores bruts et facteurs de risque",
+  },
+  "pipeline.riskFactors": {
+    en: "Risk Factor Contributions",
+    fr: "Contributions des Facteurs de Risque",
+  },
+  "pipeline.results": { en: "Final Decision", fr: "Décision Finale" },
+  "pipeline.resultsDesc": { en: "Weighted scores & decision", fr: "Scores pondérés et décision" },
   "pipeline.noData": {
     en: "No pipeline data stored for this prediction",
     fr: "Aucune donnée de pipeline stockée pour cette prédiction",

@@ -490,9 +490,73 @@ export default function PipelinePage() {
 
               <StepArrow />
 
-              {/* Step 4: Results */}
+              {/* Step 4: Model Output */}
               <StepCard
                 stepNumber={4}
+                icon={Gauge}
+                title={t("pipeline.modelOutput")}
+                subtitle={t("pipeline.modelOutputDesc")}
+                accent="bg-orange-500"
+              >
+                <div className="space-y-4">
+                  {/* Raw scores */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg border border-violet-200 bg-violet-50/50 p-3 dark:border-violet-800 dark:bg-violet-950/20">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-500">
+                        Anomaly Score
+                      </p>
+                      <p className="mt-1 font-mono text-xl font-bold text-violet-700 dark:text-violet-300">
+                        {detail.anomaly_score.toFixed(4)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-brand-200 bg-brand-50/50 p-3 dark:border-brand-800 dark:bg-brand-950/20">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-500">
+                        ML Score
+                      </p>
+                      <p className="mt-1 font-mono text-xl font-bold text-brand-700 dark:text-brand-300">
+                        {detail.ml_score.toFixed(4)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Feature contributions (risk factors) */}
+                  {detail.feature_contributions &&
+                    Object.keys(detail.feature_contributions).length > 0 && (
+                      <div>
+                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-surface-400">
+                          {t("pipeline.riskFactors")}
+                        </p>
+                        <div className="space-y-1.5">
+                          {Object.entries(detail.feature_contributions)
+                            .sort(([, a], [, b]) => b - a)
+                            .slice(0, 12)
+                            .map(([name, value]) => (
+                              <div key={name} className="flex items-center gap-2">
+                                <span className="w-36 truncate font-mono text-[10px] text-surface-500 dark:text-surface-400">
+                                  {name}
+                                </span>
+                                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
+                                  <div
+                                    className="h-full rounded-full bg-orange-400 dark:bg-orange-500"
+                                    style={{ width: `${Math.min(value * 100, 100)}%` }}
+                                  />
+                                </div>
+                                <span className="w-10 text-right font-mono text-[10px] font-semibold text-surface-600 dark:text-surface-300">
+                                  {(value * 100).toFixed(0)}%
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </StepCard>
+
+              <StepArrow />
+
+              {/* Step 5: Final Decision */}
+              <StepCard
+                stepNumber={5}
                 icon={Shield}
                 title={t("pipeline.results")}
                 subtitle={t("pipeline.resultsDesc")}

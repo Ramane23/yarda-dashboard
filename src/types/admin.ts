@@ -171,11 +171,13 @@ export interface PredictionDetail {
   // Step 3: Model
   model_name: string | null;
   model_version_id: number | null;
-  // Step 4: Results
-  decision: string | null;
-  final_score: number;
+  // Step 4: Model output
   anomaly_score: number;
   ml_score: number;
+  feature_contributions: Record<string, number>;
+  // Step 5: Decision
+  decision: string | null;
+  final_score: number;
   weights: Record<string, number>;
   thresholds: Record<string, number>;
   phase: string | null;
