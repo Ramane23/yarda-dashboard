@@ -186,6 +186,10 @@ export interface PredictionDetail {
   gnn_score: number;
   network_analysis: NetworkAnalysis | null;
   feature_contributions: Record<string, number>;
+  // Step 4b: Multi-class predictions
+  predicted_label: string | null;
+  label_probabilities: Record<string, number>;
+  trained_classes: string[];
   // Step 5: Decision
   decision: string | null;
   final_score: number;

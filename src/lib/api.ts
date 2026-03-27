@@ -130,10 +130,7 @@ export function getImpact(period: Period = "30d") {
   return fetchAPI<ImpactData>(`${BASE}/impact`, { period });
 }
 
-export function submitFeedback(
-  requestId: string,
-  feedback: { is_fraud: boolean; fraud_type?: string; notes?: string },
-) {
+export function submitFeedback(requestId: string, feedback: { label: string; notes?: string }) {
   const url = new URL(`/api/v1/predictions/${requestId}/feedback`, window.location.origin);
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   const viewAs = typeof window !== "undefined" ? localStorage.getItem("view_as_client") : null;

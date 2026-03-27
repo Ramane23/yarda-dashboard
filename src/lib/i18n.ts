@@ -268,7 +268,7 @@ const translations = {
   // Review / Labeling
   "review.labelTransaction": { en: "Label", fr: "Étiqueter" },
   "review.step": { en: "Step", fr: "Étape" },
-  "review.verdict": { en: "Verdict", fr: "Verdict" },
+  "review.chooseLabel": { en: "Choose Label", fr: "Choisir le Label" },
   "review.markFraud": { en: "Fraud", fr: "Fraude" },
   "review.markLegitimate": { en: "Legitimate", fr: "Légitime" },
   "review.fraudType": { en: "Fraud Type", fr: "Type de Fraude" },
@@ -494,6 +494,10 @@ const translations = {
   "pipeline.nodeRisk": { en: "Node Risk", fr: "Risque Noeud" },
   "pipeline.connectedAlerts": { en: "Connected Alerts", fr: "Alertes Liées" },
   "pipeline.accounts": { en: "accounts", fr: "comptes" },
+  "pipeline.labelProbabilities": {
+    en: "Label Probabilities (Multi-Class)",
+    fr: "Probabilités par Label (Multi-Classe)",
+  },
   "pipeline.riskFactors": {
     en: "Risk Factor Contributions",
     fr: "Contributions des Facteurs de Risque",

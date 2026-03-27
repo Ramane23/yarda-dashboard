@@ -603,6 +603,51 @@ export default function PipelinePage() {
                     </div>
                   )}
 
+                  {/* Label probabilities (multi-class output) */}
+                  {detail.label_probabilities &&
+                    Object.keys(detail.label_probabilities).length > 0 && (
+                      <div>
+                        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-surface-400">
+                          {t("pipeline.labelProbabilities")}
+                        </p>
+                        <div className="space-y-1.5">
+                          {Object.entries(detail.label_probabilities)
+                            .sort(([, a], [, b]) => b - a)
+                            .map(([label, prob]) => {
+                              const isLegit = label === "legitimate";
+                              const barColor = isLegit
+                                ? "bg-emerald-400 dark:bg-emerald-500"
+                                : "bg-red-400 dark:bg-red-500";
+                              const isTop = label === detail.predicted_label;
+                              return (
+                                <div key={label} className="flex items-center gap-2">
+                                  <span
+                                    className={cn(
+                                      "w-36 truncate text-[10px]",
+                                      isTop
+                                        ? "font-bold text-surface-700 dark:text-surface-200"
+                                        : "font-mono text-surface-500 dark:text-surface-400",
+                                    )}
+                                  >
+                                    {label}
+                                    {isTop ? " ←" : ""}
+                                  </span>
+                                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
+                                    <div
+                                      className={cn("h-full rounded-full", barColor)}
+                                      style={{ width: `${Math.round(prob * 100)}%` }}
+                                    />
+                                  </div>
+                                  <span className="w-12 text-right font-mono text-[10px] font-semibold text-surface-600 dark:text-surface-300">
+                                    {(prob * 100).toFixed(1)}%
+                                  </span>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
+
                   {/* Feature contributions (risk factors) */}
                   {detail.feature_contributions &&
                     Object.keys(detail.feature_contributions).length > 0 && (

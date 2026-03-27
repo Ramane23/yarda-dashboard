@@ -45,10 +45,9 @@ export default function ReviewQueuePage() {
   const [page, setPage] = useState(1);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [labelState, setLabelState] = useState<{
-    isFraud: boolean | null;
     fraudType: string;
     notes: string;
-  }>({ isFraud: null, fraudType: "", notes: "" });
+  }>({ fraudType: "", notes: "" });
   const [successId, setSuccessId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -81,12 +80,12 @@ export default function ReviewQueuePage() {
       feedback,
     }: {
       requestId: string;
-      feedback: { is_fraud: boolean; fraud_type?: string; notes?: string };
+      feedback: { label: string; notes?: string };
     }) => submitFeedback(requestId, feedback),
     onSuccess: (_data, variables) => {
       setSuccessId(variables.requestId);
       setExpandedRow(null);
-      setLabelState({ isFraud: null, fraudType: "", notes: "" });
+      setLabelState({ fraudType: "", notes: "" });
       queryClient.invalidateQueries({ queryKey: ["review-queue"] });
       queryClient.invalidateQueries({ queryKey: ["phase-progress"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
@@ -97,20 +96,19 @@ export default function ReviewQueuePage() {
   const handleToggleRow = (requestId: string) => {
     if (expandedRow === requestId) {
       setExpandedRow(null);
-      setLabelState({ isFraud: null, fraudType: "", notes: "" });
+      setLabelState({ fraudType: "", notes: "" });
     } else {
       setExpandedRow(requestId);
-      setLabelState({ isFraud: null, fraudType: "", notes: "" });
+      setLabelState({ fraudType: "", notes: "" });
     }
   };
 
   const handleSubmitLabel = (requestId: string) => {
-    if (labelState.isFraud === null) return;
+    if (!labelState.fraudType) return;
     feedbackMutation.mutate({
       requestId,
       feedback: {
-        is_fraud: labelState.isFraud,
-        fraud_type: labelState.isFraud ? labelState.fraudType || undefined : undefined,
+        label: labelState.fraudType,
         notes: labelState.notes || undefined,
       },
     });
@@ -296,92 +294,79 @@ export default function ReviewQueuePage() {
                   className="border-t border-surface-100 bg-surface-50/50 px-4 py-5 dark:border-surface-800 dark:bg-surface-900/50"
                 >
                   <div className="mx-auto max-w-2xl space-y-5">
-                    {/* Step 1: Fraud or Legitimate */}
+                    {/* Step 1: Choose label from taxonomy */}
                     <div>
                       <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-surface-400">
-                        {t("review.step")} 1 — {t("review.verdict")}
+                        {t("review.step")} 1 — {t("review.chooseLabel")}
                       </p>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() =>
-                            setLabelState((s) => ({ ...s, isFraud: true, fraudType: "" }))
-                          }
-                          className={cn(
-                            "flex items-center gap-2 rounded-xl border-2 px-5 py-2.5 text-sm font-semibold transition-all",
-                            labelState.isFraud === true
-                              ? "border-red-400 bg-red-50 text-red-700 shadow-md dark:border-red-600 dark:bg-red-950/40 dark:text-red-400"
-                              : "border-surface-200 text-surface-500 hover:border-red-200 hover:text-red-600 dark:border-surface-700 dark:text-surface-400 dark:hover:border-red-800",
-                          )}
-                        >
-                          <XCircle size={16} />
-                          {t("review.markFraud")}
-                        </button>
-                        <button
-                          onClick={() =>
-                            setLabelState((s) => ({
-                              ...s,
-                              isFraud: false,
-                              fraudType: "",
-                            }))
-                          }
-                          className={cn(
-                            "flex items-center gap-2 rounded-xl border-2 px-5 py-2.5 text-sm font-semibold transition-all",
-                            labelState.isFraud === false
-                              ? "border-emerald-400 bg-emerald-50 text-emerald-700 shadow-md dark:border-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
-                              : "border-surface-200 text-surface-500 hover:border-emerald-200 hover:text-emerald-600 dark:border-surface-700 dark:text-surface-400 dark:hover:border-emerald-800",
-                          )}
-                        >
-                          <CheckCircle2 size={16} />
-                          {t("review.markLegitimate")}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Step 2: Fraud type taxonomy (only if fraud) */}
-                    {labelState.isFraud === true && (
-                      <div>
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-surface-400">
-                          {t("review.step")} 2 — {t("review.fraudType")}
-                        </p>
-                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                          {fraudTaxonomy.map((ft) => (
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {fraudTaxonomy.map((ft) => {
+                          const isLegit = ft.key === "legitimate";
+                          const isSelected = labelState.fraudType === ft.key;
+                          return (
                             <button
                               key={ft.key}
                               onClick={() => setLabelState((s) => ({ ...s, fraudType: ft.key }))}
                               className={cn(
                                 "group relative rounded-lg border p-3 text-left transition-all",
-                                labelState.fraudType === ft.key
-                                  ? "border-red-300 bg-red-50 shadow-sm dark:border-red-700 dark:bg-red-950/30"
-                                  : "border-surface-200 hover:border-red-200 hover:bg-surface-50 dark:border-surface-700 dark:hover:border-red-800 dark:hover:bg-surface-800/50",
+                                isSelected && isLegit
+                                  ? "border-emerald-300 bg-emerald-50 shadow-sm dark:border-emerald-700 dark:bg-emerald-950/30"
+                                  : isSelected && !isLegit
+                                    ? "border-red-300 bg-red-50 shadow-sm dark:border-red-700 dark:bg-red-950/30"
+                                    : isLegit
+                                      ? "border-surface-200 hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-surface-700 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/20"
+                                      : "border-surface-200 hover:border-red-200 hover:bg-surface-50 dark:border-surface-700 dark:hover:border-red-800 dark:hover:bg-surface-800/50",
                               )}
                             >
-                              <span
-                                className={cn(
-                                  "block text-xs font-semibold",
-                                  labelState.fraudType === ft.key
-                                    ? "text-red-700 dark:text-red-400"
-                                    : "text-surface-700 dark:text-surface-300",
+                              <div className="flex items-center gap-1.5">
+                                {isLegit ? (
+                                  <CheckCircle2
+                                    size={14}
+                                    className={cn(
+                                      isSelected
+                                        ? "text-emerald-600 dark:text-emerald-400"
+                                        : "text-surface-400",
+                                    )}
+                                  />
+                                ) : (
+                                  <XCircle
+                                    size={14}
+                                    className={cn(
+                                      isSelected
+                                        ? "text-red-600 dark:text-red-400"
+                                        : "text-surface-400",
+                                    )}
+                                  />
                                 )}
-                              >
-                                {ft.label}
-                              </span>
+                                <span
+                                  className={cn(
+                                    "text-xs font-semibold",
+                                    isSelected && isLegit
+                                      ? "text-emerald-700 dark:text-emerald-400"
+                                      : isSelected && !isLegit
+                                        ? "text-red-700 dark:text-red-400"
+                                        : "text-surface-700 dark:text-surface-300",
+                                  )}
+                                >
+                                  {ft.label}
+                                </span>
+                              </div>
                               {ft.description && (
                                 <span className="mt-0.5 block text-[10px] leading-tight text-surface-400 dark:text-surface-500">
                                   {ft.description}
                                 </span>
                               )}
                             </button>
-                          ))}
-                        </div>
+                          );
+                        })}
                       </div>
-                    )}
+                    </div>
 
-                    {/* Step 3: Notes (optional) */}
-                    {labelState.isFraud !== null && (
+                    {/* Step 2: Notes (optional) */}
+                    {labelState.fraudType && (
                       <div>
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-surface-400">
-                          {labelState.isFraud ? `${t("review.step")} 3` : `${t("review.step")} 2`} —{" "}
-                          {t("review.notes")} ({t("review.optional")})
+                          {t("review.step")} 2 — {t("review.notes")} ({t("review.optional")})
                         </p>
                         <textarea
                           value={labelState.notes}
@@ -394,15 +379,11 @@ export default function ReviewQueuePage() {
                     )}
 
                     {/* Submit */}
-                    {labelState.isFraud !== null && (
+                    {labelState.fraudType && (
                       <div className="flex items-center gap-3 border-t border-surface-100 pt-4 dark:border-surface-800">
                         <button
                           onClick={() => handleSubmitLabel(item.request_id)}
-                          disabled={
-                            labelState.isFraud === null ||
-                            (labelState.isFraud && !labelState.fraudType) ||
-                            feedbackMutation.isPending
-                          }
+                          disabled={!labelState.fraudType || feedbackMutation.isPending}
                           className="btn-primary flex items-center gap-2 px-5 py-2.5 text-sm font-semibold disabled:opacity-40"
                         >
                           <Send size={14} />
@@ -410,11 +391,6 @@ export default function ReviewQueuePage() {
                             ? t("review.submitting")
                             : t("review.submitLabel")}
                         </button>
-                        {labelState.isFraud && !labelState.fraudType && (
-                          <span className="text-xs text-amber-600 dark:text-amber-400">
-                            {t("review.selectFraudType")}
-                          </span>
-                        )}
                       </div>
                     )}
                   </div>
