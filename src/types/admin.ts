@@ -157,6 +157,14 @@ export interface ExperimentList {
   experiments: ExperimentInfo[];
 }
 
+export interface NetworkAnalysis {
+  ring_id: string | null;
+  ring_size: number;
+  node_risk: number;
+  pattern: string | null;
+  connected_alerts: string[];
+}
+
 export interface PredictionDetail {
   request_id: string;
   transaction_id: string | null;
@@ -175,6 +183,8 @@ export interface PredictionDetail {
   // Step 4: Model output
   anomaly_score: number;
   ml_score: number;
+  gnn_score: number;
+  network_analysis: NetworkAnalysis | null;
   feature_contributions: Record<string, number>;
   // Step 5: Decision
   decision: string | null;

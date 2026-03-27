@@ -538,11 +538,11 @@ export default function PipelinePage() {
                 accent="bg-orange-500"
               >
                 <div className="space-y-4">
-                  {/* Raw scores */}
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Raw scores — all 3 models */}
+                  <div className="grid grid-cols-3 gap-3">
                     <div className="rounded-lg border border-violet-200 bg-violet-50/50 p-3 dark:border-violet-800 dark:bg-violet-950/20">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-500">
-                        Anomaly Score
+                        {t("pipeline.anomalyScore")}
                       </p>
                       <p className="mt-1 font-mono text-xl font-bold text-violet-700 dark:text-violet-300">
                         {detail.anomaly_score.toFixed(4)}
@@ -550,13 +550,58 @@ export default function PipelinePage() {
                     </div>
                     <div className="rounded-lg border border-brand-200 bg-brand-50/50 p-3 dark:border-brand-800 dark:bg-brand-950/20">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-500">
-                        ML Score
+                        {t("pipeline.mlScore")}
                       </p>
                       <p className="mt-1 font-mono text-xl font-bold text-brand-700 dark:text-brand-300">
                         {detail.ml_score.toFixed(4)}
                       </p>
                     </div>
+                    <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-800 dark:bg-amber-950/20">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-500">
+                        {t("pipeline.gnnScore")}
+                      </p>
+                      <p className="mt-1 font-mono text-xl font-bold text-amber-700 dark:text-amber-300">
+                        {detail.gnn_score.toFixed(4)}
+                      </p>
+                    </div>
                   </div>
+
+                  {/* GNN Network Analysis (when available) */}
+                  {detail.network_analysis && detail.network_analysis.ring_id && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50/30 p-3 dark:border-amber-800 dark:bg-amber-950/20">
+                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-amber-500">
+                        {t("pipeline.networkAnalysis")}
+                      </p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                        <span className="text-surface-400">{t("pipeline.ringId")}</span>
+                        <span className="font-mono font-semibold text-surface-700 dark:text-surface-200">
+                          {detail.network_analysis.ring_id}
+                        </span>
+                        <span className="text-surface-400">{t("pipeline.ringSize")}</span>
+                        <span className="font-mono font-semibold text-surface-700 dark:text-surface-200">
+                          {detail.network_analysis.ring_size} {t("pipeline.accounts")}
+                        </span>
+                        <span className="text-surface-400">{t("pipeline.pattern")}</span>
+                        <span className="font-mono font-semibold text-amber-600 dark:text-amber-400">
+                          {detail.network_analysis.pattern || "--"}
+                        </span>
+                        <span className="text-surface-400">{t("pipeline.nodeRisk")}</span>
+                        <span className="font-mono font-semibold text-surface-700 dark:text-surface-200">
+                          {(detail.network_analysis.node_risk * 100).toFixed(0)}%
+                        </span>
+                        {detail.network_analysis.connected_alerts.length > 0 && (
+                          <>
+                            <span className="text-surface-400">
+                              {t("pipeline.connectedAlerts")}
+                            </span>
+                            <span className="font-mono text-[10px] text-surface-500">
+                              {detail.network_analysis.connected_alerts.slice(0, 5).join(", ")}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Feature contributions (risk factors) */}
                   {detail.feature_contributions &&
@@ -618,6 +663,12 @@ export default function PipelinePage() {
                       score={detail.ml_score}
                       weight={detail.weights.ml || 0}
                       color="bg-brand-500"
+                    />
+                    <ScoreBar
+                      label="GNN Network"
+                      score={detail.gnn_score}
+                      weight={detail.weights.gnn || 0}
+                      color="bg-amber-500"
                     />
                   </div>
 

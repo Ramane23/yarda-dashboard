@@ -79,6 +79,15 @@ export default function TransactionsPage() {
       ),
     },
     {
+      key: "gnn",
+      header: t("transactions.gnnScore"),
+      render: (item: TransactionItem) => (
+        <span className="font-mono text-xs text-surface-500 dark:text-surface-400">
+          {item.gnn_score.toFixed(3)}
+        </span>
+      ),
+    },
+    {
       key: "latency",
       header: t("transactions.latency"),
       render: (item: TransactionItem) => (

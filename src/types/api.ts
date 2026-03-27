@@ -28,6 +28,7 @@ export interface TransactionItem {
   score: number;
   anomaly_score: number;
   ml_score: number;
+  gnn_score: number;
   inference_time_ms: number;
   ground_truth: Record<string, unknown> | null;
   phase: string | null;
