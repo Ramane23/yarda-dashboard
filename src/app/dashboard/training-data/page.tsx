@@ -180,7 +180,7 @@ export default function TrainingDataPage() {
   return (
     <>
       <Header title={t("training.title")} />
-      <div className="space-y-6 p-6">
+      <div className="flex-1 space-y-6 overflow-auto p-6">
         {/* KPI cards + Trigger training button */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="grid flex-1 grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -358,12 +358,12 @@ export default function TrainingDataPage() {
           </div>
         ) : (
           <div className="rounded-xl border border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
-            <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: "60vh" }}>
+            <div className="overflow-x-auto">
               <table className="min-w-max text-left">
-                <thead className="sticky top-0 z-10 bg-surface-50 dark:bg-surface-800">
+                <thead className="bg-surface-50 dark:bg-surface-800">
                   <tr>
                     {/* Meta columns */}
-                    <th className="sticky left-0 z-20 bg-surface-50 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-surface-500 dark:bg-surface-800">
+                    <th className="sticky left-0 z-10 bg-surface-50 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-surface-500 dark:bg-surface-800">
                       {t("training.label")}
                     </th>
                     <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-surface-500">
