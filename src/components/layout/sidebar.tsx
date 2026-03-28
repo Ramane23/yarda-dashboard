@@ -59,7 +59,7 @@ export function Sidebar() {
       <div
         className={cn(
           "flex items-center border-b",
-          sidebarOpen ? "h-16 justify-center px-4" : "h-16 justify-center px-2",
+          sidebarOpen ? "h-16 gap-3 pl-6 pr-2" : "h-16 justify-center px-2",
         )}
       >
         {sidebarOpen ? (

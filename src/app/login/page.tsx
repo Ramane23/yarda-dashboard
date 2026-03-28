@@ -63,14 +63,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-950">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-50 dark:bg-surface-950">
       {/* Background grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-950/50 via-transparent to-surface-950" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:64px_64px] dark:bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-100/50 via-transparent to-surface-50 dark:from-brand-950/50 dark:via-transparent dark:to-surface-950" />
 
       {/* Glow orbs */}
-      <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-brand-600/10 blur-[128px]" />
-      <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-brand-400/10 blur-[96px]" />
+      <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-brand-400/10 blur-[128px] dark:bg-brand-600/10" />
+      <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-brand-300/10 blur-[96px] dark:bg-brand-400/10" />
 
       {/* Theme + Locale toggle in top-right */}
       <div className="absolute right-6 top-6 z-20 flex items-center gap-2">
@@ -79,7 +79,7 @@ export default function LoginPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-sm px-4">
-        <div className="rounded-2xl border border-surface-800/50 bg-surface-900/80 p-8 shadow-2xl backdrop-blur-xl">
+        <div className="rounded-2xl border border-surface-200 bg-white/80 p-8 shadow-2xl backdrop-blur-xl dark:border-surface-800/50 dark:bg-surface-900/80">
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center">
             <Image
@@ -90,17 +90,17 @@ export default function LoginPage() {
               className="h-20 w-20"
               priority
             />
-            <h1 className="mt-4 text-2xl font-bold tracking-tight text-white">
+            <h1 className="mt-4 text-2xl font-bold tracking-tight text-surface-900 dark:text-white">
               {t("login.title")}
             </h1>
-            <p className="mt-1 text-center text-xs font-medium uppercase tracking-widest text-surface-400">
+            <p className="mt-1 text-center text-xs font-medium uppercase tracking-widest text-surface-500 dark:text-surface-400">
               {t("app.subtitle")}
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-surface-400">
+              <label className="mb-1.5 block text-xs font-semibold text-surface-600 dark:text-surface-400">
                 {t("login.email")}
               </label>
               <input
@@ -111,12 +111,12 @@ export default function LoginPage() {
                   setError("");
                 }}
                 placeholder={t("login.emailPlaceholder")}
-                className="w-full rounded-lg border border-surface-700 bg-surface-800/50 px-3 py-2.5 text-sm text-white placeholder:text-surface-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                className="w-full rounded-lg border border-surface-300 bg-surface-50 px-3 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-surface-700 dark:bg-surface-800/50 dark:text-white dark:placeholder:text-surface-500"
                 autoComplete="email"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-surface-400">
+              <label className="mb-1.5 block text-xs font-semibold text-surface-600 dark:text-surface-400">
                 {t("login.password")}
               </label>
               <input
@@ -127,7 +127,7 @@ export default function LoginPage() {
                   setError("");
                 }}
                 placeholder={t("login.passwordPlaceholder")}
-                className="w-full rounded-lg border border-surface-700 bg-surface-800/50 px-3 py-2.5 text-sm text-white placeholder:text-surface-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                className="w-full rounded-lg border border-surface-300 bg-surface-50 px-3 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-surface-700 dark:bg-surface-800/50 dark:text-white dark:placeholder:text-surface-500"
                 autoComplete="current-password"
               />
             </div>
@@ -135,14 +135,14 @@ export default function LoginPage() {
             <div className="flex justify-end">
               <Link
                 href="/set-password?mode=forgot"
-                className="text-xs text-brand-400 transition-colors hover:text-brand-300"
+                className="text-xs text-brand-600 transition-colors hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
               >
                 {t("login.forgotPassword")}
               </Link>
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 rounded-lg bg-red-950/30 px-3 py-2 text-xs font-medium text-red-400">
+              <div className="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400">
                 <AlertCircle size={14} />
                 {error}
               </div>

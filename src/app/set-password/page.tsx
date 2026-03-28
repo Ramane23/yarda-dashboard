@@ -7,6 +7,7 @@ import Link from "next/link";
 import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 import { useT } from "@/lib/useT";
 import { LocaleToggle } from "@/components/locale-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function SetPasswordContent() {
   const searchParams = useSearchParams();
@@ -84,20 +85,28 @@ function SetPasswordContent() {
         ? t("setPassword.resetTitle")
         : t("setPassword.title");
 
-  return (
-    // Same visual wrapper as login page: dark bg, grid, glow orbs, centered card
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-950">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-950/50 via-transparent to-surface-950" />
-      <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-brand-600/10 blur-[128px]" />
-      <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-brand-400/10 blur-[96px]" />
+  const inputClass =
+    "w-full rounded-lg border border-surface-300 bg-surface-50 px-3 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-surface-700 dark:bg-surface-800/50 dark:text-white dark:placeholder:text-surface-500";
+  const labelClass = "mb-1.5 block text-xs font-semibold text-surface-600 dark:text-surface-400";
+  const errorClass =
+    "flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400";
+  const linkClass =
+    "flex items-center justify-center gap-1.5 text-xs text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300";
 
-      <div className="absolute right-6 top-6 z-20">
+  return (
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-50 dark:bg-surface-950">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:64px_64px] dark:bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-100/50 via-transparent to-surface-50 dark:from-brand-950/50 dark:via-transparent dark:to-surface-950" />
+      <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-brand-400/10 blur-[128px] dark:bg-brand-600/10" />
+      <div className="absolute bottom-1/4 right-1/4 h-64 w-64 rounded-full bg-brand-300/10 blur-[96px] dark:bg-brand-400/10" />
+
+      <div className="absolute right-6 top-6 z-20 flex items-center gap-2">
+        <ThemeToggle />
         <LocaleToggle />
       </div>
 
       <div className="relative z-10 w-full max-w-sm px-4">
-        <div className="rounded-2xl border border-surface-800/50 bg-surface-900/80 p-8 shadow-2xl backdrop-blur-xl">
+        <div className="rounded-2xl border border-surface-200 bg-white/80 p-8 shadow-2xl backdrop-blur-xl dark:border-surface-800/50 dark:bg-surface-900/80">
           <div className="mb-8 flex flex-col items-center">
             <Image
               src="/icon.png"
@@ -107,14 +116,18 @@ function SetPasswordContent() {
               className="h-20 w-20"
               priority
             />
-            <h1 className="mt-4 text-2xl font-bold tracking-tight text-white">{title}</h1>
+            <h1 className="mt-4 text-2xl font-bold tracking-tight text-surface-900 dark:text-white">
+              {title}
+            </h1>
           </div>
 
           {/* Success state */}
           {success && (
             <div className="space-y-4 text-center">
               <CheckCircle2 size={48} className="mx-auto text-emerald-500" />
-              <p className="text-sm text-emerald-400">{t("setPassword.success")}</p>
+              <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                {t("setPassword.success")}
+              </p>
               <Link
                 href="/login"
                 className="block w-full rounded-lg bg-gradient-to-r from-brand-600 to-brand-500 py-2.5 text-center text-sm font-semibold text-white shadow-lg shadow-brand-500/25"
@@ -128,11 +141,10 @@ function SetPasswordContent() {
           {emailSent && !success && (
             <div className="space-y-4 text-center">
               <CheckCircle2 size={48} className="mx-auto text-emerald-500" />
-              <p className="text-sm text-surface-300">{t("setPassword.emailSent")}</p>
-              <Link
-                href="/login"
-                className="mt-4 flex items-center justify-center gap-1.5 text-xs text-brand-400 hover:text-brand-300"
-              >
+              <p className="text-sm text-surface-600 dark:text-surface-300">
+                {t("setPassword.emailSent")}
+              </p>
+              <Link href="/login" className={linkClass}>
                 <ArrowLeft size={12} /> {t("setPassword.backToLogin")}
               </Link>
             </div>
@@ -142,9 +154,7 @@ function SetPasswordContent() {
           {mode === "forgot" && !emailSent && !success && (
             <form onSubmit={handleForgotSubmit} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-surface-400">
-                  {t("login.email")}
-                </label>
+                <label className={labelClass}>{t("login.email")}</label>
                 <input
                   type="email"
                   required
@@ -154,11 +164,11 @@ function SetPasswordContent() {
                     setError("");
                   }}
                   placeholder={t("setPassword.enterEmail")}
-                  className="w-full rounded-lg border border-surface-700 bg-surface-800/50 px-3 py-2.5 text-sm text-white placeholder:text-surface-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                  className={inputClass}
                 />
               </div>
               {error && (
-                <div className="flex items-center gap-2 rounded-lg bg-red-950/30 px-3 py-2 text-xs font-medium text-red-400">
+                <div className={errorClass}>
                   <AlertCircle size={14} /> {error}
                 </div>
               )}
@@ -169,10 +179,7 @@ function SetPasswordContent() {
               >
                 {loading ? t("setPassword.sending") : t("setPassword.sendReset")}
               </button>
-              <Link
-                href="/login"
-                className="flex items-center justify-center gap-1.5 text-xs text-brand-400 hover:text-brand-300"
-              >
+              <Link href="/login" className={linkClass}>
                 <ArrowLeft size={12} /> {t("setPassword.backToLogin")}
               </Link>
             </form>
@@ -182,9 +189,7 @@ function SetPasswordContent() {
           {mode !== "forgot" && token && !success && (
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-surface-400">
-                  {t("setPassword.newPassword")}
-                </label>
+                <label className={labelClass}>{t("setPassword.newPassword")}</label>
                 <input
                   type="password"
                   required
@@ -195,13 +200,11 @@ function SetPasswordContent() {
                     setError("");
                   }}
                   placeholder="••••••••"
-                  className="w-full rounded-lg border border-surface-700 bg-surface-800/50 px-3 py-2.5 text-sm text-white placeholder:text-surface-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-surface-400">
-                  {t("setPassword.confirm")}
-                </label>
+                <label className={labelClass}>{t("setPassword.confirm")}</label>
                 <input
                   type="password"
                   required
@@ -212,11 +215,11 @@ function SetPasswordContent() {
                     setError("");
                   }}
                   placeholder="••••••••"
-                  className="w-full rounded-lg border border-surface-700 bg-surface-800/50 px-3 py-2.5 text-sm text-white placeholder:text-surface-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                  className={inputClass}
                 />
               </div>
               {error && (
-                <div className="flex items-center gap-2 rounded-lg bg-red-950/30 px-3 py-2 text-xs font-medium text-red-400">
+                <div className={errorClass}>
                   <AlertCircle size={14} /> {error}
                 </div>
               )}
@@ -227,10 +230,7 @@ function SetPasswordContent() {
               >
                 {loading ? t("setPassword.submitting") : t("setPassword.submit")}
               </button>
-              <Link
-                href="/login"
-                className="flex items-center justify-center gap-1.5 text-xs text-brand-400 hover:text-brand-300"
-              >
+              <Link href="/login" className={linkClass}>
                 <ArrowLeft size={12} /> {t("setPassword.backToLogin")}
               </Link>
             </form>
@@ -240,11 +240,10 @@ function SetPasswordContent() {
           {mode !== "forgot" && !token && !success && (
             <div className="space-y-4 text-center">
               <AlertCircle size={48} className="mx-auto text-red-500" />
-              <p className="text-sm text-red-400">{t("setPassword.invalidToken")}</p>
-              <Link
-                href="/login"
-                className="flex items-center justify-center gap-1.5 text-xs text-brand-400 hover:text-brand-300"
-              >
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {t("setPassword.invalidToken")}
+              </p>
+              <Link href="/login" className={linkClass}>
                 <ArrowLeft size={12} /> {t("setPassword.backToLogin")}
               </Link>
             </div>
@@ -259,8 +258,8 @@ export default function SetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-surface-950">
-          <div className="text-white">Loading...</div>
+        <div className="flex min-h-screen items-center justify-center bg-surface-50 dark:bg-surface-950">
+          <div className="text-surface-900 dark:text-white">Loading...</div>
         </div>
       }
     >
