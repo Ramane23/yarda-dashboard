@@ -461,6 +461,22 @@ const translations = {
     en: "Unauthorized — Admin access required",
     fr: "Non autorisé — Accès admin requis",
   },
+  "system.addClient": { en: "Add Client", fr: "Ajouter un Client" },
+  "system.clientId": { en: "Client ID", fr: "ID Client" },
+  "system.clientIdPlaceholder": { en: "e.g. nita", fr: "ex. nita" },
+  "system.clientName": { en: "Client Name", fr: "Nom du Client" },
+  "system.clientNamePlaceholder": { en: "e.g. NITA", fr: "ex. NITA" },
+  "system.operatorType": { en: "Type", fr: "Type" },
+  "system.currency": { en: "Currency", fr: "Devise" },
+  "system.corridors": { en: "Corridors", fr: "Corridors" },
+  "system.corridorsPlaceholder": { en: "NE-NG, NE-CI", fr: "NE-NG, NE-CI" },
+  "system.txTypes": { en: "Transaction Types", fr: "Types de Transaction" },
+  "system.txTypesPlaceholder": { en: "P2P, cash_in, cash_out", fr: "P2P, cash_in, cash_out" },
+  "system.clientCreated": {
+    en: "Client registered successfully",
+    fr: "Client enregistré avec succès",
+  },
+  "system.clientExists": { en: "Client already exists", fr: "Ce client existe déjà" },
 
   // Pipeline page
   "pipeline.title": { en: "Pipeline Flow", fr: "Flux du Pipeline" },

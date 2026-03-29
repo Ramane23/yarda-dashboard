@@ -52,6 +52,7 @@ import {
   getApiKeys,
   createApiKey,
   revokeApiKey,
+  onboardClient,
   type ApiKeyCreateResponse,
 } from "@/lib/admin-api";
 
@@ -119,6 +120,17 @@ export default function SystemPage() {
   });
   const [createdKey, setCreatedKey] = useState<ApiKeyCreateResponse | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
+
+  // Client onboarding state
+  const [showAddClient, setShowAddClient] = useState(false);
+  const [newClient, setNewClient] = useState({
+    client_id: "",
+    client_name: "",
+    operator_type: "mto" as "mto" | "mmo",
+    currency: "XOF",
+    corridors: "",
+    transaction_types: "",
+  });
 
   // Global queries (not client-filtered)
   const health = useQuery({ queryKey: ["admin-health"], queryFn: getSystemHealth, retry: 1 });
@@ -202,6 +214,22 @@ export default function SystemPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setExpandedUserId(null);
+    },
+  });
+
+  const onboardMutation = useMutation({
+    mutationFn: onboardClient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-phases"] });
+      setShowAddClient(false);
+      setNewClient({
+        client_id: "",
+        client_name: "",
+        operator_type: "mto",
+        currency: "XOF",
+        corridors: "",
+        transaction_types: "",
+      });
     },
   });
 
@@ -442,7 +470,159 @@ export default function SystemPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Client Phases */}
           <div className="card space-y-4 p-5">
-            <SectionTitle icon={Users}>{t("system.clients")}</SectionTitle>
+            <div className="flex items-center justify-between">
+              <SectionTitle icon={Users}>{t("system.clients")}</SectionTitle>
+              <button
+                onClick={() => setShowAddClient(!showAddClient)}
+                className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs"
+              >
+                <Plus size={14} />
+                {t("system.addClient")}
+              </button>
+            </div>
+
+            {/* Add Client Form */}
+            {showAddClient && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  onboardMutation.mutate({
+                    client_id: newClient.client_id.toLowerCase().replace(/\s+/g, "_"),
+                    client_name: newClient.client_name,
+                    operator_type: newClient.operator_type,
+                    currency: newClient.currency,
+                    corridors: newClient.corridors
+                      ? newClient.corridors
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean)
+                      : [],
+                    transaction_types: newClient.transaction_types
+                      ? newClient.transaction_types
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean)
+                      : [],
+                  });
+                }}
+                className="rounded-lg border bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/50"
+              >
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-surface-500">
+                      {t("system.clientId")} *
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      value={newClient.client_id}
+                      onChange={(e) => setNewClient({ ...newClient, client_id: e.target.value })}
+                      className="input-field w-full py-1.5 text-sm"
+                      placeholder={t("system.clientIdPlaceholder")}
+                      pattern="[a-z0-9_]+"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-surface-500">
+                      {t("system.clientName")} *
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      value={newClient.client_name}
+                      onChange={(e) => setNewClient({ ...newClient, client_name: e.target.value })}
+                      className="input-field w-full py-1.5 text-sm"
+                      placeholder={t("system.clientNamePlaceholder")}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-surface-500">
+                      {t("system.operatorType")}
+                    </label>
+                    <select
+                      value={newClient.operator_type}
+                      onChange={(e) =>
+                        setNewClient({
+                          ...newClient,
+                          operator_type: e.target.value as "mto" | "mmo",
+                        })
+                      }
+                      className="input-field w-full py-1.5 text-sm"
+                    >
+                      <option value="mto">MTO</option>
+                      <option value="mmo">MMO</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-surface-500">
+                      {t("system.currency")}
+                    </label>
+                    <input
+                      type="text"
+                      value={newClient.currency}
+                      onChange={(e) => setNewClient({ ...newClient, currency: e.target.value })}
+                      className="input-field w-full py-1.5 text-sm"
+                      placeholder="XOF"
+                    />
+                  </div>
+                  {newClient.operator_type === "mto" ? (
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-surface-500">
+                        {t("system.corridors")}
+                      </label>
+                      <input
+                        type="text"
+                        value={newClient.corridors}
+                        onChange={(e) => setNewClient({ ...newClient, corridors: e.target.value })}
+                        className="input-field w-full py-1.5 text-sm"
+                        placeholder={t("system.corridorsPlaceholder")}
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-surface-500">
+                        {t("system.txTypes")}
+                      </label>
+                      <input
+                        type="text"
+                        value={newClient.transaction_types}
+                        onChange={(e) =>
+                          setNewClient({ ...newClient, transaction_types: e.target.value })
+                        }
+                        className="input-field w-full py-1.5 text-sm"
+                        placeholder={t("system.txTypesPlaceholder")}
+                      />
+                    </div>
+                  )}
+                  <div className="flex items-end">
+                    <button
+                      type="submit"
+                      disabled={
+                        onboardMutation.isPending || !newClient.client_id || !newClient.client_name
+                      }
+                      className="btn-primary w-full py-1.5 text-sm disabled:opacity-50"
+                    >
+                      {onboardMutation.isPending ? (
+                        <RefreshCw size={14} className="mx-auto animate-spin" />
+                      ) : (
+                        t("system.addClient")
+                      )}
+                    </button>
+                  </div>
+                </div>
+                {onboardMutation.isError && (
+                  <p className="mt-2 text-xs text-red-500">
+                    {onboardMutation.error?.message || "Failed to onboard client"}
+                  </p>
+                )}
+                {onboardMutation.isSuccess && (
+                  <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400">
+                    {t("system.clientCreated")}
+                  </p>
+                )}
+              </form>
+            )}
+
             {ph ? (
               <>
                 <p className="text-xs text-surface-400">

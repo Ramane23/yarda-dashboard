@@ -125,6 +125,44 @@ export async function getPredictionDetail(requestId: string): Promise<Prediction
   return res.json();
 }
 
+// Client Onboarding
+export interface OnboardClientRequest {
+  client_id: string;
+  client_name: string;
+  operator_type: "mto" | "mmo";
+  currency: string;
+  corridors: string[];
+  transaction_types: string[];
+  thresholds?: { review: number; alert: number; block: number };
+  min_labels_for_learning?: number;
+  min_labels_for_classification?: number;
+}
+
+export interface OnboardClientResponse {
+  client_id: string;
+  success: boolean;
+  message: string;
+  phase: string;
+}
+
+export function onboardClient(data: OnboardClientRequest) {
+  const url = new URL(`${BASE}/clients`, window.location.origin);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
+  if (apiKey && !token) headers["X-API-Key"] = apiKey;
+  return fetch(url.toString(), {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  }).then(async (r) => {
+    const body = await r.json();
+    if (!r.ok) throw new Error(body.detail || `Onboard failed: ${r.status}`);
+    return body as OnboardClientResponse;
+  });
+}
+
 // API Key Management
 export interface ApiKeyItem {
   key_id: string;
