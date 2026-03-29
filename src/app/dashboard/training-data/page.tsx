@@ -14,6 +14,7 @@ import {
   Play,
   Loader2,
 } from "lucide-react";
+import { AdminGuard } from "@/components/admin-guard";
 import { Header } from "@/components/layout/header";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { DataTable } from "@/components/ui/data-table";
@@ -178,7 +179,7 @@ export default function TrainingDataPage() {
   const maxCount = data?.class_distribution?.[0]?.count || 1;
 
   return (
-    <>
+    <AdminGuard>
       <Header title={t("training.title")} />
       <div className="flex-1 space-y-6 overflow-auto p-6">
         {/* KPI cards + Trigger training button */}
@@ -462,6 +463,6 @@ export default function TrainingDataPage() {
           </div>
         )}
       </div>
-    </>
+    </AdminGuard>
   );
 }
