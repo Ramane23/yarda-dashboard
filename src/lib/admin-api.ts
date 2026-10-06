@@ -16,40 +16,18 @@ import type {
 } from "@/types/admin";
 import type { Period } from "@/types/api";
 
-const BASE = "/api/v1/admin";
+import { API_BASE, apiFetch } from "@/lib/http/api-client";
 
-async function fetchAdmin<T>(
+const BASE = `${API_BASE}/admin`;
+
+type Params = Record<string, string | number | boolean | undefined>;
+
+function fetchAdmin<T>(
   path: string,
-  params?: Record<string, string | number | boolean | undefined>,
+  params?: Params,
   method: "GET" | "POST" | "DELETE" = "GET",
 ): Promise<T> {
-  const url = new URL(path, window.location.origin);
-  if (params) {
-    Object.entries(params).forEach(([k, v]) => {
-      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
-    });
-  }
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  // JWT Bearer token (primary auth)
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  // Legacy API key fallback
-  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
-  if (apiKey && !token) headers["X-API-Key"] = apiKey;
-
-  const res = await fetch(url.toString(), { method, headers });
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail || `Admin API error ${res.status}`);
-  }
-
-  return res.json();
+  return apiFetch<T>(path, { params, method });
 }
 
 // Tier 1
@@ -107,22 +85,11 @@ export function getFeatureStats(clientId: string) {
   return fetchAdmin<FeatureStats>(`${BASE}/features/${clientId}`);
 }
 
-// Pipeline flow — uses dashboard endpoint (needs X-Client-ID header)
-export async function getPredictionDetail(requestId: string): Promise<PredictionDetail> {
-  const url = new URL(`/api/v1/dashboard/predictions/${requestId}`, window.location.origin);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const viewAs = typeof window !== "undefined" ? localStorage.getItem("view_as_client") : null;
-  const clientId =
-    viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
-  if (clientId) headers["X-Client-ID"] = clientId;
-  const res = await fetch(url.toString(), { headers });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail || `API error ${res.status}`);
-  }
-  return res.json();
+// Pipeline flow (dashboard endpoint, scoped to the tenant being viewed)
+export function getPredictionDetail(requestId: string): Promise<PredictionDetail> {
+  return apiFetch<PredictionDetail>(
+    `${API_BASE}/dashboard/predictions/${encodeURIComponent(requestId)}`,
+  );
 }
 
 // Client Onboarding
@@ -146,21 +113,7 @@ export interface OnboardClientResponse {
 }
 
 export function onboardClient(data: OnboardClientRequest) {
-  const url = new URL(`${BASE}/clients`, window.location.origin);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
-  if (apiKey && !token) headers["X-API-Key"] = apiKey;
-  return fetch(url.toString(), {
-    method: "POST",
-    headers,
-    body: JSON.stringify(data),
-  }).then(async (r) => {
-    const body = await r.json();
-    if (!r.ok) throw new Error(body.detail || `Onboard failed: ${r.status}`);
-    return body as OnboardClientResponse;
-  });
+  return apiFetch<OnboardClientResponse>(`${BASE}/clients`, { method: "POST", body: data });
 }
 
 // API Key Management
@@ -198,21 +151,7 @@ export function createApiKey(data: {
   description?: string;
   send_to_email?: string;
 }) {
-  const url = new URL(`${BASE}/api-keys`, window.location.origin);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
-  if (apiKey && !token) headers["X-API-Key"] = apiKey;
-  return fetch(url.toString(), {
-    method: "POST",
-    headers,
-    body: JSON.stringify(data),
-  }).then(async (r) => {
-    const body = await r.json();
-    if (!r.ok) throw new Error(body.detail || `Create API key failed: ${r.status}`);
-    return body as ApiKeyCreateResponse;
-  });
+  return apiFetch<ApiKeyCreateResponse>(`${BASE}/api-keys`, { method: "POST", body: data });
 }
 
 export function revokeApiKey(keyId: string) {
@@ -244,6 +183,7 @@ export function deleteUser(userId: number) {
   return fetchAdmin<{ ok: boolean }>(`${BASE}/users/${userId}`, undefined, "DELETE");
 }
 
+/** Create a user with a password chosen by the admin. Prefer {@link inviteUser}. */
 export function registerUser(data: {
   email: string;
   password: string;
@@ -251,41 +191,21 @@ export function registerUser(data: {
   role: string;
   client_id?: string;
 }) {
-  // Register goes through /auth/register, not /admin
-  const url = new URL("/api/v1/auth/register", window.location.origin);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
-  if (apiKey && !token) headers["X-API-Key"] = apiKey;
-  return fetch(url.toString(), {
-    method: "POST",
-    headers,
-    body: JSON.stringify(data),
-  }).then(async (r) => {
-    const body = await r.json();
-    if (!r.ok) throw new Error(body.detail || `Register failed: ${r.status}`);
-    return body;
-  });
+  return apiFetch(`${API_BASE}/auth/register`, { method: "POST", body: data });
 }
 
+/** Create a user and email them a link to choose their password. */
 export function inviteUser(data: {
   email: string;
   display_name?: string;
   role: string;
   client_id?: string;
 }) {
-  const url = new URL("/api/v1/auth/invite", window.location.origin);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  return fetch(url.toString(), {
-    method: "POST",
-    headers,
-    body: JSON.stringify(data),
-  }).then(async (r) => {
-    const body = await r.json();
-    if (!r.ok) throw new Error(body.detail || `Invite failed: ${r.status}`);
-    return body;
-  });
+  return apiFetch(`${API_BASE}/auth/invite`, { method: "POST", body: data });
+}
+
+/** Clients known to the platform, for the admin's tenant selector. */
+export async function getClientOptions(): Promise<{ client_id: string; client_name: string }[]> {
+  const data = await getPhaseManagement();
+  return data.clients.map((c) => ({ client_id: c.client_id, client_name: c.client_name }));
 }

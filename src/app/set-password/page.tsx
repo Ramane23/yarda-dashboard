@@ -5,9 +5,13 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
+import { API_BASE, ApiError, apiFetch } from "@/lib/http/api-client";
 import { useT } from "@/lib/useT";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
+
+/** Must match the server policy (``MIN_PASSWORD_LENGTH`` in the API). */
+const MIN_PASSWORD_LENGTH = 12;
 
 function SetPasswordContent() {
   const searchParams = useSearchParams();
@@ -31,14 +35,18 @@ function SetPasswordContent() {
     setLoading(true);
     setError("");
     try {
-      await fetch("/api/v1/auth/forgot-password", {
+      await apiFetch(`${API_BASE}/auth/forgot-password`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: { email: email.trim() },
+        auth: false,
       });
       setEmailSent(true);
-    } catch {
-      setError("Network error");
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.status === 429
+          ? t("login.tooManyAttempts")
+          : t("setPassword.networkError"),
+      );
     } finally {
       setLoading(false);
     }
@@ -46,7 +54,7 @@ function SetPasswordContent() {
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) {
+    if (password.length < MIN_PASSWORD_LENGTH) {
       setError(t("setPassword.tooShort"));
       return;
     }
@@ -57,21 +65,19 @@ function SetPasswordContent() {
     setLoading(true);
     setError("");
     try {
-      const endpoint =
-        mode === "reset" ? "/api/v1/auth/reset-password" : "/api/v1/auth/set-password";
-      const res = await fetch(endpoint, {
+      const endpoint = mode === "reset" ? "reset-password" : "set-password";
+      await apiFetch(`${API_BASE}/auth/${endpoint}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
+        body: { token, password },
+        auth: false,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.detail || t("setPassword.invalidToken"));
-        return;
-      }
       setSuccess(true);
-    } catch {
-      setError("Network error");
+    } catch (err) {
+      if (!(err instanceof ApiError) || err.status === 0) setError(t("setPassword.networkError"));
+      else if (err.status === 429) setError(t("login.tooManyAttempts"));
+      // 422 carries a policy message written for users (e.g. "too common").
+      else if (err.status === 422) setError(err.message);
+      else setError(t("setPassword.invalidToken"));
     } finally {
       setLoading(false);
     }

@@ -20,52 +20,11 @@ import { KpiCard } from "@/components/ui/kpi-card";
 import { DataTable } from "@/components/ui/data-table";
 import { DecisionBadge } from "@/components/ui/score-badge";
 import { Pagination } from "@/components/ui/pagination";
-import { getTrainingData } from "@/lib/api";
+import { getTrainingData, getTrainingTable, triggerTraining } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
 import type { LabeledSample } from "@/types/api";
-
-// --- API helpers (inline to avoid circular imports) ---
-const BASE = "/api/v1/dashboard";
-
-async function fetchTrainingTable(page: number, pageSize: number) {
-  const url = new URL(`${BASE}/training-data/table`, window.location.origin);
-  url.searchParams.set("page", String(page));
-  url.searchParams.set("page_size", String(pageSize));
-  const headers: Record<string, string> = {};
-  const viewAs = typeof window !== "undefined" ? localStorage.getItem("view_as_client") : null;
-  const clientId =
-    viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
-  if (clientId) headers["X-Client-ID"] = clientId;
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(url.toString(), { headers });
-  if (!res.ok) throw new Error(`Failed: ${res.status}`);
-  return res.json() as Promise<{
-    client_id: string;
-    total: number;
-    page: number;
-    page_size: number;
-    pages: number;
-    feature_columns: string[];
-    rows: Record<string, unknown>[];
-  }>;
-}
-
-async function triggerTraining() {
-  const url = new URL(`${BASE}/trigger-training`, window.location.origin);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const viewAs = typeof window !== "undefined" ? localStorage.getItem("view_as_client") : null;
-  const clientId =
-    viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
-  if (clientId) headers["X-Client-ID"] = clientId;
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(url.toString(), { method: "POST", headers });
-  if (!res.ok) throw new Error(`Failed: ${res.status}`);
-  return res.json();
-}
 
 // --- Tab type ---
 type Tab = "overview" | "table";
@@ -85,7 +44,7 @@ export default function TrainingDataPage() {
 
   const { data: tableData, isLoading: tableLoading } = useQuery({
     queryKey: ["training-table", viewAsClient, tablePage],
-    queryFn: () => fetchTrainingTable(tablePage, 50),
+    queryFn: () => getTrainingTable(tablePage, 50),
     enabled: tab === "table",
   });
 

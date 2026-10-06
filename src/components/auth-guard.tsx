@@ -1,61 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { ensureSession, purgeLegacyStorage } from "@/lib/auth";
 import { useAppStore } from "@/lib/store";
 
 /**
- * Waits for Zustand store to rehydrate from localStorage,
- * then redirects to /login if no token is found.
+ * Renders its children only for a signed-in user.
+ *
+ * On first render it restores the session from the httpOnly refresh cookie
+ * (the access token lives in memory and does not survive a reload). If that
+ * fails, or the session ends later (expiry, logout in another tab), it sends
+ * the user to the login page and remembers where they were going.
  */
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const token = useAppStore((s) => s.token);
-  const [hydrated, setHydrated] = useState(false);
+  const pathname = usePathname();
+  const authStatus = useAppStore((s) => s.authStatus);
 
   useEffect(() => {
-    // Zustand persist rehydrates synchronously after first render.
-    // We also check localStorage directly as a fallback.
-    const stored = localStorage.getItem("token");
-    const storeToken = useAppStore.getState().token;
+    purgeLegacyStorage();
+    void ensureSession();
+  }, []);
 
-    if (storeToken || stored) {
-      setHydrated(true);
-    } else {
-      // Give Zustand one tick to rehydrate, then decide
-      const unsub = useAppStore.persist.onFinishHydration?.(() => {
-        const t = useAppStore.getState().token;
-        if (t) {
-          setHydrated(true);
-        } else {
-          router.replace("/login");
-        }
-        unsub?.();
-      });
-
-      // Fallback: if already hydrated but no token
-      if (useAppStore.persist.hasHydrated?.()) {
-        if (!useAppStore.getState().token && !stored) {
-          router.replace("/login");
-        } else {
-          setHydrated(true);
-        }
-        unsub?.();
-      }
-    }
-  }, [router]);
-
-  // Also redirect if token disappears (e.g., logout in another tab)
   useEffect(() => {
-    if (hydrated && !token) {
-      router.replace("/login");
+    if (authStatus === "anonymous") {
+      const next = encodeURIComponent(pathname);
+      router.replace(`/login?next=${next}`);
     }
-  }, [hydrated, token, router]);
+  }, [authStatus, pathname, router]);
 
-  if (!hydrated) {
+  if (authStatus !== "authenticated") {
     return (
-      <div className="flex h-screen items-center justify-center bg-surface-50 dark:bg-surface-950">
+      <div
+        className="flex h-screen items-center justify-center bg-surface-50 dark:bg-surface-950"
+        role="status"
+        aria-live="polite"
+      >
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+        <span className="sr-only">Loading…</span>
       </div>
     );
   }

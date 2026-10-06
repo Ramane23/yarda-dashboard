@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Eye } from "lucide-react";
-import { useAppStore } from "@/lib/store";
+import { getClientOptions } from "@/lib/admin-api";
+import { selectIsAdmin, useAppStore } from "@/lib/store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { useT } from "@/lib/useT";
@@ -18,27 +19,22 @@ const periods: { value: Period; key: TranslationKey }[] = [
 ];
 
 export function Header({ title }: { title: string }) {
-  const { period, setPeriod, clientId, userRole, viewAsClient, setViewAsClient } = useAppStore();
+  const period = useAppStore((s) => s.period);
+  const setPeriod = useAppStore((s) => s.setPeriod);
+  const viewAsClient = useAppStore((s) => s.viewAsClient);
+  const setViewAsClient = useAppStore((s) => s.setViewAsClient);
+  const user = useAppStore((s) => s.user);
+  const isAdmin = useAppStore(selectIsAdmin);
   const t = useT();
-  const isAdmin = userRole === "admin" || clientId === "admin";
 
-  // Fetch client list for admin selector
   const { data: clients } = useQuery({
-    queryKey: ["admin-clients-header"],
-    queryFn: async () => {
-      const headers: Record<string, string> = {};
-      const token = localStorage.getItem("token");
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-      const apiKey = localStorage.getItem("api_key");
-      if (apiKey && !token) headers["X-API-Key"] = apiKey;
-      const res = await fetch("/api/v1/admin/clients/phases", { headers });
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data.clients as { client_id: string; client_name: string }[];
-    },
+    queryKey: ["admin-client-options"],
+    queryFn: getClientOptions,
     enabled: isAdmin,
     staleTime: 60_000,
   });
+
+  const badgeLabel = isAdmin ? viewAsClient : (user?.clientId ?? "");
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white/80 px-6 backdrop-blur-sm dark:bg-surface-900/80">
@@ -50,6 +46,7 @@ export function Header({ title }: { title: string }) {
           <div className="flex items-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-2 py-1 dark:border-brand-800 dark:bg-brand-950/30">
             <Eye size={14} className="text-brand-500" />
             <select
+              aria-label={t("system.filterByClient")}
               value={viewAsClient}
               onChange={(e) => setViewAsClient(e.target.value)}
               className="bg-transparent text-xs font-semibold text-brand-700 outline-none dark:text-brand-300"
@@ -85,12 +82,12 @@ export function Header({ title }: { title: string }) {
         <LocaleToggle />
         <ThemeToggle />
 
-        {/* Client badge */}
-        {clientId && (
+        {/* Tenant badge: the tenant being viewed (admins) or the user's own tenant. */}
+        {badgeLabel && (
           <div className="flex items-center gap-2 rounded-full border bg-surface-50 px-3 py-1.5 dark:bg-surface-800">
             <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
             <span className="text-xs font-semibold text-surface-700 dark:text-surface-300">
-              {isAdmin && viewAsClient ? viewAsClient.toUpperCase() : clientId.toUpperCase()}
+              {badgeLabel.toUpperCase()}
             </span>
           </div>
         )}

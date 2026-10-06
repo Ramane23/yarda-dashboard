@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Monitor, LogOut, Save, Check, Globe } from "lucide-react";
+import { Sun, Moon, Monitor, LogOut, Globe } from "lucide-react";
 import { Header } from "@/components/layout/header";
+import { signOut } from "@/lib/auth";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/useT";
@@ -13,31 +14,15 @@ import type { Locale } from "@/lib/i18n";
 export default function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const { clientId, apiKey, setClientId, setApiKey, locale, setLocale } = useAppStore();
+  const locale = useAppStore((s) => s.locale);
+  const setLocale = useAppStore((s) => s.setLocale);
   const t = useT();
-  const [localClientId, setLocalClientId] = useState(clientId);
-  const [localApiKey, setLocalApiKey] = useState(apiKey);
-  const [saved, setSaved] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
-  useEffect(() => {
-    setLocalClientId(clientId);
-    setLocalApiKey(apiKey);
-  }, [clientId, apiKey]);
 
-  const handleSave = () => {
-    setClientId(localClientId.trim());
-    setApiKey(localApiKey.trim());
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
-
-  const handleLogout = () => {
-    setClientId("");
-    setApiKey("");
-    localStorage.removeItem("client_id");
-    localStorage.removeItem("api_key");
+  const handleLogout = async () => {
+    await signOut();
     router.push("/login");
   };
 
@@ -98,41 +83,6 @@ export default function SettingsPage() {
                   <span className="text-sm font-semibold">{lang.label}</span>
                 </button>
               ))}
-            </div>
-          </div>
-
-          {/* API Config */}
-          <div className="card p-6">
-            <h3 className="section-title mb-4">{t("settings.apiConfig")}</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-surface-500">
-                  {t("settings.clientId")}
-                </label>
-                <input
-                  type="text"
-                  value={localClientId}
-                  onChange={(e) => setLocalClientId(e.target.value)}
-                  placeholder="e.g. sako, nita"
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-surface-500">
-                  {t("settings.apiKey")}
-                </label>
-                <input
-                  type="password"
-                  value={localApiKey}
-                  onChange={(e) => setLocalApiKey(e.target.value)}
-                  placeholder={t("login.apiKeyPlaceholder")}
-                  className="input-field"
-                />
-              </div>
-              <button onClick={handleSave} className="btn-primary flex items-center gap-2">
-                {saved ? <Check size={16} /> : <Save size={16} />}
-                {saved ? t("settings.saved") : t("settings.save")}
-              </button>
             </div>
           </div>
 
