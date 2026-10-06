@@ -136,29 +136,42 @@ async function send(path: string, options: ApiRequestOptions): Promise<Response>
   }
 }
 
-let refreshInFlight: Promise<boolean> | null = null;
+/**
+ * Result of trying to renew the session.
+ * - `refreshed`: a new access token is in memory;
+ * - `expired`: the server rejected the refresh token; the session is over;
+ * - `unavailable`: the API could not be reached or failed; the session is
+ *   kept and the caller may retry later.
+ */
+export type RefreshOutcome = "refreshed" | "expired" | "unavailable";
+
+let refreshInFlight: Promise<RefreshOutcome> | null = null;
+
+/** HTTP statuses with which the API rejects a refresh token. */
+const SESSION_REJECTED = new Set([401, 403]);
 
 /**
  * Exchange the refresh cookie for a new access token.
  *
- * Concurrent callers share one request. Resolves `false` (never rejects) when
- * the session cannot be renewed; the store is then cleared.
+ * Concurrent callers share one request. Never rejects. Only an explicit
+ * rejection by the API ends the session; a network error or server failure
+ * leaves it in place so that a brief outage does not sign everyone out.
  */
-export function refreshSession(): Promise<boolean> {
-  refreshInFlight ??= (async () => {
+export function refreshSession(): Promise<RefreshOutcome> {
+  refreshInFlight ??= (async (): Promise<RefreshOutcome> => {
     try {
       const response = await send(`${API_BASE}/auth/refresh`, { method: "POST", auth: false });
-      if (!response.ok) {
+      if (SESSION_REJECTED.has(response.status)) {
         onSessionExpired();
-        return false;
+        return "expired";
       }
+      if (!response.ok) return "unavailable";
       const session = (await response.json()) as SessionResponse;
       setAccessToken(session.token);
       useAppStore.getState().setUser(toSessionUser(session.user));
-      return true;
+      return "refreshed";
     } catch {
-      onSessionExpired();
-      return false;
+      return "unavailable";
     } finally {
       refreshInFlight = null;
     }
@@ -169,14 +182,20 @@ export function refreshSession(): Promise<boolean> {
 /**
  * Call the API and return the parsed JSON body.
  *
- * @throws {ApiError} for any non-2xx response or network failure. A 401 is
- *   only thrown after one refresh-and-retry has failed.
+ * On a 401 the session is refreshed once and the request retried. If the
+ * retried request is still rejected, the session is over (the user was
+ * deactivated or signed out everywhere) and it is cleared.
+ *
+ * @throws {ApiError} for any non-2xx response or network failure.
  */
 export async function apiFetch<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   let response = await send(path, options);
 
   if (response.status === 401 && options.auth !== false) {
-    if (await refreshSession()) response = await send(path, options);
+    if ((await refreshSession()) === "refreshed") {
+      response = await send(path, options);
+      if (response.status === 401) onSessionExpired();
+    }
   }
   if (!response.ok) throw await toApiError(response);
   if (response.status === 204) return undefined as T;

@@ -11,6 +11,7 @@
  * drop their session too (plan item DSH-41).
  */
 
+import { queryClient } from "@/lib/query-client";
 import { useAppStore } from "@/lib/store";
 
 let accessToken: string | null = null;
@@ -37,9 +38,13 @@ export function setAccessToken(token: string): void {
   accessToken = token;
 }
 
-/** Forget the session in this tab only. */
+/**
+ * Forget the session in this tab only, including every cached API response:
+ * the next user signing in here must never see the previous user's data.
+ */
 function clearLocalSession(): void {
   accessToken = null;
+  queryClient.clear();
   useAppStore.getState().clearUser();
 }
 

@@ -42,11 +42,10 @@ function SetPasswordContent() {
       });
       setEmailSent(true);
     } catch (err) {
-      setError(
-        err instanceof ApiError && err.status === 429
-          ? t("login.tooManyAttempts")
-          : t("setPassword.networkError"),
-      );
+      if (err instanceof ApiError && err.status === 429) setError(t("login.tooManyAttempts"));
+      else if (err instanceof ApiError && err.status === 422)
+        setError(t("setPassword.invalidEmail"));
+      else setError(t("setPassword.networkError"));
     } finally {
       setLoading(false);
     }

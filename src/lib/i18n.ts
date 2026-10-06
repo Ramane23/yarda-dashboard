@@ -65,6 +65,15 @@ const translations = {
     en: "Password must be at least 12 characters",
     fr: "Le mot de passe doit contenir au moins 12 caract\u00e8res",
   },
+  "setPassword.invalidEmail": {
+    en: "Enter a valid email address.",
+    fr: "Saisissez une adresse email valide.",
+  },
+  "auth.loading": { en: "Loading…", fr: "Chargement…" },
+  "auth.reconnecting": {
+    en: "Can't reach YARDA right now. Reconnecting…",
+    fr: "YARDA est momentan\u00e9ment injoignable. Reconnexion…",
+  },
   "setPassword.networkError": {
     en: "Connection error. Try again.",
     fr: "Erreur de connexion. R\u00e9essayez.",

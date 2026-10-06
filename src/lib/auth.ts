@@ -11,6 +11,7 @@ import {
   apiFetch,
   refreshSession,
   toSessionUser,
+  type RefreshOutcome,
   type SessionResponse,
 } from "@/lib/http/api-client";
 import { endSessionEverywhere, getAccessToken, setAccessToken } from "@/lib/http/session";
@@ -44,10 +45,11 @@ export async function signIn(email: string, password: string): Promise<void> {
  * Make sure this tab has a live session, restoring it from the refresh cookie
  * after a page load if needed.
  *
- * @returns `true` when the user is signed in.
+ * @returns The outcome; `unavailable` means the API could not be reached and
+ *   the caller should retry rather than treat the user as signed out.
  */
-export async function ensureSession(): Promise<boolean> {
-  if (getAccessToken() && useAppStore.getState().user) return true;
+export async function ensureSession(): Promise<RefreshOutcome> {
+  if (getAccessToken() && useAppStore.getState().user) return "refreshed";
   return refreshSession();
 }
 

@@ -5,18 +5,14 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
-import { signIn } from "@/lib/auth";
+import { ensureSession, signIn } from "@/lib/auth";
+import { safeNextPath } from "@/lib/navigation";
 import { ApiError } from "@/lib/http/api-client";
 import { useAppStore } from "@/lib/store";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { TranslationKey } from "@/lib/i18n";
 import { useT } from "@/lib/useT";
-
-/** Only same-site paths may be used as a post-login destination. */
-function safeNextPath(raw: string | null): string {
-  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/dashboard";
-}
 
 /**
  * Message for a failed sign-in. Any rejection by the server reads as bad
@@ -39,6 +35,11 @@ export default function LoginPage() {
   const t = useT();
 
   const nextPath = () => safeNextPath(new URLSearchParams(window.location.search).get("next"));
+
+  // Someone with a valid session cookie does not need to sign in again.
+  useEffect(() => {
+    void ensureSession();
+  }, []);
 
   useEffect(() => {
     if (authStatus === "authenticated") router.replace(nextPath());
