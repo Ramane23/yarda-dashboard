@@ -16,7 +16,8 @@ import {
   Database,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/lib/store";
+import { signOut } from "@/lib/auth";
+import { selectIsAdmin, useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
 import type { TranslationKey } from "@/lib/i18n";
 
@@ -45,11 +46,13 @@ const nav: {
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { sidebarOpen, toggleSidebar, logout, clientId } = useAppStore();
+  const sidebarOpen = useAppStore((s) => s.sidebarOpen);
+  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
+  const isAdmin = useAppStore(selectIsAdmin);
   const t = useT();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     router.push("/login");
   };
 
@@ -100,12 +103,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
         {nav
-          .filter((item) => {
-            const storeRole = useAppStore.getState().userRole;
-            const lsRole = typeof window !== "undefined" ? localStorage.getItem("user_role") : null;
-            const isAdmin = storeRole === "admin" || lsRole === "admin" || clientId === "admin";
-            return !item.adminOnly || isAdmin;
-          })
+          .filter((item) => !item.adminOnly || isAdmin)
           .map((item) => {
             const label = t(item.labelKey);
             const active =

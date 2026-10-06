@@ -5,59 +5,60 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
+import { ensureSession, signIn } from "@/lib/auth";
+import { safeNextPath } from "@/lib/navigation";
+import { ApiError } from "@/lib/http/api-client";
 import { useAppStore } from "@/lib/store";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
+import type { TranslationKey } from "@/lib/i18n";
 import { useT } from "@/lib/useT";
+
+/**
+ * Message for a failed sign-in. Any rejection by the server reads as bad
+ * credentials, so the page never hints at why a login was refused.
+ */
+function loginErrorKey(err: unknown): TranslationKey {
+  if (!(err instanceof ApiError) || err.status === 0 || err.status >= 500) {
+    return "login.networkError";
+  }
+  return err.status === 429 ? "login.tooManyAttempts" : "login.invalidCredentials";
+}
 
 export default function LoginPage() {
   const router = useRouter();
-  const { clientId: storedClientId, login } = useAppStore();
+  const authStatus = useAppStore((s) => s.authStatus);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const t = useT();
 
+  const nextPath = () => safeNextPath(new URLSearchParams(window.location.search).get("next"));
+
+  // Someone with a valid session cookie does not need to sign in again.
   useEffect(() => {
-    if (storedClientId) router.replace("/dashboard");
-  }, [storedClientId, router]);
+    void ensureSession();
+  }, []);
+
+  useEffect(() => {
+    if (authStatus === "authenticated") router.replace(nextPath());
+  }, [authStatus, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
+    if (!email.trim() || !password) {
       setError(t("login.fieldsRequired"));
       return;
     }
 
     setLoading(true);
     setError("");
-
     try {
-      const res = await fetch("/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.detail || t("login.invalidCredentials"));
-        setLoading(false);
-        return;
-      }
-
-      login({
-        token: data.token,
-        clientId: data.user.client_id,
-        role: data.user.role,
-        displayName: data.user.display_name,
-      });
-
-      router.push("/dashboard");
-    } catch {
-      setError(t("login.networkError"));
+      await signIn(email.trim(), password);
+      router.push(nextPath());
+    } catch (err) {
+      setError(t(loginErrorKey(err)));
       setLoading(false);
     }
   };

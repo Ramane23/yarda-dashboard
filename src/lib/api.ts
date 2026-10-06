@@ -14,45 +14,14 @@ import type {
   SortOrder,
 } from "@/types/api";
 
-const BASE = "/api/v1/dashboard";
+import { API_BASE, apiFetch } from "@/lib/http/api-client";
 
-async function fetchAPI<T>(
-  path: string,
-  params?: Record<string, string | number | boolean | undefined>,
-): Promise<T> {
-  const url = new URL(path, window.location.origin);
-  if (params) {
-    Object.entries(params).forEach(([k, v]) => {
-      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
-    });
-  }
+const BASE = `${API_BASE}/dashboard`;
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
+type Params = Record<string, string | number | boolean | undefined>;
 
-  // Admin "view as client" override, then fall back to actual client ID
-  const viewAs = typeof window !== "undefined" ? localStorage.getItem("view_as_client") : null;
-  const clientId =
-    viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
-  if (clientId) headers["X-Client-ID"] = clientId;
-
-  // JWT Bearer token (primary auth)
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  // Legacy API key fallback
-  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
-  if (apiKey && !token) headers["X-API-Key"] = apiKey;
-
-  const res = await fetch(url.toString(), { headers });
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail || `API error ${res.status}`);
-  }
-
-  return res.json();
+function fetchAPI<T>(path: string, params?: Params): Promise<T> {
+  return apiFetch<T>(path, { params });
 }
 
 // ---- Dashboard endpoints ----
@@ -135,23 +104,31 @@ export function getTrainingData(page = 1, pageSize = 50) {
   return fetchAPI<TrainingDataResponse>(`${BASE}/training-data`, { page, page_size: pageSize });
 }
 
+/** One page of the engineered feature matrix with labels (admins only). */
+export interface TrainingTablePage {
+  client_id: string;
+  total: number;
+  page: number;
+  page_size: number;
+  pages: number;
+  feature_columns: string[];
+  rows: Record<string, unknown>[];
+}
+
+export function getTrainingTable(page: number, pageSize: number) {
+  return fetchAPI<TrainingTablePage>(`${BASE}/training-data/table`, { page, page_size: pageSize });
+}
+
+/** Start a training run for the tenant being viewed (admins only). */
+export function triggerTraining() {
+  return apiFetch<{ client_id: string; message: string }>(`${BASE}/trigger-training`, {
+    method: "POST",
+  });
+}
+
 export function submitFeedback(requestId: string, feedback: { label: string; notes?: string }) {
-  const url = new URL(`/api/v1/predictions/${requestId}/feedback`, window.location.origin);
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const viewAs = typeof window !== "undefined" ? localStorage.getItem("view_as_client") : null;
-  const clientId =
-    viewAs || (typeof window !== "undefined" ? localStorage.getItem("client_id") : null);
-  if (clientId) headers["X-Client-ID"] = clientId;
-  // JWT token (primary auth for dashboard)
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  // Legacy API key fallback
-  const apiKey = typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
-  if (apiKey && !token) headers["X-API-Key"] = apiKey;
-  return fetch(url.toString(), { method: "POST", headers, body: JSON.stringify(feedback) }).then(
-    (r) => {
-      if (!r.ok) throw new Error(`Feedback failed: ${r.status}`);
-      return r.json();
-    },
+  return apiFetch<{ status: string; request_id: string }>(
+    `${API_BASE}/predictions/${encodeURIComponent(requestId)}/feedback`,
+    { method: "POST", body: feedback },
   );
 }

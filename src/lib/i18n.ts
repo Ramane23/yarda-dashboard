@@ -23,13 +23,12 @@ const translations = {
     en: "Connection error. Try again.",
     fr: "Erreur de connexion. Réessayez.",
   },
+  "login.tooManyAttempts": {
+    en: "Too many attempts. Wait a few minutes and try again.",
+    fr: "Trop de tentatives. Patientez quelques minutes puis r\u00e9essayez.",
+  },
   // Legacy (kept for compat)
   "login.forgotPassword": { en: "Forgot password?", fr: "Mot de passe oubli\u00e9 ?" },
-  "login.clientId": { en: "Client ID", fr: "Identifiant Client" },
-  "login.clientIdPlaceholder": { en: "e.g. sako", fr: "ex. sako" },
-  "login.apiKey": { en: "API Key", fr: "Clé API" },
-  "login.apiKeyPlaceholder": { en: "Your API key", fr: "Votre clé API" },
-  "login.clientIdRequired": { en: "Client ID is required", fr: "L'identifiant client est requis" },
 
   // Set Password / Invite / Reset
   "setPassword.title": { en: "Set Your Password", fr: "D\u00e9finir votre mot de passe" },
@@ -63,8 +62,21 @@ const translations = {
     fr: "Les mots de passe ne correspondent pas",
   },
   "setPassword.tooShort": {
-    en: "Password must be at least 8 characters",
-    fr: "Le mot de passe doit contenir au moins 8 caract\u00e8res",
+    en: "Password must be at least 12 characters",
+    fr: "Le mot de passe doit contenir au moins 12 caract\u00e8res",
+  },
+  "setPassword.invalidEmail": {
+    en: "Enter a valid email address.",
+    fr: "Saisissez une adresse email valide.",
+  },
+  "auth.loading": { en: "Loading…", fr: "Chargement…" },
+  "auth.reconnecting": {
+    en: "Can't reach YARDA right now. Reconnecting…",
+    fr: "YARDA est momentan\u00e9ment injoignable. Reconnexion…",
+  },
+  "setPassword.networkError": {
+    en: "Connection error. Try again.",
+    fr: "Erreur de connexion. R\u00e9essayez.",
   },
 
   // Sidebar navigation
@@ -218,11 +230,6 @@ const translations = {
   "settings.dark": { en: "Dark", fr: "Sombre" },
   "settings.system": { en: "System", fr: "Système" },
   "settings.language": { en: "Language", fr: "Langue" },
-  "settings.apiConfig": { en: "API Configuration", fr: "Configuration API" },
-  "settings.clientId": { en: "Client ID", fr: "Identifiant Client" },
-  "settings.apiKey": { en: "API Key", fr: "Clé API" },
-  "settings.save": { en: "Save Configuration", fr: "Sauvegarder" },
-  "settings.saved": { en: "Saved!", fr: "Sauvegardé !" },
   "settings.signOut": { en: "Sign Out", fr: "Déconnexion" },
   "settings.signOutDesc": {
     en: "This will clear your credentials and return to the login page.",
