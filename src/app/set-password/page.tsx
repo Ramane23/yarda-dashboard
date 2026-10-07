@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 import { API_BASE, ApiError, apiFetch } from "@/lib/http/api-client";
+import { readSetPasswordLink, type SetPasswordLink } from "@/lib/navigation";
 import { useT } from "@/lib/useT";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -13,11 +13,24 @@ import { ThemeToggle } from "@/components/theme-toggle";
 /** Must match the server policy (``MIN_PASSWORD_LENGTH`` in the API). */
 const MIN_PASSWORD_LENGTH = 12;
 
-function SetPasswordContent() {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const mode = searchParams.get("mode") || (token ? "invite" : "forgot");
+/**
+ * Invitation, password reset and "forgot password" in one page.
+ *
+ * The one-time token arrives in the URL fragment. It is read once on mount
+ * and then removed from the address bar, so it does not linger in history,
+ * screenshots or a link copied from the browser.
+ */
+export default function SetPasswordPage() {
+  const [link, setLink] = useState<SetPasswordLink | null>(null);
   const t = useT();
+
+  useEffect(() => {
+    const parsed = readSetPasswordLink(window.location.hash, window.location.search);
+    window.history.replaceState(null, "", window.location.pathname);
+    setLink(parsed);
+  }, []);
+  const token = link?.token ?? null;
+  const mode = link?.mode ?? "forgot";
 
   // Forgot mode state
   const [email, setEmail] = useState("");
@@ -82,7 +95,10 @@ function SetPasswordContent() {
     }
   };
 
-  // Determine title
+  if (link === null) {
+    return <div className="min-h-screen bg-surface-50 dark:bg-surface-950" aria-busy="true" />;
+  }
+
   const title =
     mode === "forgot"
       ? t("setPassword.forgotTitle")
@@ -198,7 +214,7 @@ function SetPasswordContent() {
                 <input
                   type="password"
                   required
-                  minLength={8}
+                  minLength={MIN_PASSWORD_LENGTH}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -213,7 +229,7 @@ function SetPasswordContent() {
                 <input
                   type="password"
                   required
-                  minLength={8}
+                  minLength={MIN_PASSWORD_LENGTH}
                   value={confirmPassword}
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
@@ -256,19 +272,5 @@ function SetPasswordContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function SetPasswordPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-surface-50 dark:bg-surface-950">
-          <div className="text-surface-900 dark:text-white">Loading...</div>
-        </div>
-      }
-    >
-      <SetPasswordContent />
-    </Suspense>
   );
 }

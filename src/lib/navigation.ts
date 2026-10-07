@@ -29,3 +29,35 @@ export function safeNextPath(
     return DEFAULT_AFTER_LOGIN;
   }
 }
+
+/** What the set-password page was opened for. */
+export type SetPasswordMode = "invite" | "reset" | "forgot";
+
+/** The one-time token and mode carried by a set-password link. */
+export interface SetPasswordLink {
+  token: string | null;
+  mode: SetPasswordMode;
+}
+
+/**
+ * Read the token and mode from a set-password link.
+ *
+ * Emails put them in the URL fragment (`#token=...&mode=reset`), which
+ * browsers never send to a server, so the token stays out of access logs
+ * and `Referer` headers. Links sent before that change used the query
+ * string; it is still read so they keep working until they expire.
+ *
+ * @param hash - `location.hash`, with or without the leading `#`.
+ * @param search - `location.search`, with or without the leading `?`.
+ */
+export function readSetPasswordLink(hash: string, search: string): SetPasswordLink {
+  const fromHash = new URLSearchParams(hash.replace(/^#/, ""));
+  const params = fromHash.has("token") ? fromHash : new URLSearchParams(search.replace(/^\?/, ""));
+  const token = params.get("token") || null;
+  const mode: SetPasswordMode = !token
+    ? "forgot"
+    : params.get("mode") === "reset"
+      ? "reset"
+      : "invite";
+  return { token, mode };
+}

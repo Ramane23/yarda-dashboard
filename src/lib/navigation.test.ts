@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_AFTER_LOGIN, safeNextPath } from "@/lib/navigation";
+import { DEFAULT_AFTER_LOGIN, readSetPasswordLink, safeNextPath } from "@/lib/navigation";
 
 const ORIGIN = "https://app.yarda.ai";
 
@@ -22,5 +22,34 @@ describe("safeNextPath", () => {
     "javascript:alert(1)",
   ])("rejects %s", (raw) => {
     expect(safeNextPath(raw, ORIGIN)).toBe(DEFAULT_AFTER_LOGIN);
+  });
+});
+
+describe("readSetPasswordLink", () => {
+  it("reads the token and mode from the fragment", () => {
+    expect(readSetPasswordLink("#token=abc&mode=reset", "")).toEqual({
+      token: "abc",
+      mode: "reset",
+    });
+    expect(readSetPasswordLink("#token=abc", "")).toEqual({ token: "abc", mode: "invite" });
+  });
+
+  it("still accepts links that used the query string", () => {
+    expect(readSetPasswordLink("", "?token=old&mode=reset")).toEqual({
+      token: "old",
+      mode: "reset",
+    });
+  });
+
+  it("prefers the fragment when both are present", () => {
+    expect(readSetPasswordLink("#token=new", "?token=old")).toEqual({
+      token: "new",
+      mode: "invite",
+    });
+  });
+
+  it("falls back to the forgot-password form without a token", () => {
+    expect(readSetPasswordLink("", "")).toEqual({ token: null, mode: "forgot" });
+    expect(readSetPasswordLink("#token=", "")).toEqual({ token: null, mode: "forgot" });
   });
 });

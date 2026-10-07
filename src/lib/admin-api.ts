@@ -51,6 +51,27 @@ export function getReports(clientId?: string) {
   return fetchAdmin<ReportList>(`${BASE}/reports`, { client_id: clientId });
 }
 
+/** A signed link that downloads one report without credentials. */
+export interface ReportLink {
+  /** Path under the API root, e.g. `/v1/reports/download?token=...`. */
+  url: string;
+  expires_at: string;
+}
+
+/**
+ * Ask the API for a one-minute download link to a report.
+ *
+ * A link the browser opens directly cannot carry the access token, so the
+ * dashboard requests a signed link (authenticated) and then navigates to it.
+ *
+ * @returns The URL to open, already prefixed with the dashboard's API proxy.
+ */
+export async function getReportDownloadUrl(clientId: string, filename: string): Promise<string> {
+  const path = `${BASE}/reports/${encodeURIComponent(clientId)}/${encodeURIComponent(filename)}/link`;
+  const link = await apiFetch<ReportLink>(path, { method: "POST" });
+  return `${API_BASE.replace(/\/v1$/, "")}${link.url}`;
+}
+
 export function getSystemHealth() {
   return fetchAdmin<SystemHealth>(`${BASE}/system/health`);
 }
@@ -149,7 +170,6 @@ export function createApiKey(data: {
   scopes?: string[];
   expires_in_days?: number;
   description?: string;
-  send_to_email?: string;
 }) {
   return apiFetch<ApiKeyCreateResponse>(`${BASE}/api-keys`, { method: "POST", body: data });
 }

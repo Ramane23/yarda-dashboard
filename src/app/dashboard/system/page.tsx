@@ -6,7 +6,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Database,
-  ExternalLink,
+  Download,
   Globe,
   FlaskConical,
   Layers,
@@ -30,8 +30,9 @@ import {
   Check,
   Plus,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Header } from "@/components/layout/header";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
 import { cn, formatNumber, formatMs } from "@/lib/utils";
@@ -45,6 +46,7 @@ import {
   getFeedbackStats,
   getExperiments,
   getReports,
+  getReportDownloadUrl,
   getFeatureStats,
   getUsers,
   inviteUser,
@@ -116,9 +118,11 @@ export default function SystemPage() {
     client_id: "",
     description: "",
     expires_in_days: "",
-    send_to_email: "",
   });
   const [createdKey, setCreatedKey] = useState<ApiKeyCreateResponse | null>(null);
+  // Destructive actions wait for a typed confirmation (SEC-30).
+  const [keyToRevoke, setKeyToRevoke] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{ id: number; email: string } | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
 
   // Client onboarding state
@@ -180,6 +184,14 @@ export default function SystemPage() {
     mutationFn: (clientId: string) => checkRetraining(clientId),
   });
 
+  // Reports open through a one-minute signed link: a plain link cannot
+  // carry the access token.
+  const downloadReport = useMutation({
+    mutationFn: ({ clientId, filename }: { clientId: string; filename: string }) =>
+      getReportDownloadUrl(clientId, filename),
+    onSuccess: (url) => window.location.assign(url),
+  });
+
   // API key management
   const apiKeys = useQuery({ queryKey: ["admin-api-keys"], queryFn: () => getApiKeys(), retry: 1 });
   const createKeyMutation = useMutation({
@@ -187,13 +199,14 @@ export default function SystemPage() {
     onSuccess: (data) => {
       setCreatedKey(data);
       setShowCreateKey(false);
-      setNewKey({ client_id: "", description: "", expires_in_days: "", send_to_email: "" });
+      setNewKey({ client_id: "", description: "", expires_in_days: "" });
       queryClient.invalidateQueries({ queryKey: ["admin-api-keys"] });
     },
   });
   const revokeKeyMutation = useMutation({
     mutationFn: revokeApiKey,
     onSuccess: () => {
+      setKeyToRevoke(null);
       queryClient.invalidateQueries({ queryKey: ["admin-api-keys"] });
     },
   });
@@ -212,10 +225,14 @@ export default function SystemPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteUser,
     onSuccess: () => {
+      setUserToDelete(null);
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       setExpandedUserId(null);
     },
   });
+
+  const closeRevokeDialog = useCallback(() => setKeyToRevoke(null), []);
+  const closeDeleteDialog = useCallback(() => setUserToDelete(null), []);
 
   const onboardMutation = useMutation({
     mutationFn: onboardClient,
@@ -1228,12 +1245,14 @@ export default function SystemPage() {
               ) : (
                 <div className="max-h-56 space-y-1.5 overflow-auto">
                   {rep.reports.map((r) => (
-                    <a
+                    <button
+                      type="button"
                       key={`${r.client_id}-${r.filename}`}
-                      href={r.url || `/api/v1/admin/reports/${r.client_id}/${r.filename}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 rounded-lg border bg-surface-50 p-2.5 text-xs transition-colors hover:bg-surface-100 dark:border-surface-700 dark:bg-surface-800/50 dark:hover:bg-surface-800"
+                      onClick={() =>
+                        downloadReport.mutate({ clientId: r.client_id, filename: r.filename })
+                      }
+                      disabled={downloadReport.isPending}
+                      className="flex w-full items-center gap-2 rounded-lg border bg-surface-50 p-2.5 text-left text-xs transition-colors hover:bg-surface-100 disabled:opacity-60 dark:border-surface-700 dark:bg-surface-800/50 dark:hover:bg-surface-800"
                     >
                       <FileText size={14} className="shrink-0 text-brand-500" />
                       <div className="min-w-0 flex-1">
@@ -1249,9 +1268,12 @@ export default function SystemPage() {
                           ? `${(r.size_bytes / 1024).toFixed(0)} KB`
                           : `${r.size_bytes} B`}
                       </span>
-                      <ExternalLink size={12} className="shrink-0 text-surface-400" />
-                    </a>
+                      <Download size={12} className="shrink-0 text-surface-400" />
+                    </button>
                   ))}
+                  {downloadReport.isError && (
+                    <p className="text-xs text-red-500">{downloadReport.error.message}</p>
+                  )}
                 </div>
               )
             ) : reports.isLoading ? (
@@ -1322,12 +1344,11 @@ export default function SystemPage() {
                     ? parseInt(newKey.expires_in_days)
                     : undefined,
                   description: newKey.description || undefined,
-                  send_to_email: newKey.send_to_email || undefined,
                 });
               }}
               className="rounded-lg border bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/50"
             >
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-surface-500">
                     {t("system.keyClient")} *
@@ -1369,18 +1390,6 @@ export default function SystemPage() {
                     onChange={(e) => setNewKey({ ...newKey, expires_in_days: e.target.value })}
                     className="input-field w-full py-1.5 text-sm"
                     placeholder={t("system.keyNeverExpires")}
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-surface-500">
-                    {t("system.recipientEmail")}
-                  </label>
-                  <input
-                    type="email"
-                    value={newKey.send_to_email}
-                    onChange={(e) => setNewKey({ ...newKey, send_to_email: e.target.value })}
-                    className="input-field w-full py-1.5 text-sm"
-                    placeholder={t("system.sendViaEmail")}
                   />
                 </div>
                 <div className="flex items-end">
@@ -1469,11 +1478,7 @@ export default function SystemPage() {
                     </div>
                     {k.is_active && (
                       <button
-                        onClick={() => {
-                          if (window.confirm(t("system.keyRevokeConfirm"))) {
-                            revokeKeyMutation.mutate(k.key_id);
-                          }
-                        }}
+                        onClick={() => setKeyToRevoke(k.key_id)}
                         disabled={revokeKeyMutation.isPending}
                         className="shrink-0 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
                       >
@@ -1713,15 +1718,7 @@ export default function SystemPage() {
                           {/* Delete button */}
                           <div className="mt-4 flex items-center justify-end border-t pt-3 dark:border-surface-700">
                             <button
-                              onClick={() => {
-                                if (
-                                  window.confirm(
-                                    `Delete user "${u.email}"? This action cannot be undone.`,
-                                  )
-                                ) {
-                                  deleteMutation.mutate(u.id);
-                                }
-                              }}
+                              onClick={() => setUserToDelete({ id: u.id, email: u.email })}
                               disabled={deleteMutation.isPending}
                               className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
                             >
@@ -1755,6 +1752,27 @@ export default function SystemPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={keyToRevoke !== null}
+        title={t("system.revokeKey")}
+        description={t("system.keyRevokeConfirm")}
+        phrase={keyToRevoke ?? ""}
+        confirmLabel={t("system.revokeKey")}
+        pending={revokeKeyMutation.isPending}
+        onConfirm={() => keyToRevoke && revokeKeyMutation.mutate(keyToRevoke)}
+        onCancel={closeRevokeDialog}
+      />
+      <ConfirmDialog
+        open={userToDelete !== null}
+        title={userToDelete?.email ?? ""}
+        description={t("system.userDeleteConfirm")}
+        phrase={userToDelete?.email ?? ""}
+        confirmLabel={t("system.deleteUser")}
+        pending={deleteMutation.isPending}
+        onConfirm={() => userToDelete && deleteMutation.mutate(userToDelete.id)}
+        onCancel={closeDeleteDialog}
+      />
     </>
   );
 }
