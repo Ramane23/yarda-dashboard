@@ -35,7 +35,8 @@ import { Header } from "@/components/layout/header";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
-import { cn, formatNumber, formatMs } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useFormat } from "@/lib/useFormat";
 import {
   getSystemHealth,
   getIngestionStats,
@@ -97,6 +98,7 @@ function Stat({ label, value, sub }: { label: string; value: string | number; su
 }
 
 export default function SystemPage() {
+  const fmt = useFormat();
   const period = useAppStore((s) => s.period);
   const viewAsClient = useAppStore((s) => s.viewAsClient);
   const t = useT();
@@ -431,18 +433,24 @@ export default function SystemPage() {
             {ing ? (
               <>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  <Stat
-                    label={t("system.totalRequests")}
-                    value={formatNumber(ing.total_requests)}
-                  />
+                  <Stat label={t("system.totalRequests")} value={fmt.number(ing.total_requests)} />
                   <Stat
                     label={t("system.errorRate")}
                     value={`${ing.error_rate_percent.toFixed(2)}%`}
                     sub={`${ing.total_errors} errors`}
                   />
-                  <Stat label={t("system.avgLatency")} value={formatMs(ing.avg_response_time_ms)} />
-                  <Stat label={t("system.p95Latency")} value={formatMs(ing.p95_response_time_ms)} />
-                  <Stat label={t("system.p99Latency")} value={formatMs(ing.p99_response_time_ms)} />
+                  <Stat
+                    label={t("system.avgLatency")}
+                    value={fmt.duration(ing.avg_response_time_ms)}
+                  />
+                  <Stat
+                    label={t("system.p95Latency")}
+                    value={fmt.duration(ing.p95_response_time_ms)}
+                  />
+                  <Stat
+                    label={t("system.p99Latency")}
+                    value={fmt.duration(ing.p99_response_time_ms)}
+                  />
                 </div>
                 {ing.per_path.length > 0 && (
                   <div>
@@ -462,7 +470,7 @@ export default function SystemPage() {
                             {ep.path}
                           </span>
                           <span className="font-mono text-surface-900 dark:text-white">
-                            {formatNumber(ep.total)}
+                            {fmt.number(ep.total)}
                           </span>
                           {ep.errors > 0 && (
                             <span className="font-mono text-red-500">{ep.errors} err</span>
@@ -927,9 +935,7 @@ export default function SystemPage() {
                       )}
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      {feat.n_rows != null && (
-                        <Stat label="Rows" value={formatNumber(feat.n_rows)} />
-                      )}
+                      {feat.n_rows != null && <Stat label="Rows" value={fmt.number(feat.n_rows)} />}
                       {feat.n_features != null && <Stat label="Features" value={feat.n_features} />}
                     </div>
                     {feat.columns.length > 0 && (
@@ -1109,9 +1115,9 @@ export default function SystemPage() {
             {fb ? (
               <>
                 <div className="grid grid-cols-3 gap-4">
-                  <Stat label={t("system.totalLabeled")} value={formatNumber(fb.total_labeled)} />
-                  <Stat label={t("system.fraudLabels")} value={formatNumber(fb.total_fraud)} />
-                  <Stat label={t("system.legitLabels")} value={formatNumber(fb.total_legitimate)} />
+                  <Stat label={t("system.totalLabeled")} value={fmt.number(fb.total_labeled)} />
+                  <Stat label={t("system.fraudLabels")} value={fmt.number(fb.total_fraud)} />
+                  <Stat label={t("system.legitLabels")} value={fmt.number(fb.total_legitimate)} />
                 </div>
                 {fb.total_labeled > 0 && (
                   <div className="h-3 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">

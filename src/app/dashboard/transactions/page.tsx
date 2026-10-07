@@ -7,14 +7,16 @@ import { Filter } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { DataTable } from "@/components/ui/data-table";
 import { Pagination } from "@/components/ui/pagination";
-import { ScoreBadge, DecisionBadge } from "@/components/ui/score-badge";
+import { ScoreBadge, DecisionBadge } from "@/components/ui/badge";
 import { getTransactions } from "@/lib/api";
-import { formatMs, cn, phaseLabel } from "@/lib/utils";
+import { cn, phaseLabel } from "@/lib/utils";
+import { useFormat } from "@/lib/useFormat";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
 import type { TransactionItem, Decision, SortOrder } from "@/types/api";
 
 export default function TransactionsPage() {
+  const fmt = useFormat();
   const period = useAppStore((s) => s.period);
   const locale = useAppStore((s) => s.locale);
   const viewAsClient = useAppStore((s) => s.viewAsClient);
@@ -92,7 +94,7 @@ export default function TransactionsPage() {
       header: t("transactions.latency"),
       render: (item: TransactionItem) => (
         <span className="font-mono text-xs text-surface-500 dark:text-surface-400">
-          {formatMs(item.inference_time_ms)}
+          {fmt.duration(item.inference_time_ms)}
         </span>
       ),
     },

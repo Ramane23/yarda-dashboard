@@ -16,14 +16,15 @@ import {
 } from "lucide-react";
 import { AdminGuard } from "@/components/admin-guard";
 import { Header } from "@/components/layout/header";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { DataTable } from "@/components/ui/data-table";
-import { DecisionBadge } from "@/components/ui/score-badge";
+import { DecisionBadge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
 import { getTrainingData, getTrainingTable, triggerTraining } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
 import { cn } from "@/lib/utils";
+import { useFormat } from "@/lib/useFormat";
 import type { LabeledSample } from "@/types/api";
 
 // --- Tab type ---
@@ -31,6 +32,7 @@ type Tab = "overview" | "table";
 
 export default function TrainingDataPage() {
   const t = useT();
+  const fmt = useFormat();
   const viewAsClient = useAppStore((s) => s.viewAsClient);
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("overview");
@@ -144,35 +146,35 @@ export default function TrainingDataPage() {
         {/* KPI cards + Trigger training button */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="grid flex-1 grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            <KpiCard
-              title={t("training.totalLabeled")}
-              value={data?.total_labeled?.toLocaleString() ?? "--"}
+            <StatCard
+              label={t("training.totalLabeled")}
+              value={fmt.number(data?.total_labeled)}
               icon={Database}
-              accent="bg-brand-500"
+              loading={!data}
             />
-            <KpiCard
-              title={t("training.humanLabeled")}
-              value={data?.human_labeled?.toLocaleString() ?? "--"}
+            <StatCard
+              label={t("training.humanLabeled")}
+              value={fmt.number(data?.human_labeled)}
               icon={User}
-              accent="bg-violet-500"
+              loading={!data}
             />
-            <KpiCard
-              title={t("training.autoLabeled")}
-              value={data?.auto_labeled?.toLocaleString() ?? "--"}
+            <StatCard
+              label={t("training.autoLabeled")}
+              value={fmt.number(data?.auto_labeled)}
               icon={Bot}
-              accent="bg-surface-400"
+              loading={!data}
             />
-            <KpiCard
-              title={t("training.unlabeled")}
-              value={data?.unlabeled?.toLocaleString() ?? "--"}
+            <StatCard
+              label={t("training.unlabeled")}
+              value={fmt.number(data?.unlabeled)}
               icon={CircleDot}
-              accent="bg-amber-500"
+              loading={!data}
             />
-            <KpiCard
-              title={t("training.classesObserved")}
-              value={data?.classes_observed?.toString() ?? "--"}
+            <StatCard
+              label={t("training.classesObserved")}
+              value={fmt.number(data?.classes_observed)}
               icon={Tag}
-              accent="bg-emerald-500"
+              loading={!data}
             />
           </div>
           <button

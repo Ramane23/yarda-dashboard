@@ -15,12 +15,14 @@ import {
   Shield,
 } from "lucide-react";
 import { Header } from "@/components/layout/header";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { VolumeChart } from "@/components/charts/volume-chart";
 import { DecisionDonut } from "@/components/charts/decision-donut";
 import { ScoreHistogram } from "@/components/charts/score-histogram";
 import { getStats, getAnalytics, getPhaseProgress, getScoringConfig, getImpact } from "@/lib/api";
-import { formatNumber, formatPercent, formatMs, cn, phaseLabel } from "@/lib/utils";
+import { cn, phaseLabel } from "@/lib/utils";
+import { useFormat } from "@/lib/useFormat";
+import { decisionTone } from "@/lib/tokens";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
 import type { TranslationKey } from "@/lib/i18n";
@@ -58,11 +60,8 @@ export default function DashboardOverview() {
 
   const phase = stats ? phaseLabel(stats.phase, locale) : null;
 
-  const formatAmount = (amount: number, currency: string) => {
-    if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M ${currency}`;
-    if (amount >= 1_000) return `${(amount / 1_000).toFixed(0)}K ${currency}`;
-    return `${amount.toFixed(0)} ${currency}`;
-  };
+  const fmt = useFormat();
+  const formatAmount = (amount: number, currency: string) => fmt.money(amount, currency, true);
 
   const decisionKeys: Record<string, TranslationKey> = {
     allow: "decision.allow",
@@ -96,47 +95,51 @@ export default function DashboardOverview() {
 
         {/* KPI Grid */}
         <div className="animate-fade-in grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          <KpiCard
-            title={t("kpi.transactions")}
-            value={statsLoading ? "\u2014" : formatNumber(stats?.total_transactions ?? 0)}
+          <StatCard
+            label={t("kpi.transactions")}
+            value={fmt.number(stats?.total_transactions ?? 0)}
             icon={ArrowLeftRight}
-            accent="bg-brand-500"
+            loading={statsLoading}
           />
-          <KpiCard
-            title={t("kpi.flagged")}
-            value={statsLoading ? "\u2014" : formatNumber(stats?.total_flagged ?? 0)}
-            subtitle={
-              statsLoading ? "" : `${formatPercent(stats?.flagged_rate ?? 0)} ${t("kpi.ofTotal")}`
-            }
+          <StatCard
+            label={t("kpi.flagged")}
+            value={fmt.number(stats?.total_flagged ?? 0)}
+            hint={`${fmt.percent(stats?.flagged_rate ?? 0)} ${t("kpi.ofTotal")}`}
             icon={ShieldAlert}
-            accent="bg-red-500"
+            valueClassName={
+              (stats?.total_flagged ?? 0) > 0 ? decisionTone("alert").text : undefined
+            }
+            loading={statsLoading}
           />
-          <KpiCard
-            title={t("kpi.riskScore")}
-            value={statsLoading ? "\u2014" : (stats?.avg_score ?? 0).toFixed(3)}
-            subtitle={t("kpi.average")}
+          <StatCard
+            label={t("kpi.riskScore")}
+            value={fmt.score(stats?.avg_score ?? 0)}
+            hint={t("kpi.average")}
             icon={TrendingUp}
-            accent="bg-amber-500"
+            loading={statsLoading}
           />
-          <KpiCard
-            title={t("kpi.latency")}
-            value={statsLoading ? "\u2014" : formatMs(stats?.avg_inference_time_ms ?? 0)}
-            subtitle={t("kpi.avgInference")}
+          <StatCard
+            label={t("kpi.latency")}
+            value={fmt.duration(stats?.avg_inference_time_ms ?? 0)}
+            hint={t("kpi.avgInference")}
             icon={Timer}
-            accent="bg-emerald-500"
+            loading={statsLoading}
           />
-          <KpiCard
-            title={t("kpi.phase")}
-            value={statsLoading ? "\u2014" : (phase?.label ?? "\u2014")}
-            subtitle={`${stats?.labeled_count ?? 0} ${t("kpi.labels")}`}
+          <StatCard
+            label={t("kpi.phase")}
+            value={phase?.label ?? "\u2014"}
+            hint={`${fmt.number(stats?.labeled_count ?? 0)} ${t("kpi.labels")}`}
             icon={Layers}
-            accent="bg-violet-500"
+            loading={statsLoading}
           />
-          <KpiCard
-            title={t("kpi.pendingReview")}
-            value={statsLoading ? "\u2014" : formatNumber(stats?.pending_review ?? 0)}
+          <StatCard
+            label={t("kpi.pendingReview")}
+            value={fmt.number(stats?.pending_review ?? 0)}
             icon={AlertCircle}
-            accent="bg-orange-500"
+            valueClassName={
+              (stats?.pending_review ?? 0) > 0 ? decisionTone("review").text : undefined
+            }
+            loading={statsLoading}
           />
         </div>
 

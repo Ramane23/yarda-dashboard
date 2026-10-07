@@ -2,70 +2,214 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * YARDA design tokens (plan item UX-02).
+ *
+ * Every colour the UI uses is a semantic token defined here, once per theme,
+ * as space-separated HSL channels so Tailwind can apply opacity
+ * (`bg-primary/10`). Components never hardcode a colour: risk levels,
+ * decisions, phases and chart series all come from these variables, so
+ * badges, tables and charts always agree, in both themes.
+ *
+ * Palette: neutral zinc surfaces and one violet brand hue taken from the
+ * logo. Muted text is calibrated for WCAG AA (≥ 4.5:1) on its background.
+ */
 @layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 4%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 40%;
+    --subtle-foreground: 240 4% 46%;
+    --accent: 240 5% 94%;
+    --accent-foreground: 240 6% 10%;
+    --border: 240 6% 90%;
+    --input: 240 6% 86%;
+    --ring: 262 83% 58%;
+
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 262 90% 96%;
+    --primary-soft-foreground: 263 70% 45%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 160 84% 30%;
+    --warning: 32 95% 40%;
+    --info: 217 91% 50%;
+
+    /* Decisions / risk levels */
+    --risk-allow: 160 84% 30%;
+    --risk-allow-soft: 152 76% 95%;
+    --risk-review: 38 92% 38%;
+    --risk-review-soft: 48 96% 93%;
+    --risk-alert: 21 90% 45%;
+    --risk-alert-soft: 33 100% 94%;
+    --risk-block: 0 72% 48%;
+    --risk-block-soft: 0 86% 96%;
+
+    /* Learning phases */
+    --phase-detection: 199 89% 38%;
+    --phase-learning: 38 92% 38%;
+    --phase-classification: 160 84% 30%;
+    --phase-intelligence: 262 83% 58%;
+
+    /* Chart series (categorical, colour-blind friendly order) */
+    --chart-1: 262 83% 58%;
+    --chart-2: 199 89% 42%;
+    --chart-3: 160 70% 36%;
+    --chart-4: 38 92% 45%;
+    --chart-5: 340 75% 52%;
+    --chart-6: 240 4% 55%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 240 10% 4%;
+    --foreground: 0 0% 96%;
+    --card: 240 6% 7%;
+    --card-foreground: 0 0% 96%;
+    --popover: 240 6% 9%;
+    --popover-foreground: 0 0% 96%;
+    --muted: 240 4% 12%;
+    --muted-foreground: 240 5% 66%;
+    --subtle-foreground: 240 4% 58%;
+    --accent: 240 4% 14%;
+    --accent-foreground: 0 0% 96%;
+    --border: 240 4% 16%;
+    --input: 240 4% 20%;
+    --ring: 263 90% 70%;
+
+    --primary: 263 85% 66%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 263 50% 15%;
+    --primary-soft-foreground: 263 95% 80%;
+
+    --destructive: 0 75% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 158 64% 52%;
+    --warning: 38 92% 58%;
+    --info: 213 94% 68%;
+
+    --risk-allow: 158 64% 52%;
+    --risk-allow-soft: 160 60% 10%;
+    --risk-review: 43 96% 56%;
+    --risk-review-soft: 40 70% 11%;
+    --risk-alert: 27 96% 61%;
+    --risk-alert-soft: 25 70% 12%;
+    --risk-block: 0 84% 63%;
+    --risk-block-soft: 0 60% 12%;
+
+    --phase-detection: 199 89% 60%;
+    --phase-learning: 43 96% 56%;
+    --phase-classification: 158 64% 52%;
+    --phase-intelligence: 263 85% 72%;
+
+    --chart-1: 263 85% 68%;
+    --chart-2: 199 89% 60%;
+    --chart-3: 158 64% 52%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 340 82% 66%;
+    --chart-6: 240 5% 60%;
+  }
+
   * {
-    @apply border-surface-200 dark:border-surface-700/60;
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
-    @apply bg-surface-50 text-surface-900 antialiased dark:bg-surface-950 dark:text-surface-100;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* Custom scrollbar */
+  /* Figures align in columns everywhere (tabular, not monospace). */
+  .tabular,
+  td,
+  th {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  ::selection {
+    @apply bg-primary/20;
+  }
+
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-surface-300 dark:bg-surface-700;
+    @apply rounded-full border-2 border-solid border-transparent bg-border bg-clip-padding;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-surface-400 dark:bg-surface-600;
+    @apply bg-muted-foreground/40;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
+/*
+ * Legacy component classes, now drawn from the tokens so every existing page
+ * picks up the new palette. New code uses the React primitives in
+ * `src/components/ui` instead; these classes disappear as pages migrate (A2).
+ */
 @layer components {
   .card {
-    @apply rounded-xl border bg-white shadow-card dark:bg-surface-900 dark:shadow-dark-card;
+    @apply rounded-lg border bg-card text-card-foreground shadow-xs;
   }
 
   .card-hover {
-    @apply card transition-shadow duration-200 hover:shadow-card-hover dark:hover:shadow-glow;
+    @apply card transition-colors duration-150 hover:border-foreground/15;
   }
 
   .input-field {
-    @apply w-full rounded-lg border bg-white px-3 py-2.5 text-sm transition-colors
-      placeholder:text-surface-400
-      focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20
-      dark:bg-surface-800 dark:text-surface-100 dark:placeholder:text-surface-500
-      dark:focus:border-brand-400 dark:focus:ring-brand-400/20;
+    @apply flex h-9 w-full rounded-md border border-input bg-card px-3 py-1.5 text-sm shadow-xs transition-colors
+      placeholder:text-subtle-foreground
+      focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25 focus-visible:ring-offset-0
+      disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-primary {
-    @apply rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm
-      transition-all hover:bg-brand-700 active:scale-[0.98]
-      dark:bg-brand-500 dark:hover:bg-brand-400;
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs
+      transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-ghost {
-    @apply rounded-lg px-3 py-2 text-sm font-medium text-surface-600 transition-colors
-      hover:bg-surface-100 hover:text-surface-900
-      dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-100;
+    @apply inline-flex h-9 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium text-muted-foreground
+      transition-colors hover:bg-accent hover:text-accent-foreground;
   }
 
   .section-title {
-    @apply text-sm font-semibold text-surface-700 dark:text-surface-300;
+    @apply text-sm font-semibold text-foreground;
   }
 
   .text-muted {
-    @apply text-surface-500 dark:text-surface-400;
+    @apply text-muted-foreground;
   }
 
   .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium;
   }
 }

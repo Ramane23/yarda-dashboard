@@ -1,16 +1,13 @@
 "use client";
 
+import { useChartTheme } from "@/components/charts/chart-theme";
+import type { Decision } from "@/lib/tokens";
+import { useFormat } from "@/lib/useFormat";
+
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useT } from "@/lib/useT";
 import type { DecisionBreakdown } from "@/types/api";
 import type { TranslationKey } from "@/lib/i18n";
-
-const COLORS: Record<string, string> = {
-  allow: "#059669",
-  review: "#d97706",
-  alert: "#ea580c",
-  block: "#dc2626",
-};
 
 const LABEL_KEYS: Record<string, TranslationKey> = {
   allow: "legend.allowed",
@@ -20,6 +17,8 @@ const LABEL_KEYS: Record<string, TranslationKey> = {
 };
 
 export function DecisionDonut({ data }: { data: DecisionBreakdown }) {
+  const theme = useChartTheme();
+  const fmt = useFormat();
   const t = useT();
 
   const chartData = Object.entries(data).map(([name, value]) => ({
@@ -46,21 +45,17 @@ export function DecisionDonut({ data }: { data: DecisionBreakdown }) {
                 strokeWidth={0}
               >
                 {chartData.map((entry) => (
-                  <Cell key={entry.name} fill={COLORS[entry.name] || "#94a3b8"} />
+                  <Cell
+                    key={entry.name}
+                    fill={theme.decision[entry.name as Decision] ?? theme.axis}
+                  />
                 ))}
               </Pie>
               <Tooltip
                 formatter={(value: number) => [
                   `${value.toLocaleString()} (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`,
                 ]}
-                contentStyle={{
-                  borderRadius: 12,
-                  border: "1px solid rgba(148, 163, 184, 0.2)",
-                  backgroundColor: "rgba(15, 23, 42, 0.95)",
-                  color: "#e2e8f0",
-                  fontSize: 12,
-                  padding: "8px 12px",
-                }}
+                {...theme.tooltip}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -86,22 +81,20 @@ export function DecisionDonut({ data }: { data: DecisionBreakdown }) {
                   <div className="flex items-center gap-2">
                     <span
                       className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: COLORS[d.name] }}
+                      style={{ backgroundColor: theme.decision[d.name as Decision] ?? theme.axis }}
                     />
                     <span className="text-xs font-medium text-surface-600 dark:text-surface-300">
                       {labelKey ? t(labelKey) : d.name}
                     </span>
                   </div>
-                  <span className="font-mono text-xs font-semibold text-surface-900 dark:text-white">
-                    {d.value.toLocaleString()}
-                  </span>
+                  <span className="text-xs font-semibold tabular-nums">{fmt.number(d.value)}</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-surface-100 dark:bg-surface-800">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
                       width: `${pct}%`,
-                      backgroundColor: COLORS[d.name],
+                      backgroundColor: theme.decision[d.name as Decision] ?? theme.axis,
                     }}
                   />
                 </div>
