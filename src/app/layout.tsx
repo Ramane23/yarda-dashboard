@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { NONCE_HEADER } from "@/lib/csp";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,7 +23,12 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.png", apple: "/icon.png" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+/**
+ * Root layout. Reading the request headers makes every page render per
+ * request, which the CSP nonce requires (see `src/middleware.ts`).
+ */
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const nonce = (await headers()).get(NONCE_HEADER) ?? undefined;
   return (
     <html
       lang="en"
@@ -29,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body className="font-sans">
-        <Providers>{children}</Providers>
+        <Providers nonce={nonce}>{children}</Providers>
       </body>
     </html>
   );

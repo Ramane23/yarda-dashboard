@@ -448,6 +448,16 @@ const translations = {
     en: "Revoke this API key? The client will no longer be able to authenticate.",
     fr: "Révoquer cette clé API ? Le client ne pourra plus s'authentifier.",
   },
+  "system.userDeleteConfirm": {
+    en: "Delete this user? They lose access immediately. This cannot be undone.",
+    fr: "Supprimer cet utilisateur ? Il perd l'accès immédiatement. Action irréversible.",
+  },
+  "confirm.typeToConfirm": {
+    en: "Type the value below to confirm:",
+    fr: "Saisissez la valeur ci-dessous pour confirmer :",
+  },
+  "confirm.cancel": { en: "Cancel", fr: "Annuler" },
+  "system.deleteUser": { en: "Delete user", fr: "Supprimer l'utilisateur" },
   "system.users": { en: "User Management", fr: "Gestion des Utilisateurs" },
   "system.addUser": { en: "Add User", fr: "Ajouter un Utilisateur" },
   "system.userEmail": { en: "Email", fr: "Email" },
@@ -462,8 +472,6 @@ const translations = {
     en: "Invite sent successfully",
     fr: "Invitation envoy\u00e9e avec succ\u00e8s",
   },
-  "system.recipientEmail": { en: "Recipient Email", fr: "Email du destinataire" },
-  "system.sendViaEmail": { en: "Send via email", fr: "Envoyer par email" },
   "system.unauthorized": {
     en: "Unauthorized — Admin access required",
     fr: "Non autorisé — Accès admin requis",
