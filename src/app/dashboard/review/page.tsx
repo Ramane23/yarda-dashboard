@@ -15,7 +15,7 @@ import {
 import { Header } from "@/components/layout/header";
 import { DataTable } from "@/components/ui/data-table";
 import { Pagination } from "@/components/ui/pagination";
-import { DecisionBadge } from "@/components/ui/score-badge";
+import { DecisionBadge } from "@/components/ui/badge";
 import { getReviewQueue, getPhaseProgress, getScoringConfig, submitFeedback } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { cn, phaseLabel } from "@/lib/utils";

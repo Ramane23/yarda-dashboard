@@ -9,12 +9,16 @@ import {
   ShieldAlert,
   Box,
   Settings,
-  ChevronLeft,
+  PanelLeftClose,
+  PanelLeftOpen,
   LogOut,
   Monitor,
   Workflow,
   Database,
 } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
+import { Button } from "@/components/ui/button";
+import { Tooltip } from "@/components/ui/menu";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/auth";
 import { selectIsAdmin, useAppStore } from "@/lib/store";
@@ -59,49 +63,55 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "flex flex-col border-r bg-white transition-all duration-300 dark:bg-surface-900",
-        sidebarOpen ? "w-64" : "w-[68px]",
+        "flex shrink-0 flex-col border-r bg-card transition-[width] duration-200",
+        sidebarOpen ? "w-60" : "w-[60px]",
       )}
     >
-      {/* Logo */}
       <div
         className={cn(
-          "flex items-center border-b",
-          sidebarOpen ? "h-16 gap-3 pl-6 pr-2" : "h-16 justify-center px-2",
+          "flex h-14 items-center border-b",
+          sidebarOpen ? "gap-2 pl-5 pr-2" : "justify-center px-2",
         )}
       >
         {sidebarOpen ? (
-          <Image
-            src="/logo.png"
-            alt="YARDA"
-            width={480}
-            height={136}
-            className="h-10 w-auto object-contain"
-            priority
-          />
+          <Logo className="h-7" priority />
         ) : (
           <Image
             src="/icon.png"
             alt="YARDA"
             width={356}
             height={358}
-            className="h-9 w-9 object-contain"
+            className="size-8 object-contain"
             priority
           />
         )}
-        <button
-          onClick={toggleSidebar}
-          className="ml-auto rounded-lg p-1.5 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800 dark:hover:text-surface-300"
-        >
-          <ChevronLeft
-            size={16}
-            className={cn("transition-transform duration-300", !sidebarOpen && "rotate-180")}
-          />
-        </button>
+        {sidebarOpen && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="ml-auto"
+            onClick={toggleSidebar}
+            aria-label={t("nav.collapse")}
+            aria-expanded
+          >
+            <PanelLeftClose />
+          </Button>
+        )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav aria-label={t("nav.main")} className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3">
+        {!sidebarOpen && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="mx-auto mb-2 flex"
+            onClick={toggleSidebar}
+            aria-label={t("nav.expand")}
+            aria-expanded={false}
+          >
+            <PanelLeftOpen />
+          </Button>
+        )}
         {nav
           .filter((item) => !item.adminOnly || isAdmin)
           .map((item) => {
@@ -109,43 +119,53 @@ export function Sidebar() {
             const active =
               pathname === item.href ||
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
-            return (
+            const link = (
               <Link
                 key={item.href}
                 href={item.href}
-                title={!sidebarOpen ? label : undefined}
+                aria-current={active ? "page" : undefined}
+                aria-label={!sidebarOpen ? label : undefined}
                 className={cn(
-                  "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                  "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors",
                   active
-                    ? "bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300"
-                    : "text-surface-500 hover:bg-surface-50 hover:text-surface-900 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200",
-                  !sidebarOpen && "justify-center px-2",
+                    ? "bg-accent font-medium text-foreground"
+                    : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+                  !sidebarOpen && "justify-center px-0",
                 )}
               >
-                {active && (
-                  <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-brand-600 dark:bg-brand-400" />
-                )}
-                <item.icon size={20} strokeWidth={active ? 2.25 : 1.75} />
-                {sidebarOpen && <span>{label}</span>}
+                <item.icon
+                  className={cn("size-4 shrink-0", active && "text-primary")}
+                  aria-hidden
+                />
+                {sidebarOpen && <span className="truncate">{label}</span>}
               </Link>
+            );
+            return sidebarOpen ? (
+              link
+            ) : (
+              <Tooltip key={item.href} content={label} side="right">
+                {link}
+              </Tooltip>
             );
           })}
       </nav>
 
-      {/* Footer */}
-      <div className="border-t px-3 py-3 space-y-1">
+      <div className="space-y-1 border-t p-2.5">
         <button
+          type="button"
           onClick={handleLogout}
+          aria-label={!sidebarOpen ? t("nav.signOut") : undefined}
           className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-surface-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-surface-400 dark:hover:bg-red-950/30 dark:hover:text-red-400",
-            !sidebarOpen && "justify-center px-2",
+            "flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-sm text-muted-foreground transition-colors",
+            "hover:bg-destructive/10 hover:text-destructive",
+            !sidebarOpen && "justify-center px-0",
           )}
         >
-          <LogOut size={18} />
+          <LogOut className="size-4" aria-hidden />
           {sidebarOpen && <span>{t("nav.signOut")}</span>}
         </button>
         {sidebarOpen && (
-          <p className="px-3 py-1 text-[10px] font-medium text-surface-400">{t("app.version")}</p>
+          <p className="px-2.5 pt-1 text-2xs text-subtle-foreground">{t("app.version")}</p>
         )}
       </div>
     </aside>

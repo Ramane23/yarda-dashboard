@@ -7,7 +7,7 @@ import { selectIsAdmin, useAppStore } from "@/lib/store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { useT } from "@/lib/useT";
-import { cn } from "@/lib/utils";
+import { SegmentedControl } from "@/components/ui/tabs";
 import type { Period } from "@/types/api";
 import type { TranslationKey } from "@/lib/i18n";
 
@@ -37,19 +37,18 @@ export function Header({ title }: { title: string }) {
   const badgeLabel = isAdmin ? viewAsClient : (user?.clientId ?? "");
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b bg-white/80 px-6 backdrop-blur-sm dark:bg-surface-900/80">
-      <h1 className="text-lg font-semibold text-surface-900 dark:text-white">{title}</h1>
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-4 border-b bg-background/80 px-6 backdrop-blur">
+      <h1 className="truncate text-base font-semibold tracking-tight">{title}</h1>
 
-      <div className="flex items-center gap-3">
-        {/* Admin client selector */}
+      <div className="flex items-center gap-2">
         {isAdmin && clients && clients.length > 0 && (
-          <div className="flex items-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-2 py-1 dark:border-brand-800 dark:bg-brand-950/30">
-            <Eye size={14} className="text-brand-500" />
+          <label className="flex h-8 items-center gap-1.5 rounded-md border bg-card pl-2.5 pr-1 shadow-xs">
+            <Eye className="size-3.5 text-muted-foreground" aria-hidden />
+            <span className="sr-only">{t("system.filterByClient")}</span>
             <select
-              aria-label={t("system.filterByClient")}
               value={viewAsClient}
               onChange={(e) => setViewAsClient(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-brand-700 outline-none dark:text-brand-300"
+              className="h-full cursor-pointer bg-transparent pr-1 text-xs font-medium outline-none"
             >
               <option value="">{t("system.allClients")}</option>
               {clients.map((c) => (
@@ -58,38 +57,25 @@ export function Header({ title }: { title: string }) {
                 </option>
               ))}
             </select>
-          </div>
+          </label>
         )}
 
-        {/* Period selector */}
-        <div className="flex rounded-lg border bg-surface-50 p-0.5 dark:bg-surface-800">
-          {periods.map((p) => (
-            <button
-              key={p.value}
-              onClick={() => setPeriod(p.value)}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-200",
-                period === p.value
-                  ? "bg-white text-brand-700 shadow-sm dark:bg-surface-700 dark:text-brand-300"
-                  : "text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200",
-              )}
-            >
-              {t(p.key)}
-            </button>
-          ))}
-        </div>
-
+        <SegmentedControl
+          label={t("header.period")}
+          value={period}
+          onChange={setPeriod}
+          options={periods.map((p) => ({ value: p.value, label: t(p.key) }))}
+          size="sm"
+        />
         <LocaleToggle />
         <ThemeToggle />
 
-        {/* Tenant badge: the tenant being viewed (admins) or the user's own tenant. */}
+        {/* The tenant being viewed (admins) or the user's own tenant. */}
         {badgeLabel && (
-          <div className="flex items-center gap-2 rounded-full border bg-surface-50 px-3 py-1.5 dark:bg-surface-800">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-            <span className="text-xs font-semibold text-surface-700 dark:text-surface-300">
-              {badgeLabel.toUpperCase()}
-            </span>
-          </div>
+          <span className="hidden items-center gap-1.5 rounded-md border bg-card px-2 py-1 text-xs font-medium shadow-xs sm:inline-flex">
+            <span className="size-1.5 rounded-full bg-success" aria-hidden />
+            {badgeLabel.toUpperCase()}
+          </span>
         )}
       </div>
     </header>

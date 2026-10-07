@@ -21,7 +21,8 @@ import {
 import { Header } from "@/components/layout/header";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
-import { cn, formatMs } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useFormat } from "@/lib/useFormat";
 import { getTransactions } from "@/lib/api";
 import { getPredictionDetail } from "@/lib/admin-api";
 
@@ -274,6 +275,7 @@ function StepArrow() {
 // Main page
 // ---------------------------------------------------------------------------
 export default function PipelinePage() {
+  const fmt = useFormat();
   const period = useAppStore((s) => s.period);
   const viewAsClient = useAppStore((s) => s.viewAsClient);
   const t = useT();
@@ -417,7 +419,7 @@ export default function PipelinePage() {
                 {detail.inference_time_ms > 0 && (
                   <span className="flex items-center gap-1">
                     <Gauge size={12} />
-                    {formatMs(detail.inference_time_ms)}
+                    {fmt.duration(detail.inference_time_ms)}
                   </span>
                 )}
                 {detail.model_name && (

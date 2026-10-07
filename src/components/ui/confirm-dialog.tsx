@@ -2,6 +2,16 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input, Label } from "@/components/ui/form-controls";
 import { useT } from "@/lib/useT";
 
 /**
@@ -36,7 +46,8 @@ export interface ConfirmDialogProps {
  *
  * `window.confirm` is one click away from a mistake and can be dismissed by
  * habit. This dialog names the exact target and requires typing it, which
- * makes the intent explicit. Escape or the backdrop cancels.
+ * makes the intent explicit. Built on the Radix dialog: focus is trapped,
+ * Escape and the backdrop cancel, and focus returns to the trigger.
  */
 export function ConfirmDialog({
   open,
@@ -50,83 +61,71 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const t = useT();
   const [typed, setTyped] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const titleId = useId();
-
-  useEffect(() => {
-    if (!open) return;
-    setTyped("");
-    inputRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onCancel();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onCancel]);
-
-  if (!open) return null;
+  const inputId = useId();
   const confirmed = matchesConfirmation(typed, phrase);
+  // Opened programmatically (no Radix trigger), so remember what had focus
+  // and give it back on close; otherwise keyboard users land on <body>.
+  const returnFocusTo = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (open) returnFocusTo.current = document.activeElement as HTMLElement | null;
+  }, [open]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onCancel}
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onCancel();
+        setTyped("");
+      }}
     >
-      <div
+      <DialogContent
         role="alertdialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="w-full max-w-md rounded-xl border bg-white p-6 shadow-2xl dark:border-surface-700 dark:bg-surface-900"
-        onClick={(event) => event.stopPropagation()}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          returnFocusTo.current?.focus();
+        }}
       >
-        <div className="flex items-start gap-3">
-          <AlertTriangle size={20} className="mt-0.5 shrink-0 text-red-500" />
-          <div className="min-w-0 space-y-2">
-            <h2 id={titleId} className="text-sm font-semibold text-surface-900 dark:text-white">
-              {title}
-            </h2>
-            <p className="text-xs text-surface-600 dark:text-surface-300">{description}</p>
-          </div>
-        </div>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="size-4 text-destructive" aria-hidden />
+            {title}
+          </DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
         <form
-          className="mt-4 space-y-3"
+          className="grid gap-4"
           onSubmit={(event) => {
             event.preventDefault();
             if (confirmed && !pending) onConfirm();
           }}
         >
-          <label className="block text-xs text-surface-500">
-            {t("confirm.typeToConfirm")}{" "}
-            <code className="select-all break-all font-mono text-surface-900 dark:text-white">
-              {phrase}
-            </code>
-          </label>
-          <input
-            ref={inputRef}
-            value={typed}
-            onChange={(event) => setTyped(event.target.value)}
-            autoComplete="off"
-            spellCheck={false}
-            className="input-field w-full py-1.5 font-mono text-sm"
-          />
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-lg border px-3 py-1.5 text-xs dark:border-surface-700"
-            >
-              {t("confirm.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={!confirmed || pending}
-              className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
-            >
-              {confirmLabel}
-            </button>
+          <div className="grid gap-1.5">
+            <Label htmlFor={inputId} className="font-normal text-muted-foreground">
+              {t("confirm.typeToConfirm")}{" "}
+              <code className="select-all break-all rounded bg-muted px-1 py-0.5 font-mono text-foreground">
+                {phrase}
+              </code>
+            </Label>
+            <Input
+              id={inputId}
+              value={typed}
+              onChange={(event) => setTyped(event.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+              autoFocus
+              className="font-mono"
+            />
           </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={onCancel}>
+              {t("confirm.cancel")}
+            </Button>
+            <Button type="submit" variant="danger" disabled={!confirmed} loading={pending}>
+              {confirmLabel}
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -19,7 +19,8 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { getProductionModels } from "@/lib/api";
-import { cn, formatNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useFormat } from "@/lib/useFormat";
 import { useAppStore } from "@/lib/store";
 import { useT } from "@/lib/useT";
 import { format } from "date-fns";
@@ -29,7 +30,7 @@ import type { TranslationKey } from "@/lib/i18n";
 function MetricCard({
   label,
   value,
-  format: fmt = "percent",
+  format: kind = "percent",
   color = "brand",
 }: {
   label: string;
@@ -37,16 +38,17 @@ function MetricCard({
   format?: "percent" | "number" | "rate";
   color?: "brand" | "emerald" | "amber" | "violet" | "red";
 }) {
+  const fmt = useFormat();
   const displayValue =
-    fmt === "percent"
+    kind === "percent"
       ? `${(value * 100).toFixed(1)}%`
-      : fmt === "rate"
+      : kind === "rate"
         ? `${(value * 100).toFixed(2)}%`
         : value >= 1000
-          ? formatNumber(value)
+          ? fmt.number(value)
           : value.toFixed(4);
 
-  const barPct = fmt === "percent" || fmt === "rate" ? value * 100 : Math.min(value, 1) * 100;
+  const barPct = kind === "percent" || kind === "rate" ? value * 100 : Math.min(value, 1) * 100;
 
   const colorMap: Record<string, { text: string; bar: string }> = {
     brand: { text: "text-brand-600 dark:text-brand-400", bar: "bg-brand-500" },
@@ -62,7 +64,7 @@ function MetricCard({
     <div className="rounded-lg border bg-surface-50/50 p-3 dark:border-surface-700 dark:bg-surface-800/50">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">{label}</p>
       <p className={cn("mt-0.5 font-mono text-lg font-bold", c.text)}>{displayValue}</p>
-      {(fmt === "percent" || fmt === "rate") && (
+      {(kind === "percent" || kind === "rate") && (
         <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-surface-200 dark:bg-surface-700">
           <div
             className={cn("h-full rounded-full transition-all duration-500", c.bar)}
@@ -81,6 +83,7 @@ function ConfusionMatrix({
   data: NonNullable<ProductionModel["confusion_matrix"]>;
   t: (key: TranslationKey) => string;
 }) {
+  const fmt = useFormat();
   return (
     <div className="mx-auto max-w-xs">
       <div className="grid grid-cols-2 gap-2">
@@ -89,7 +92,7 @@ function ConfusionMatrix({
             {t("models.truePositive")}
           </p>
           <p className="font-mono text-xl font-bold text-emerald-700 dark:text-emerald-300">
-            {formatNumber(data.true_positives)}
+            {fmt.number(data.true_positives)}
           </p>
         </div>
         <div className="rounded-lg bg-red-50 p-3 text-center dark:bg-red-950/30">
@@ -97,7 +100,7 @@ function ConfusionMatrix({
             {t("models.falseNegative")}
           </p>
           <p className="font-mono text-xl font-bold text-red-700 dark:text-red-300">
-            {formatNumber(data.false_negatives)}
+            {fmt.number(data.false_negatives)}
           </p>
         </div>
         <div className="rounded-lg bg-red-50 p-3 text-center dark:bg-red-950/30">
@@ -105,7 +108,7 @@ function ConfusionMatrix({
             {t("models.falsePositive")}
           </p>
           <p className="font-mono text-xl font-bold text-red-700 dark:text-red-300">
-            {formatNumber(data.false_positives)}
+            {fmt.number(data.false_positives)}
           </p>
         </div>
         <div className="rounded-lg bg-emerald-50 p-3 text-center dark:bg-emerald-950/30">
@@ -113,7 +116,7 @@ function ConfusionMatrix({
             {t("models.trueNegative")}
           </p>
           <p className="font-mono text-xl font-bold text-emerald-700 dark:text-emerald-300">
-            {formatNumber(data.true_negatives)}
+            {fmt.number(data.true_negatives)}
           </p>
         </div>
       </div>
